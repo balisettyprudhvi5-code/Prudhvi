@@ -1,0 +1,15 @@
+{
+  "name": "Smart Compress",
+  "short_name": "SmartCompress",
+  "description": "Free online image compressor and editing suite. Compress, resize, convert, and merge images entirely in your browser.",
+  "icons": [
+    { "src": "/favicon-16x16.png", "sizes": "16x16", "type": "image/png" },
+    { "src": "/favicon-32x32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/logo-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ],
+  "theme_color": "#0d0d0f",
+  "background_color": "#0d0d0f",
+  "display": "standalone",
+  "start_url": "/"
+}

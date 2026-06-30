@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Smart Compress — Free online image compressor. Compress JPG, PNG, and WebP images instantly in your browser. No uploads, no servers, 100% private and secure." />
+  <meta name="keywords" content="image compressor, compress jpg, compress png, compress webp, reduce image size, online image optimizer, free image compression, smart compress, image resizer, crop image, rotate image, png to jpg converter, jpg to png converter, webp converter, image to pdf" />
+  <meta name="author" content="Smart Compress" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0d0d0f" />
+  
+  <meta name="google-site-verification" content="psA8MfKKF78GGiesEYnI_M-4c1n1z2ePlYbKt9MMhHk" />
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="48x48" />
+  <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
+  <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <meta property="og:title" content="Smart Compress — Free Instant Image Compression & Editing Tools" />
+  <meta property="og:description" content="Compress JPG, PNG, and WebP images instantly in your browser. Nothing leaves your device. Free forever." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Smart Compress" />
+  <meta property="og:url" content="https://smartcompress.app/" />
+  <meta property="og:image" content="https://smartcompress.app/logo-icon.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Smart Compress — Free Instant Image Tools" />
+  <meta name="twitter:description" content="Compress JPG, PNG, and WebP images instantly. Nothing leaves your device." />
+
+  <link rel="canonical" href="https://smartcompress.app/" />
+  <title>Smart Compress — Free Online Image Compressor & Editing Suite</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Smart Compress",
+    "description": "Free online browser-based image compression and conversion tools. Optimize JPG, PNG, WebP, Crop, Rotate, Resize, and Convert to PDF completely client-side.",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg:        #0d0d0f;
+      --surface:   #17171b;
+      --surface2:  #1f1f25;
+      --border:    #2a2a33;
+      --accent:    #7fff6e;
+      --accent2:   #3dffd0;
+      --text:      #e8e8f0;
+      --muted:     #6b6b7e;
+      --danger:    #ff5c5c;
+      --radius:    14px;
+      --radius-sm: 8px;
+      --mono:      'Space Mono', monospace;
+      --sans:      'Space Grotesk', sans-serif;
+      --max-w:     1000px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip-link:focus {
+      left: 1rem; top: 1rem;
+      width: auto; height: auto;
+      padding: .5rem 1rem;
+      background: var(--accent);
+      color: #0d0d0f;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      z-index: 9999;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(13,13,15,.85);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      z-index: 200;
+      gap: 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      text-decoration: none;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .logo-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: .15rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      display: block;
+      padding: .4rem .75rem;
+      font-size: .88rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      transition: color .15s, background .15s;
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover, .nav-links a:focus {
+      color: var(--text);
+      background: var(--surface2);
+      outline: none;
+    }
+
+    .nav-links a.active { color: var(--accent); }
+
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: .35rem;
+      border-radius: var(--radius-sm);
+    }
+    .nav-toggle span {
+      display: block;
+      width: 22px; height: 2px;
+      background: var(--text);
+      border-radius: 99px;
+      transition: transform .2s, opacity .2s;
+    }
+    .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .hero {
+      text-align: center;
+      padding: 5rem 1.5rem 3rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: .75rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -.035em;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 span { color: var(--accent); }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1.1rem;
+      line-height: 1.65;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    .hero-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary, .btn-secondary {
+      padding: .75rem 1.8rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: .92rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0d0d0f;
+      border: none;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--surface2); border-color: var(--muted); }
+
+    .features-strip {
+      display: flex;
+      gap: .8rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .feat-chip {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .75rem;
+      font-family: var(--mono);
+      color: var(--muted);
+      letter-spacing: .04em;
+    }
+
+    .feat-chip::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent2);
+    }
+
+    .tools-menu-section {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 1.5rem 2rem;
+    }
+
+    .tools-tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: .6rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .tool-tab-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: .9rem 1rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: .88rem;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      transition: all .2s ease;
+    }
+
+    .tool-tab-btn svg {
+      width: 18px; height: 18px; stroke: var(--muted); fill: none; transition: stroke .2s;
+    }
+
+    .tool-tab-btn:hover {
+      border-color: var(--muted);
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    .tool-tab-btn.active {
+      background: rgba(127,255,110,0.06);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .tool-tab-btn.active svg { stroke: var(--accent); }
+
+    .tool-workspace {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      display: none;
+      animation: fadeUp .4s ease both;
+    }
+
+    .tool-workspace.active { display: block; }
+
+    .tool-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+
+    .tool-title-row h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .tool-title-row h2 span { color: var(--accent2); font-weight: 400; font-size: .9rem; margin-left: .5rem; font-family: var(--mono); }
+
+    .tool-controls-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 1.5rem;
+      background: var(--surface2);
+      padding: 1.2rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+
+    .control-group label {
+      font-size: .8rem;
+      font-family: var(--mono);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .control-group input[type="number"],
+    .control-group select,
+    .control-group input[type="text"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: .5rem .75rem;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: .9rem;
+      border-radius: var(--radius-sm);
+      outline: none;
+    }
+    .control-group input:focus, .control-group select:focus { border-color: var(--accent2); }
+
+    .range-label-wrap { display: flex; justify-content: space-between; align-items: center; }
+    .range-val-lbl { color: var(--accent); font-family: var(--mono); font-size: .85rem; }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      outline: none;
+      cursor: pointer;
+      margin: .5rem 0;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(127,255,110,.5);
+    }
+
+    .tool-drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+      background: rgba(13,13,15,0.4);
+    }
+    .tool-drop-zone:hover, .tool-drop-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--surface2);
+    }
+    .tool-drop-zone svg { width: 40px; height: 40px; stroke: var(--accent); fill: none; margin-bottom: .8rem; }
+    .tool-drop-zone p { font-size: .9rem; color: var(--muted); }
+    .tool-drop-zone span { color: var(--text); font-weight: 500; }
+
+    .file-input-hidden { display: none; }
+
+    .workbench-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    @media (max-width: 768px) { .workbench-layout { grid-template-columns: 1fr; } }
+
+    .preview-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 220px;
+      position: relative;
+    }
+    .preview-box h4 { font-size: .75rem; font-family: var(--mono); color: var(--muted); text-transform: uppercase; margin-bottom: .8rem; align-self: flex-start; }
+    .preview-box img, .preview-box canvas { max-width: 100%; max-height: 320px; border-radius: 4px; object-fit: contain; background: #111; }
+    
+    .meta-badge {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: .6rem;
+      background: var(--surface2);
+      padding: .2rem .6rem;
+      border-radius: 4px;
+    }
+
+    .optimization-notice {
+      background: rgba(127,255,110,0.08);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: .8rem 1rem;
+      border-radius: var(--radius-sm);
+      margin-top: 1rem;
+      font-size: .88rem;
+      text-align: center;
+      font-weight: 500;
+      width: 100%;
+    }
+
+    .crop-frame-wrapper {
+      position: relative;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.2rem;
+    }
+
+    .page-section {
+      border-top: 1px solid var(--border);
+      padding: 6rem 1.5rem;
+      scroll-margin-top: 80px;
+    }
+
+    .section-inner { max-width: var(--max-w); margin: 0 auto; }
+    .section-eyebrow { font-family: var(--mono); font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin-bottom: .85rem; }
+    .section-title { font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 700; letter-spacing: -.03em; line-height: 1.15; margin-bottom: 1.2rem; }
+    .section-lead { font-size: 1.05rem; color: var(--muted); line-height: 1.7; max-width: 700px; margin-bottom: 3rem; }
+
+    .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; margin-bottom: 3rem; }
+    .about-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.8rem; transition: border-color .2s; }
+    .about-card:hover { border-color: var(--accent); }
+    .about-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: .5rem; color: var(--text); }
+    .about-card p { font-size: .9rem; color: var(--muted); line-height: 1.6; }
+
+    .privacy-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; margin-bottom: 1.2rem; }
+    .privacy-block h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: .8rem; color: var(--accent2); }
+    .privacy-block p { font-size: .92rem; color: var(--muted); line-height: 1.7; }
+    .privacy-highlight { background: rgba(61,255,208,0.04); border: 1px solid rgba(61,255,208,0.15); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 2rem; color: var(--text); font-size: .95rem; line-height: 1.6; }
+
+    .contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 3rem; align-items: start; }
+    @media (max-width: 768px) { .contact-grid { grid-template-columns: 1fr; gap: 2rem; } }
+    .contact-info { display: flex; flex-direction: column; gap: 1rem; }
+    .contact-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; display: flex; gap: 1rem; align-items: flex-start; }
+    .contact-item svg { width: 22px; height: 22px; stroke: var(--accent); fill: none; flex-shrink: 0; }
+    .contact-item h4 { font-size: .95rem; font-weight: 600; margin-bottom: .2rem; }
+    .contact-item p { font-size: .88rem; color: var(--muted); }
+    .contact-item a { color: var(--accent2); text-decoration: none; }
+    .contact-item a:hover { text-decoration: underline; }
+
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; background: var(--surface); padding: 2rem; border-radius: var(--radius); border: 1px solid var(--border); }
+    .form-group-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 480px) { .form-group-row { grid-template-columns: 1fr; } }
+    .form-field { display: flex; flex-direction: column; gap: .4rem; }
+    .form-field label { font-size: .78rem; font-family: var(--mono); color: var(--muted); text-transform: uppercase; }
+    .form-field input, .form-field textarea { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .7rem .9rem; color: var(--text); outline: none; font-family: var(--sans); font-size: .9rem; }
+    .form-field input:focus, .form-field textarea:focus { border-color: var(--accent); }
+    .form-success { display: none; background: rgba(127,255,110,0.08); border: 1px solid var(--accent); color: var(--accent); padding: 1rem; border-radius: var(--radius-sm); font-size: .9rem; text-align: center; }
+
+    .terms-toc { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 2rem; display: inline-block; }
+    .terms-toc h4 { font-family: var(--mono); font-size: .75rem; text-transform: uppercase; color: var(--muted); margin-bottom: .6rem; }
+    .terms-toc ol { padding-left: 1.2rem; font-size: .88rem; color: var(--accent2); }
+    .terms-toc li { margin-bottom: .3rem; }
+    .terms-toc a { color: var(--accent2); text-decoration: none; }
+    .terms-toc a:hover { text-decoration: underline; }
+    .terms-box { max-width: 800px; }
+    .terms-block { margin-bottom: 1.8rem; }
+    .terms-block h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: .6rem; }
+    .terms-block p { font-size: .9rem; color: var(--muted); line-height: 1.7; }
+
+    footer { border-top: 1px solid var(--border); padding: 4rem 1.5rem 2.5rem; background: #09090b; }
+    .footer-inner { max-width: var(--max-w); margin: 0 auto; }
+    .footer-top { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 2.5rem; margin-bottom: 3rem; }
+    @media (max-width: 768px) { .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; } .footer-brand { grid-column: 1 / -1; } }
+    @media (max-width: 480px) { .footer-top { grid-template-columns: 1fr; } }
+    .footer-brand p { font-size: .88rem; color: var(--muted); line-height: 1.6; margin-top: .8rem; max-width: 280px; }
+    .footer-col h4 { font-family: var(--mono); font-size: .75rem; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; letter-spacing: .05em; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
+    .footer-col a { font-size: .88rem; color: var(--muted); text-decoration: none; transition: color .2s; }
+    .footer-col a:hover { color: var(--accent); }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 1.8rem; font-size: .8rem; color: var(--muted); font-family: var(--mono); flex-wrap: wrap; gap: 1rem; }
+    
+    .btn-totop { background: var(--surface2); border: 1px solid var(--border); color: var(--text); width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; border-radius: var(--radius-sm); transition: all .2s; text-decoration: none; }
+    .btn-totop:hover { background: var(--accent); color: #0d0d0f; border-color: var(--accent); }
+    .btn-totop svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      header { padding: 1rem 1.5rem; }
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%; left: 0; right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        background: rgba(13,13,15,0.98);
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 1.5rem 1.5rem;
+        gap: .2rem;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { padding: .7rem 1rem; font-size: .95rem; }
+      .nav-toggle { display: flex; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    /* Blog Section */
+    .blog-section { max-width: var(--max-w); margin: 0 auto; padding: 0 1.5rem 2rem; }
+    .blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.4rem; margin-top: 2rem; }
+    .blog-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.6rem; display: flex; flex-direction: column; }
+    .blog-card h3 { font-size: 1.08rem; font-weight: 700; margin-bottom: .6rem; line-height: 1.35; }
+    .blog-card .blog-excerpt { color: var(--muted); font-size: .9rem; line-height: 1.65; margin-bottom: 1rem; }
+    .blog-card .blog-meta { font-family: var(--mono); font-size: .72rem; color: var(--accent2); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .7rem; }
+    .blog-full { display: none; margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+    .blog-full.open { display: block; animation: fadeUp .35s ease both; }
+    .blog-full p { color: var(--muted); font-size: .92rem; line-height: 1.75; margin-bottom: 1rem; }
+    .blog-full h4 { font-size: 1rem; color: var(--text); margin: 1.4rem 0 .6rem; }
+    .blog-full ul { margin: 0 0 1rem 1.2rem; color: var(--muted); font-size: .9rem; line-height: 1.7; }
+    .blog-read-more { background: transparent; border: 1px solid var(--border); color: var(--accent); font-weight: 600; font-size: .82rem; padding: .55rem 1.1rem; border-radius: var(--radius-sm); cursor: pointer; align-self: flex-start; transition: all .2s; font-family: var(--sans); }
+    .blog-read-more:hover { background: var(--surface2); border-color: var(--accent); }
+    .blog-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .blog-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .blog-table th, .blog-table td { border: 1px solid var(--border); padding: .6rem .8rem; text-align: left; color: var(--muted); }
+    .blog-table th { color: var(--text); background: var(--surface2); font-family: var(--mono); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+    .blog-faq-item { border-top: 1px solid var(--border); padding: .8rem 0; }
+    .blog-faq-item:first-of-type { border-top: none; }
+    .blog-faq-item strong { display: block; color: var(--text); font-size: .92rem; margin-bottom: .35rem; }
+  </style>
+</head>
+<body>
+
+  <a href="#suite-workspace-block" class="skip-link">Skip to operational image tools</a>
+
+  <header>
+    <a class="logo" href="#home" aria-label="Smart Compress — Back to top">
+      <img src="logo-icon.png" alt="" aria-hidden="true" style="height:22px;width:22px;display:block;" />
+      Smart Compress
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="main-nav" id="nav-toggle" type="button">
+      <span></span><span></span><span></span>
+    </button>
+    <nav aria-label="Main navigation menu">
+      <ul class="nav-links" id="main-nav" role="list">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#tools-suite">Tools</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#blog">Blog</a></li>
+        <li><a href="#privacy">Privacy Policy</a></li>
+        <li><a href="#contact">Contact Us</a></li>
+        <li><a href="#terms">Terms & Conditions</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="hero" id="home" aria-labelledby="hero-title">
+    <p class="hero-eyebrow">100% Client-Side · Private · Blazing Fast</p>
+    <h1 id="hero-title">Compress Images in <span>Seconds</span></h1>
+    <p>Free Online Image Compressor for JPG, PNG & WebP. Optimize sizes instantly right inside your local browser memory without server uploads.</p>
+    <div class="hero-buttons">
+      <a href="#tools-suite" class="btn-primary" role="button">Compress Now</a>
+      <a href="#about" class="btn-secondary" role="button">Learn More</a>
+    </div>
+  </section>
+
+  <div class="features-strip" role="list" aria-label="Suite Feature Checklist">
+    <span class="feat-chip" role="listitem">Secure Browser-based Conversion</span>
+    <span class="feat-chip" role="listitem">No File Uploads Required</span>
+    <span class="feat-chip" role="listitem">Zero Loss Smart Truncation</span>
+    <span class="feat-chip" role="listitem">Batch PDF Operations</span>
+  </div>
+
+  <section class="tools-menu-section" id="tools-suite" aria-labelledby="suite-heading">
+    <div class="section-inner">
+      <h2 id="suite-heading" class="section-title" style="text-align: center; margin-bottom: 2rem;">Browser Toolkit Processing Suite</h2>
+      
+      <div class="tools-tabs" role="tablist" aria-label="Image utility select tabs">
+        <button class="tool-tab-btn active" role="tab" aria-selected="true" aria-controls="panel-compressor" id="tab-compressor">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 14h16M4 10h16M12 3v18"/></svg> 1. Image Compressor
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-resizer" id="tab-resizer">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 21H3V3m18 0L10 14"/></svg> 2. Image Resizer
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-crop" id="tab-crop">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 2v16h16M2 6h16v16"/></svg> 3. Crop Image
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-rotate" id="tab-rotate">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg> 4. Rotate Image
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-jpgpng" id="tab-jpgpng">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 8l4 4-4 4M3 12h18"/></svg> 5. JPG → PNG Converter
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-pngjpg" id="tab-pngjpg">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M7 16l-4-4 4-4M21 12H3"/></svg> 6. PNG → JPG Converter
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-webp" id="tab-webp">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/></svg> 7. WebP Converter
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-pdf" id="tab-pdf">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> 8. Image → PDF
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-pdf2img" id="tab-pdf2img">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> 9. PDF → Image
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-promptstudio" id="tab-promptstudio">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg> 10. AI Prompt Studio
+        </button>
+      </div>
+
+      <div id="suite-workspace-block">
+        
+        <div class="tool-workspace active" id="panel-compressor" role="tabpanel" aria-labelledby="tab-compressor">
+          <div class="tool-title-row">
+            <h2>Image Compressor <span>Adjustable Byte Reduction Engine</span></h2>
+          </div>
+          
+          <div class="tool-controls-panel">
+            <div class="control-group">
+              <div class="range-label-wrap">
+                <label for="comp-quality">Compression Quality</label>
+                <span class="range-val-lbl" id="comp-quality-lbl">75%</span>
+              </div>
+              <input type="range" id="comp-quality" min="5" max="100" step="5" value="75">
+            </div>
+            <div class="control-group">
+              <label for="comp-format">Force Output Format</label>
+              <select id="comp-format">
+                <option value="original">Keep Original Type</option>
+                <option value="image/jpeg">Convert to JPEG</option>
+                <option value="image/png">Convert to PNG</option>
+                <option value="image/webp">Convert to WebP</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="comp-target-size">Target File Size</label>
+              <select id="comp-target-size">
+                <option value="none">No Target (Use Quality Slider)</option>
+                <option value="50">Under 50 KB</option>
+                <option value="100">Under 100 KB</option>
+                <option value="200">Under 200 KB</option>
+                <option value="custom">Custom KB…</option>
+              </select>
+            </div>
+            <div class="control-group" id="comp-custom-kb-group" style="display:none;">
+              <label for="comp-custom-kb">Custom Target (KB)</label>
+              <input type="number" id="comp-custom-kb" min="1" max="99999" value="150" placeholder="e.g. 150">
+            </div>
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-compressor">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+            <p>Drag & drop one or more images or <span>browse local directory</span></p>
+            <input type="file" id="file-compressor" class="file-input-hidden" accept="image/jpeg, image/png, image/webp" multiple />
+          </div>
+
+          <!-- Progress bar (hidden until needed) -->
+          <div id="comp-progress-wrap" style="display:none; margin-top:1.2rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.4rem;">
+              <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted);" id="comp-progress-label">Processing 0 / 0</span>
+            </div>
+            <div style="background:var(--border);border-radius:99px;height:6px;overflow:hidden;">
+              <div id="comp-progress-bar" style="height:100%;width:0%;background:var(--accent);border-radius:99px;transition:width .2s;"></div>
+            </div>
+          </div>
+
+          <!-- Total summary (hidden until needed) -->
+          <div id="comp-summary" style="display:none; margin-top:1.2rem; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:1rem 1.2rem;">
+            <div style="display:flex; flex-wrap:wrap; gap:1.5rem; align-items:center; justify-content:space-between;">
+              <div style="font-family:var(--mono);font-size:.8rem;color:var(--muted);">
+                Total Original: <span id="sum-orig" style="color:var(--text);">0 KB</span>
+              </div>
+              <div style="font-family:var(--mono);font-size:.8rem;color:var(--muted);">
+                Total Compressed: <span id="sum-comp" style="color:var(--accent2);">0 KB</span>
+              </div>
+              <div style="font-family:var(--mono);font-size:.8rem;color:var(--muted);">
+                Total Saved: <span id="sum-saved" style="color:var(--accent);">0 KB (0%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Per-image result cards container -->
+          <div id="comp-results-list" style="margin-top:1.5rem; display:flex; flex-direction:column; gap:1.2rem;"></div>
+
+          <div class="action-row" id="comp-action-row">
+            <a id="dl-all-compressor" class="btn-primary" style="display:none;" href="#">⬇ Download All</a>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-resizer" role="tabpanel" aria-labelledby="tab-resizer">
+          <div class="tool-title-row">
+            <h2>Image Resizer <span>Pixel Dimension Scaling</span></h2>
+          </div>
+          
+          <div class="tool-controls-panel">
+            <div class="control-group">
+              <label for="resize-width">Width (px)</label>
+              <input type="number" id="resize-width" value="800" min="1">
+            </div>
+            <div class="control-group">
+              <label for="resize-height">Height (px)</label>
+              <input type="number" id="resize-height" value="600" min="1">
+            </div>
+            <div class="control-group" style="justify-content: center; flex-direction: row; gap: 0.5rem; align-items: center; padding-top: 1rem;">
+              <input type="checkbox" id="resize-aspect" checked>
+              <label for="resize-aspect" style="cursor: pointer; text-transform: none;">Maintain Aspect Ratio</label>
+            </div>
+            <div class="control-group">
+              <label for="resize-percent">Or Resize By Percentage</label>
+              <input type="number" id="resize-percent" min="1" max="500" placeholder="e.g. 50">
+            </div>
+            <div class="control-group">
+              <label for="resize-format">Output Format</label>
+              <select id="resize-format">
+                <option value="image/jpeg">JPG</option>
+                <option value="image/png" selected>PNG</option>
+                <option value="image/webp">WebP</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-resizer">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 14h16M4 10h16"/></svg>
+            <p>Drag & drop or <span>click to browse</span> images to resize</p>
+            <input type="file" id="file-resizer" class="file-input-hidden" accept="image/*" />
+          </div>
+
+          <div class="workbench-layout" id="workbench-resizer" style="display: none;">
+            <div class="preview-box">
+              <h4>Input Reference</h4>
+              <img id="prev-resize-orig" src="#" alt="Original size preview dimension reference">
+            </div>
+            <div class="preview-box">
+              <h4>Resized Simulation Output</h4>
+              <canvas id="canvas-resizer"></canvas>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button id="action-resize" class="btn-primary" style="display: none;">Execute Scaling View</button>
+            <a id="dl-resizer" class="btn-primary" style="display: none;" href="#" download="smartresize.png">Download Resized Image</a>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-crop" role="tabpanel" aria-labelledby="tab-crop">
+          <div class="tool-title-row">
+            <h2>Crop Image <span>Bespoke Section Isolation Boundary</span></h2>
+          </div>
+
+          <div class="tool-controls-panel">
+            <div class="control-group">
+              <label for="crop-x">X Offset (px)</label>
+              <input type="number" id="crop-x" value="0" min="0">
+            </div>
+            <div class="control-group">
+              <label for="crop-y">Y Offset (px)</label>
+              <input type="number" id="crop-y" value="0" min="0">
+            </div>
+            <div class="control-group">
+              <label for="crop-w">Width (px)</label>
+              <input type="number" id="crop-w" value="300" min="1">
+            </div>
+            <div class="control-group">
+              <label for="crop-h">Height (px)</label>
+              <input type="number" id="crop-h" value="300" min="1">
+            </div>
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-crop">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/></svg>
+            <p>Drag & drop or <span>select an image</span> to crop layout canvas boundaries</p>
+            <input type="file" id="file-crop" class="file-input-hidden" accept="image/*" />
+          </div>
+
+          <div class="workbench-layout" id="workbench-crop" style="display: none;">
+            <div class="preview-box">
+              <h4>Source View</h4>
+              <div class="crop-frame-wrapper">
+                <img id="prev-crop-orig" src="#" alt="Source for crop alignment overlay template">
+              </div>
+            </div>
+            <div class="preview-box">
+              <h4>Cropped View Output</h4>
+              <canvas id="canvas-crop"></canvas>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button id="action-crop" class="btn-primary" style="display: none;">Render Crop Slice</button>
+            <a id="dl-crop" class="btn-primary" style="display: none;" href="#" download="smartcrop.png">Download Cropped Image</a>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-rotate" role="tabpanel" aria-labelledby="tab-rotate">
+          <div class="tool-title-row">
+            <h2>Rotate Image <span>Angular Axis Transformation Matrix</span></h2>
+          </div>
+
+          <div class="tool-controls-panel">
+            <div class="control-group">
+              <label for="rotate-angle">Rotation Direction Degree</label>
+              <select id="rotate-angle">
+                <option value="90">90° Clockwise</option>
+                <option value="180">180° Half Cycle</option>
+                <option value="270">270° Counter-Clockwise</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-rotate">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 1 1 21.308 8H21"/></svg>
+            <p>Drop file or <span>browse filesystem directory</span> to setup angular skewing orientation</p>
+            <input type="file" id="file-rotate" class="file-input-hidden" accept="image/*" />
+          </div>
+
+          <div class="workbench-layout" id="workbench-rotate" style="display: none;">
+            <div class="preview-box">
+              <h4>Pre-Rotation orientation</h4>
+              <img id="prev-rotate-orig" src="#" alt="Original image before application of canvas context matrix rotational translation step">
+            </div>
+            <div class="preview-box">
+              <h4>Rotated Output Stream</h4>
+              <canvas id="canvas-rotate"></canvas>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button id="action-rotate" class="btn-primary" style="display: none;">Apply Canvas Rotation</button>
+            <a id="dl-rotate" class="btn-primary" style="display: none;" href="#" download="smartrotate.png">Download Rotated File</a>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-jpgpng" role="tabpanel" aria-labelledby="tab-jpgpng">
+          <div class="tool-title-row">
+            <h2>JPG → PNG Converter <span>Lossless Transcoding Packaging Layer</span></h2>
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-jpgpng">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+            <p>Select your native operational <span>JPG image resource mapping</span></p>
+            <input type="file" id="file-jpgpng" class="file-input-hidden" accept="image/jpeg" />
+          </div>
+
+          <div class="workbench-layout" id="workbench-jpgpng" style="display: none;">
+            <div class="preview-box">
+              <h4>Input File Status (JPEG)</h4>
+              <img id="prev-jpgpng-orig" src="#" alt="JPEG source parsing layout channel view">
+            </div>
+            <div class="preview-box">
+              <h4>Transcoded Output Representation (PNG)</h4>
+              <canvas id="canvas-jpgpng"></canvas>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <a id="dl-jpgpng" class="btn-primary" style="display: none;" href="#" download="converted.png">Download Lossless PNG Package</a>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-pngjpg" role="tabpanel" aria-labelledby="tab-pngjpg">
+          <div class="tool-title-row">
+            <h2>PNG → JPG Converter <span>Raster Quantization Compression Layer</span></h2>
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-pngjpg">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M11 19l-7-7 7-7M19 19l-7-7 7-7"/></svg>
+            <p>Select or upload your translucent <span>PNG structure payload mapping</span></p>
+            <input type="file" id="file-pngjpg" class="file-input-hidden" accept="image/png" />
+          </div>
+
+          <div class="workbench-layout" id="workbench-pngjpg" style="display: none;">
+            <div class="preview-box">
+              <h4>Input File Target (PNG Source)</h4>
+              <img id="prev-pngjpg-orig" src="#" alt="PNG upload context tracking placeholder">
+            </div>
+            <div class="preview-box">
+              <h4>Transcoded Encoded Stream Output (JPEG Data URL)</h4>
+              <canvas id="canvas-pngjpg"></canvas>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <a id="dl-pngjpg" class="btn-primary" style="display: none;" href="#" download="converted.jpg">Download Consolidated JPG File</a>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-webp" role="tabpanel" aria-labelledby="tab-webp">
+          <div class="tool-title-row">
+            <h2>WebP Converter <span>Modern High Performance Image Pipeline Encoding</span></h2>
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-webp">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 11H11V7h2v6z"/></svg>
+            <p>Upload standard images here to <span>compile structural WebP containers</span> natively</p>
+            <input type="file" id="file-webp" class="file-input-hidden" accept="image/*" />
+          </div>
+
+          <div class="workbench-layout" id="workbench-webp" style="display: none;">
+            <div class="preview-box">
+              <h4>Input Content Type Instance</h4>
+              <img id="prev-webp-orig" src="#" alt="Legacy format input source wrapper asset stream profile">
+            </div>
+            <div class="preview-box">
+              <h4>Re-encoded WebP Container Content Structure</h4>
+              <canvas id="canvas-webp"></canvas>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <a id="dl-webp" class="btn-primary" style="display: none;" href="#" download="smartcompressed.webp">Download WebP Content Bitstream</a>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-pdf" role="tabpanel" aria-labelledby="tab-pdf">
+          <div class="tool-title-row">
+            <h2>Image → PDF <span>Merge Multiple Images Into One PDF</span></h2>
+          </div>
+
+          <div class="control-row" style="display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:1.2rem;">
+            <div class="control-group">
+              <label for="pdf-page-size">Page Size</label>
+              <select id="pdf-page-size">
+                <option value="a4">A4</option>
+                <option value="letter">Letter</option>
+                <option value="auto" selected>Auto (Fit Image)</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="pdf-orientation">Orientation</label>
+              <select id="pdf-orientation">
+                <option value="auto" selected>Auto</option>
+                <option value="portrait">Portrait</option>
+                <option value="landscape">Landscape</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="pdf-margin">Margin (mm)</label>
+              <input type="number" id="pdf-margin" value="10" min="0" max="50">
+            </div>
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-pdf">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M7 21h10a2 2 0 0 0 2-2V9l-6-6H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2z"/></svg>
+            <p>Drop images or <span>browse files</span> — multiple images supported, merged in order shown below</p>
+            <input type="file" id="file-pdf" class="file-input-hidden" accept="image/jpeg, image/png, image/webp" multiple />
+          </div>
+
+          <div id="pdf-image-list" style="display:flex; flex-wrap:wrap; gap:.9rem; margin-top:1.2rem;"></div>
+
+          <div class="action-row" id="pdf-action-row">
+            <button id="action-pdf" class="btn-primary" style="display: none;">Merge Into PDF</button>
+            <a id="dl-pdf" class="btn-primary" style="display: none;" href="#" download="smartdocument.pdf">Download Compiled PDF</a>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-pdf2img" role="tabpanel" aria-labelledby="tab-pdf2img">
+          <div class="tool-title-row">
+            <h2>PDF → Image <span>Convert Every Page To JPG or PNG</span></h2>
+          </div>
+
+          <div class="control-row" style="display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:1.2rem;">
+            <div class="control-group">
+              <label for="pdf2img-format">Output Format</label>
+              <select id="pdf2img-format">
+                <option value="image/jpeg" selected>JPG</option>
+                <option value="image/png">PNG</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-pdf2img">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <p>Drop a PDF or <span>browse files</span> to extract every page as an image</p>
+            <input type="file" id="file-pdf2img" class="file-input-hidden" accept="application/pdf" />
+          </div>
+
+          <div id="pdf2img-progress-wrap" style="display:none; margin-top:1.2rem;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:.4rem;">
+              <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted);" id="pdf2img-progress-label">Processing 0 / 0</span>
+            </div>
+            <div style="height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+              <div id="pdf2img-progress-bar" style="height:100%;width:0%;background:var(--accent);border-radius:99px;transition:width .2s;"></div>
+            </div>
+          </div>
+
+          <div id="pdf2img-results" style="display:flex; flex-wrap:wrap; gap:.9rem; margin-top:1.2rem;"></div>
+
+          <div class="action-row">
+            <a id="dl-all-pdf2img" class="btn-primary" style="display:none;" href="#">⬇ Download All as ZIP</a>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-promptstudio" role="tabpanel" aria-labelledby="tab-promptstudio">
+          <div class="tool-title-row">
+            <h2>AI Prompt Studio <span>Craft Professional AI Image Prompts</span></h2>
+          </div>
+
+          <div class="prompt-studio-tabs" style="display:flex; gap:.6rem; margin-bottom:1.4rem; flex-wrap:wrap;">
+            <button class="tool-tab-btn active" id="ps-tab-generator" type="button" style="font-size:.82rem;">Prompt Generator</button>
+            <button class="tool-tab-btn" id="ps-tab-image" type="button" style="font-size:.82rem;">Image → Prompt</button>
+          </div>
+
+          <div id="ps-panel-generator">
+            <div class="control-group" style="margin-bottom:1rem;">
+              <label for="ps-input">Your Idea</label>
+              <textarea id="ps-input" placeholder="e.g. a cat sitting on a windowsill at sunset" style="width:100%;min-height:90px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:.8rem;font-family:var(--sans);resize:vertical;"></textarea>
+            </div>
+            <div class="control-group" style="margin-bottom:1rem;">
+              <label for="ps-style">Style</label>
+              <select id="ps-style">
+                <option value="realistic">Realistic</option>
+                <option value="cinematic">Cinematic</option>
+                <option value="anime">Anime</option>
+                <option value="ghibli">Ghibli</option>
+                <option value="pixar">Pixar</option>
+                <option value="fantasy">Fantasy</option>
+                <option value="product">Product Photography</option>
+                <option value="logo">Logo</option>
+                <option value="wallpaper">Wallpaper</option>
+                <option value="poster">Poster</option>
+                <option value="thumbnail">YouTube Thumbnail</option>
+                <option value="social">Social Media</option>
+              </select>
+            </div>
+            <div class="action-row" style="margin-bottom:1rem;">
+              <button id="ps-generate-btn" class="btn-primary" type="button">Generate Prompt</button>
+              <button id="ps-clear-btn" class="btn-secondary" type="button">Clear</button>
+            </div>
+            <div class="control-group" id="ps-output-wrap" style="display:none;">
+              <label>Generated Prompt</label>
+              <textarea id="ps-output" readonly style="width:100%;min-height:140px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent2);padding:.8rem;font-family:var(--mono);font-size:.85rem;resize:vertical;"></textarea>
+              <div class="action-row" style="margin-top:.8rem;">
+                <button id="ps-copy-btn" class="btn-primary" type="button">Copy</button>
+                <a id="ps-download-btn" class="btn-secondary" href="#" download="smart-compress-prompt.txt">Download TXT</a>
+              </div>
+            </div>
+          </div>
+
+          <div id="ps-panel-image" style="display:none;">
+            <div class="tool-drop-zone" id="dropzone-ps-image">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              <p>Drop an image or <span>browse files</span> to reverse-engineer a detailed AI prompt</p>
+              <input type="file" id="file-ps-image" class="file-input-hidden" accept="image/*" />
+            </div>
+            <div class="workbench-layout" id="workbench-ps-image" style="display:none;">
+              <div class="preview-box">
+                <h4>Source Image</h4>
+                <img id="prev-ps-image" src="#" alt="Uploaded source image for prompt extraction">
+              </div>
+              <div class="preview-box" id="ps-image-output-wrap">
+                <h4>Generated Prompt</h4>
+                <textarea id="ps-image-output" readonly style="width:100%;min-height:200px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent2);padding:.8rem;font-family:var(--mono);font-size:.82rem;resize:vertical;"></textarea>
+              </div>
+            </div>
+            <div class="action-row" style="margin-top:1rem;">
+              <button id="ps-image-copy-btn" class="btn-primary" type="button" style="display:none;">Copy Prompt</button>
+              <a id="ps-image-download-btn" class="btn-secondary" href="#" download="smart-compress-image-prompt.txt" style="display:none;">Download TXT</a>
+              <button id="ps-image-clear-btn" class="btn-secondary" type="button" style="display:none;">Clear</button>
+            </div>
+          </div>
+
+          <div style="margin-top:1.6rem; padding:1rem 1.2rem; border:1px dashed var(--border); border-radius:var(--radius-sm); font-family:var(--mono); font-size:.78rem; color:var(--muted);">
+            🚀 Coming soon: Prompt → AI Image Generator. The architecture here is ready to connect to an image-generation API the moment one is added.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section" id="about" aria-labelledby="about-heading">
+    <div class="section-inner">
+      <p class="section-eyebrow">Enterprise Grade Optimization Performance Matrix</p>
+      <h2 id="about-heading" class="section-title">About Our Client-Side Secure Pipeline Technology Architecture</h2>
+      <p class="section-lead">Smart Compress represents a profound paradigm shift towards privacy-first high-speed digital asset rendering optimizations. By completely eliminating remote cloud storage file payload roundtrip transit times, metadata optimization parsing computation tasks take place safely and exclusively in your modern sandbox runtime container space directly.</p>
+      
+      <div class="about-grid">
+        <div class="about-card">
+          <h3>Web Assembly Canvas Isolation</h3>
+          <p>By leveraging dynamic device processor optimization execution loops inside modern client threads, high-fidelity visual translation operations compute safely with premium zero latency metrics.</p>
+        </div>
+        <div class="about-card">
+          <h3>SaaS Level Operational Capabilities</h3>
+          <p>Get professional image workflows including dimensions scaling, cropping offsets configurations, array transformations, and filetype transformations completely free without subscriptions or installation binaries.</p>
+        </div>
+        <div class="about-card">
+          <h3>Ecological Computing</h3>
+          <p>Decentralized computation utilizes local client cycles directly, avoiding the massive carbon footprint of cooling large cloud-based processing servers.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section" id="privacy" aria-labelledby="privacy-heading">
+    <div class="section-inner">
+      <p class="section-eyebrow">Guaranteed Cryptographic Boundary Shield Protection</p>
+      <h2 id="privacy-heading" class="section-title">Privacy Policy Agreement Directive</h2>
+      
+      <div class="privacy-highlight">
+        Our core foundational design relies on absolute structural isolation. No information data blocks are ever extracted, analyzed, indexed, or saved to any external infrastructure entity whatsoever.
+      </div>
+
+      <div class="privacy-block">
+        <h3>1. Local Storage Client Data Sandbox Processing Rules</h3>
+        <p>Images imported into the operational user interfaces remain contained entirely inside the ephemeral JavaScript File object allocation runtime bounds. Our architecture avoids remote cloud networking server transfers entirely.</p>
+      </div>
+      <div class="privacy-block">
+        <h3>2. Analytics Tracking Telemetry Framework Exclusions</h3>
+        <p>We do not capture user interaction streams, cookie definitions, canvas fingerprints, or browser environments telemetry profiling parameters, ensuring complete functional configuration isolation security.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section" id="contact" aria-labelledby="contact-heading">
+    <div class="section-inner">
+      <p class="section-eyebrow">Immediate Global Engineering Communication Channels</p>
+      <h2 id="contact-heading" class="section-title">Contact Support Dispatch Operations</h2>
+      
+      <div class="contact-grid">
+        <div class="contact-info">
+          <div class="contact-item" style="border-color: var(--accent); background: rgba(123,245,162,0.05);">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <div>
+              <h4>Email Support</h4>
+              <p>Reach our core engineering team directly at:<br>
+                <a href="mailto:balisettyprudhvi5@gmail.com" style="font-weight:600; font-family: var(--mono);">balisettyprudhvi5@gmail.com</a>
+              </p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+            <div>
+              <h4>Operational Status Metrics</h4>
+              <p>Decentralized Sandbox Gateway Cluster Nodes: Active 100% Client-Side Availability</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <form class="contact-form" id="help-ticket-form" onsubmit="event.preventDefault();">
+            <div class="form-group-row">
+              <div class="form-field">
+                <label for="f-name">Identity Username</label>
+                <input type="text" id="f-name" placeholder="John Doe" required>
+              </div>
+              <div class="form-field">
+                <label for="f-email">Communication Mail Route</label>
+                <input type="email" id="f-email" placeholder="john@example.com" required>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="f-subject">Ticket Core Classification Topic</label>
+              <input type="text" id="f-subject" placeholder="Infrastructure Inquiry Overview" required>
+            </div>
+            <div class="form-field">
+              <label for="f-msg">Detailed Payload Message Request Description</label>
+              <textarea id="f-msg" placeholder="Write message summary here..." required></textarea>
+            </div>
+            <button type="submit" class="btn-primary" id="btn-ticket-submit">Dispatch Ticket Payload</button>
+            <div class="form-success" id="ticket-success-alert">Communication metrics matched. Local simulated terminal feedback logged successfully.</div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section" id="terms" aria-labelledby="terms-heading">
+    <div class="section-inner">
+      <p class="section-eyebrow">Legal Matrix Frame Operational Agreement Definitions</p>
+      <h2 id="terms-heading" class="section-title">Terms & Conditions Agreement Directive</h2>
+      
+      <div class="terms-toc">
+        <h4>Table of Index</h4>
+        <ol>
+          <li><a href="#t1">Functional Access License Grants</a></li>
+          <li><a href="#t2">Disclaimer of Boundary Warranties</a></li>
+          <li><a href="#t3">Execution Pipeline Framework Isolation Clauses</a></li>
+        </ol>
+      </div>
+
+      <div class="terms-box">
+        <div class="terms-block" id="t1">
+          <h3>1. Functional Access License Grants</h3>
+          <p>Users receive an unrevoked, fully royalty-free, transactional instance authorization permit to operate our browser toolkit applications for individual or large-scale automated enterprise workflow tasks with no data pipeline volume caps restrictions applied.</p>
+        </div>
+        <div class="terms-block" id="t2">
+          <h3>2. Disclaimer of Boundary Warranties</h3>
+          <p>Smart Compress applications compute entirely in an "As-Is" execution layer state framework container model without explicit or implicit operational guarantees regarding absolute multi-format rendering longevity specifications.</p>
+        </div>
+        <div class="terms-block" id="t3">
+          <h3>3. Execution Pipeline Framework Isolation Clauses</h3>
+          <p>Because the image compression application lifecycle computes completely inside individual decentralized browser clients, user data handling liabilities remain entirely controlled by the user's terminal environment configuration space management policies.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section blog-section" id="blog" aria-labelledby="blog-heading">
+    <div class="section-inner">
+      <p class="section-eyebrow">Guides, Comparisons & Practical Tips</p>
+      <h2 id="blog-heading" class="section-title">Latest Blog Articles</h2>
+      <p class="section-lead">Practical, no-fluff guides on image compression, formats, and optimization — written to help you make faster decisions about your files.</p>
+
+      <div class="blog-grid" id="blog-grid">
+
+        <article class="blog-card" id="blog-1">
+          <div class="blog-meta">Image Compression</div>
+          <h3>Best Free Image Compressor: What Actually Matters in 2026</h3>
+          <p class="blog-excerpt">Not every "free compressor" is actually free, and not every free tool keeps your files private. Here's how to tell the good ones from the data-harvesting ones.</p>
+          <button class="blog-read-more" data-target="full-1" aria-expanded="false">Read More</button>
+          <div class="blog-full" id="full-1">
+            <p>Search for "best free image compressor" and you'll get a dozen tools that look identical: a drag-and-drop box, a percentage saved, a download button. The differences that actually matter are invisible at first glance — where your file goes, how much quality you lose, and whether the tool quietly caps your usage after a few files.</p>
+            <p>Most online compressors upload your image to a server, compress it there, and send it back. That's fine for a single holiday photo, but it means your file briefly sits on someone else's infrastructure. For anything sensitive — screenshots with personal data, client work, ID documents — that's a real consideration, not a paranoid one. Tools that run entirely in your browser, using canvas-based recompression, never send the file anywhere. The trade-off is that very large batches can be slower on older devices, since your own CPU is doing the work instead of a server farm.</p>
+            <h4>What "good" compression actually looks like</h4>
+            <p>A good compressor should let you control the quality level rather than forcing a fixed preset, show you the before/after size difference before you download, and — critically — never hand you a file that's larger than what you started with. That last point sounds obvious, but it's a common failure mode: highly compressed JPEGs that are already efficient can sometimes grow slightly larger when re-encoded at a "safe" quality setting. A properly built tool checks the output size against the original and keeps the original if compression didn't help.</p>
+            <h4>Free tools worth your time</h4>
+            <ul>
+              <li>Browser-based compressors (no upload) — best for privacy and one-off speed</li>
+              <li>Batch compressors with quality sliders — best when you have a folder of images</li>
+              <li>Format-converting compressors — useful when you want WebP output for the web</li>
+            </ul>
+            <div class="blog-table-wrap">
+              <table class="blog-table">
+                <tr><th>Tool Type</th><th>Privacy</th><th>Speed (large batch)</th><th>Quality Control</th></tr>
+                <tr><td>Browser-based (client-side)</td><td>High — nothing leaves device</td><td>Depends on device</td><td>Usually adjustable</td></tr>
+                <tr><td>Server-based uploaders</td><td>Lower — file leaves device</td><td>Fast, server-powered</td><td>Often fixed presets</td></tr>
+                <tr><td>Desktop software</td><td>High</td><td>Fast</td><td>Highly adjustable</td></tr>
+              </table>
+            </div>
+            <h4>Frequently Asked Questions</h4>
+            <div class="blog-faq-item"><strong>Is a free compressor as good as a paid one?</strong>For everyday JPG/PNG/WebP compression, yes. Paid tools mostly add batch automation, API access, or enterprise support — not better core compression.</div>
+            <div class="blog-faq-item"><strong>Will compressing an image lower its quality permanently?</strong>If you compress a JPEG repeatedly at low quality, yes, quality degrades each time. Keep an original copy and compress from that copy each time you need a new output.</div>
+            <div class="blog-faq-item"><strong>Can compression make a file bigger?</strong>Occasionally, if the source is already heavily optimized. A well-built compressor detects this and keeps the original file instead of forcing a worse result on you.</div>
+          </div>
+        </article>
+
+        <article class="blog-card" id="blog-2">
+          <div class="blog-meta">JPG Compression</div>
+          <h3>How to Compress JPG Images Without Wrecking the Photo</h3>
+          <p class="blog-excerpt">JPG compression is a balancing act between file size and visible artifacts. Here's how to find the sweet spot for different use cases.</p>
+          <button class="blog-read-more" data-target="full-2" aria-expanded="false">Read More</button>
+          <div class="blog-full" id="full-2">
+            <p>JPG (or JPEG) uses "lossy" compression, meaning it throws away some image data permanently to save space. The trick to compressing JPGs well isn't finding a magic setting — it's matching the compression level to what the image will actually be used for.</p>
+            <p>A photo destined for a website header doesn't need the same fidelity as a print-ready product shot. Web images are typically viewed on screens at modest sizes, so you can push compression quality down to 60–75% and most viewers won't notice. Print or archival photos should stay closer to 85–95% to avoid visible blocking artifacts, especially in skies, skin tones, and gradients where compression artifacts show up first.</p>
+            <h4>A practical workflow</h4>
+            <ul>
+              <li>Start at 75% quality — this is the standard "good enough" baseline for web use</li>
+              <li>Zoom into detail-heavy areas (faces, text, gradients) to check for blockiness</li>
+              <li>If it looks clean, drop quality further in 5% steps until you see the first visible artifact, then back off one step</li>
+              <li>For thumbnails or previews, you can go much lower — 40–50% is often invisible at small display sizes</li>
+            </ul>
+            <h4>Why resolution matters more than people think</h4>
+            <p>Before you even touch compression quality, check the pixel dimensions. A 4000×3000 photo displayed in a 600px-wide blog post is carrying triple the pixel data it needs. Resizing to actual display dimensions first, then compressing, almost always produces a smaller and cleaner result than compressing the full-resolution original.</p>
+            <h4>Frequently Asked Questions</h4>
+            <div class="blog-faq-item"><strong>What quality setting should I use for web images?</strong>70–80% is the standard range that balances size and visual quality for most photography.</div>
+            <div class="blog-faq-item"><strong>Does compressing a JPG multiple times keep degrading it?</strong>Yes — each lossy re-save compounds artifacts. Always compress from an original or high-quality master, not from a previously compressed file.</div>
+            <div class="blog-faq-item"><strong>Should I convert JPG to PNG before compressing?</strong>No, that typically increases file size since PNG is built for flat graphics, not photographic detail.</div>
+          </div>
+        </article>
+
+        <article class="blog-card" id="blog-3">
+          <div class="blog-meta">Format Comparison</div>
+          <h3>PNG vs WebP: Which Format Should You Actually Use?</h3>
+          <p class="blog-excerpt">PNG and WebP solve overlapping problems but aren't interchangeable. Here's a clear breakdown of when each format wins.</p>
+          <button class="blog-read-more" data-target="full-3" aria-expanded="false">Read More</button>
+          <div class="blog-full" id="full-3">
+            <p>PNG has been the default "high quality, no compression artifacts" format for two decades. WebP is the newer challenger, built specifically to beat PNG and JPEG at their own games — usually successfully. But "newer and smaller" doesn't automatically mean "better for your situation."</p>
+            <p>PNG uses lossless compression, meaning it preserves every pixel exactly. That makes it ideal for screenshots, logos, icons, and any image with sharp edges, text, or transparency where you can't afford any visual degradation. The downside is file size — PNGs of photographic content can be enormous compared to JPEG or WebP equivalents.</p>
+            <p>WebP supports both lossy and lossless modes, transparency like PNG, and animation like GIF, all in one format. In lossy mode, WebP files are typically 25–35% smaller than equivalent-quality JPEGs, and its lossless mode usually beats PNG too. The catch: while WebP is now supported by virtually all modern browsers, some older software, certain CMS plugins, and a handful of email clients still don't render it properly.</p>
+            <div class="blog-table-wrap">
+              <table class="blog-table">
+                <tr><th>Use Case</th><th>Recommended Format</th><th>Why</th></tr>
+                <tr><td>Website photography</td><td>WebP</td><td>Smaller files, same visual quality</td></tr>
+                <tr><td>Logos & icons with transparency</td><td>PNG or WebP (lossless)</td><td>Sharp edges, no artifacts</td></tr>
+                <tr><td>Email attachments</td><td>JPG or PNG</td><td>Universal client support</td></tr>
+                <tr><td>Archival / master copies</td><td>PNG</td><td>Lossless, widely future-proof</td></tr>
+              </table>
+            </div>
+            <h4>Frequently Asked Questions</h4>
+            <div class="blog-faq-item"><strong>Is WebP always smaller than PNG?</strong>For photographic images, almost always. For very simple graphics with few colors, PNG can sometimes be comparable or smaller.</div>
+            <div class="blog-faq-item"><strong>Does WebP support transparency?</strong>Yes, both lossy and lossless WebP support an alpha channel, just like PNG.</div>
+            <div class="blog-faq-item"><strong>Should I replace all my PNGs with WebP?</strong>For web delivery, generally yes. For source files you might re-edit later, keep a PNG or layered master and export WebP copies for publishing.</div>
+          </div>
+        </article>
+
+        <article class="blog-card" id="blog-4">
+          <div class="blog-meta">Quality Preservation</div>
+          <h3>How to Reduce Image Size Without Losing Quality</h3>
+          <p class="blog-excerpt">"Without losing quality" doesn't mean zero change — it means changes your eye won't catch. Here's the actual method.</p>
+          <button class="blog-read-more" data-target="full-4" aria-expanded="false">Read More</button>
+          <div class="blog-full" id="full-4">
+            <p>Every compression method involves some trade-off — the goal isn't to find a setting with zero loss, it's to find the point where loss becomes imperceptible to a normal viewer at normal viewing distance. That threshold is more forgiving than most people assume.</p>
+            <h4>Step 1: Resize before you compress</h4>
+            <p>This is the single biggest size reduction most people skip. If an image will display at 800px wide, exporting it at 4000px wide and compressing hard is fighting the wrong battle. Resize to actual display dimensions first — this alone can cut file size by 80% or more before you even adjust quality.</p>
+            <h4>Step 2: Choose the right format for the content</h4>
+            <p>Photos compress best as JPEG or WebP. Flat graphics, text, and icons compress best as PNG or lossless WebP. Using the wrong format for the content type wastes bytes regardless of quality settings.</p>
+            <h4>Step 3: Use a moderate-high quality setting, not maximum</h4>
+            <p>100% quality JPEG is rarely necessary — the file size jump from 90% to 100% is large while the visual difference is nearly invisible. 80–90% quality is the practical ceiling for most use cases.</p>
+            <h4>Step 4: Strip unnecessary metadata</h4>
+            <p>Camera EXIF data, color profiles, and thumbnail previews embedded in image files can add tens or hundreds of kilobytes with zero visual benefit for web use. Many compression tools strip this automatically.</p>
+            <h4>Frequently Asked Questions</h4>
+            <div class="blog-faq-item"><strong>What's the safest quality percentage to use?</strong>75–85% for JPEG and lossy WebP covers nearly all use cases without visible quality loss.</div>
+            <div class="blog-faq-item"><strong>Does resizing count as "losing quality"?</strong>Not in the way compression artifacts do — resizing reduces resolution intentionally to match where the image will be displayed, which is a deliberate design choice, not degradation.</div>
+            <div class="blog-faq-item"><strong>Is there a tool that automatically prevents quality loss?</strong>Yes — compressors that compare output size to original size and keep the original when compression doesn't help avoid the worst-case scenario automatically.</div>
+          </div>
+        </article>
+
+        <article class="blog-card" id="blog-5">
+          <div class="blog-meta">Format Guide</div>
+          <h3>Best Image Formats Explained: JPG, PNG, WebP & When to Use Each</h3>
+          <p class="blog-excerpt">There's no single "best" image format — only the best format for a specific job. Here's the decision framework.</p>
+          <button class="blog-read-more" data-target="full-5" aria-expanded="false">Read More</button>
+          <div class="blog-full" id="full-5">
+            <p>People often ask which image format is objectively best, but the right answer always depends on the content type and where the image will be used. Treating format choice as a single global decision is how websites end up bloated with oversized files.</p>
+            <h4>JPG (JPEG)</h4>
+            <p>Best for photographs and complex images with lots of color gradients. Lossy compression makes it efficient for photo-heavy content, but it doesn't support transparency and shows visible artifacts at low quality settings or with sharp-edged graphics.</p>
+            <h4>PNG</h4>
+            <p>Best for screenshots, logos, illustrations, and anything needing transparency or pixel-perfect edges. Lossless compression means no artifacts, but file sizes for photographic content are much larger than JPEG or WebP.</p>
+            <h4>WebP</h4>
+            <p>Best as a general-purpose replacement for both JPEG and PNG on the web. Supports lossy and lossless modes plus transparency and animation, with smaller file sizes across the board. The main limitation is occasional compatibility gaps with older or niche software.</p>
+            <h4>GIF</h4>
+            <p>Still useful for simple looping animations, though WebP and modern video formats now generally produce smaller animated files at equal or better quality.</p>
+            <div class="blog-table-wrap">
+              <table class="blog-table">
+                <tr><th>Format</th><th>Compression</th><th>Transparency</th><th>Best For</th></tr>
+                <tr><td>JPG</td><td>Lossy</td><td>No</td><td>Photos</td></tr>
+                <tr><td>PNG</td><td>Lossless</td><td>Yes</td><td>Graphics, logos, screenshots</td></tr>
+                <tr><td>WebP</td><td>Lossy or Lossless</td><td>Yes</td><td>Web delivery, general use</td></tr>
+              </table>
+            </div>
+            <h4>Frequently Asked Questions</h4>
+            <div class="blog-faq-item"><strong>Which format loads fastest on websites?</strong>WebP, in most real-world comparisons, due to its smaller average file size at equivalent visual quality.</div>
+            <div class="blog-faq-item"><strong>Can I convert between formats without quality loss?</strong>Converting from lossless to lossless (PNG to lossless WebP) preserves quality. Converting from lossy to anything cannot recover detail already discarded.</div>
+            <div class="blog-faq-item"><strong>Is PNG outdated?</strong>No — it's still the safest universal choice for graphics needing transparency and guaranteed lossless fidelity.</div>
+          </div>
+        </article>
+
+        <article class="blog-card" id="blog-6">
+          <div class="blog-meta">Web Performance</div>
+          <h3>Image Optimization for Websites: A Practical Checklist</h3>
+          <p class="blog-excerpt">Slow-loading images are still one of the most common reasons websites feel sluggish. Here's a checklist that actually moves the needle.</p>
+          <button class="blog-read-more" data-target="full-6" aria-expanded="false">Read More</button>
+          <div class="blog-full" id="full-6">
+            <p>Image weight is consistently one of the largest contributors to total page size on the modern web. Optimizing images properly is often the highest-impact, lowest-effort improvement you can make to page load speed.</p>
+            <h4>1. Serve images at the size they're displayed</h4>
+            <p>Use responsive image techniques (srcset, sizes attributes) so mobile visitors don't download desktop-resolution files. A 2000px image shown in a 400px container wastes bandwidth and slows the page for no visual benefit.</p>
+            <h4>2. Choose modern formats where supported</h4>
+            <p>WebP (or AVIF where supported) for photographs, with appropriate fallbacks, typically cuts image payload significantly compared to JPEG-only delivery.</p>
+            <h4>3. Lazy-load below-the-fold images</h4>
+            <p>The native <code>loading="lazy"</code> attribute defers loading images until they're about to enter the viewport, which speeds up initial page render dramatically on image-heavy pages.</p>
+            <h4>4. Compress before upload, not after</h4>
+            <p>Optimizing images before they reach your CMS or codebase avoids repeated server-side processing and keeps your asset pipeline lean from the start.</p>
+            <h4>5. Set explicit width and height attributes</h4>
+            <p>This prevents layout shift while images load, which matters for both user experience and search ranking signals tied to visual stability.</p>
+            <h4>Frequently Asked Questions</h4>
+            <div class="blog-faq-item"><strong>How much can image optimization improve load time?</strong>On image-heavy pages, proper optimization commonly cuts total page weight by 40–70%.</div>
+            <div class="blog-faq-item"><strong>Does lazy loading hurt SEO?</strong>No, when implemented with native lazy loading and proper fallback markup, search engines handle it correctly.</div>
+            <div class="blog-faq-item"><strong>Should every image on a site use WebP?</strong>For photos and most graphics, yes. For favicons or very small icons, the difference is negligible either way.</div>
+          </div>
+        </article>
+
+        <article class="blog-card" id="blog-7">
+          <div class="blog-meta">Email & Attachments</div>
+          <h3>How to Compress Images for Email Without Losing Detail</h3>
+          <p class="blog-excerpt">Email providers cap attachment sizes, and large images bounce or get stripped. Here's how to keep them under the limit cleanly.</p>
+          <button class="blog-read-more" data-target="full-7" aria-expanded="false">Read More</button>
+          <div class="blog-full" id="full-7">
+            <p>Most email providers cap total attachment size somewhere between 10MB and 25MB, and a handful of modern smartphone photos can blow past that limit easily — a single high-resolution photo can be 8–15MB before any compression at all.</p>
+            <h4>Why email-bound images need different handling than web images</h4>
+            <p>Web images are optimized for screen display at modest resolution. Email recipients sometimes want to view or print images at higher quality, so the compression approach should be a bit more conservative than typical web compression — usually 80–90% quality rather than 70%.</p>
+            <h4>A simple process for email attachments</h4>
+            <ul>
+              <li>Compress each photo individually rather than relying on your email client's automatic "small/medium/large" resizing, which often applies overly aggressive, uncontrolled compression</li>
+              <li>Keep JPG for photos — it remains the most universally compatible format across every email client and platform</li>
+              <li>For multiple images, compress all of them to a consistent quality level before attaching, rather than mixing different sizes</li>
+              <li>If you need many images, consider combining them into a single PDF instead of multiple attachments — this is often smaller in total and easier for the recipient to review</li>
+            </ul>
+            <h4>Frequently Asked Questions</h4>
+            <div class="blog-faq-item"><strong>What's a safe target file size per image for email?</strong>Aiming for under 1–2MB per photo keeps multi-image emails comfortably under most provider limits.</div>
+            <div class="blog-faq-item"><strong>Should I use PNG for email photos?</strong>No — PNG produces much larger files for photographic content than JPEG at a similar visual quality.</div>
+            <div class="blog-faq-item"><strong>Will compressing images affect how they print?</strong>At 80%+ quality, the difference is rarely visible even in standard home or office prints.</div>
+          </div>
+        </article>
+
+        <article class="blog-card" id="blog-8">
+          <div class="blog-meta">PDF Conversion</div>
+          <h3>Image to PDF: A Complete Guide for Clean, Shareable Documents</h3>
+          <p class="blog-excerpt">Converting images to PDF is useful for far more than scanning paperwork. Here's how to do it well.</p>
+          <button class="blog-read-more" data-target="full-8" aria-expanded="false">Read More</button>
+          <div class="blog-full" id="full-8">
+            <p>Converting an image to PDF packages it into a universally viewable, printable document format that behaves consistently across devices — no app-specific image viewer required, no accidental cropping in different aspect ratios.</p>
+            <h4>Common reasons to convert images to PDF</h4>
+            <ul>
+              <li>Combining multiple photos (like scanned receipts or ID pages) into a single shareable file</li>
+              <li>Submitting application materials, forms, or certificates that require PDF format specifically</li>
+              <li>Archiving images in a format that prints predictably on any printer</li>
+              <li>Sending images to recipients whose devices may not render certain image formats correctly</li>
+            </ul>
+            <h4>What to check before converting</h4>
+            <p>Image resolution matters for print clarity inside a PDF — a low-resolution image stretched to fill a page will look blurry in the final document, even though it might have looked fine on a phone screen. For documents you intend to print, start from the highest-resolution version of the image you have.</p>
+            <h4>Keeping file size reasonable</h4>
+            <p>PDFs built from uncompressed images can balloon in size quickly, especially with multiple pages. Compressing each image moderately before conversion — rather than relying on the PDF tool to do it — gives you more control over the final quality-to-size balance.</p>
+            <h4>Frequently Asked Questions</h4>
+            <div class="blog-faq-item"><strong>Can I combine multiple images into one PDF?</strong>Yes, most image-to-PDF tools support multi-page output from multiple source images.</div>
+            <div class="blog-faq-item"><strong>Does converting to PDF reduce image quality?</strong>Not inherently — quality depends on the compression applied during conversion, which is usually configurable.</div>
+            <div class="blog-faq-item"><strong>What resolution is good enough for a printable PDF?</strong>Around 150–300 DPI at the final print size is the standard range for clear, professional-looking prints.</div>
+          </div>
+        </article>
+
+        <article class="blog-card" id="blog-9">
+          <div class="blog-meta">Photo Compression</div>
+          <h3>Best Photo Compressor for Photographers: What to Look For</h3>
+          <p class="blog-excerpt">Photographers have different needs than casual users — batch handling, color accuracy, and predictable output matter more than flashy presets.</p>
+          <button class="blog-read-more" data-target="full-9" aria-expanded="false">Read More</button>
+          <div class="blog-full" id="full-9">
+            <p>A casual user compressing one vacation photo and a photographer compressing a 400-image client gallery need very different tools, even though the underlying task — "make the file smaller" — sounds the same.</p>
+            <h4>Batch processing is non-negotiable</h4>
+            <p>If a tool only handles one image at a time, it's not a serious option for photography workflows. Look for compressors that accept multiple files at once, apply consistent settings across the batch, and let you download everything together rather than one at a time.</p>
+            <h4>Color accuracy and profile handling</h4>
+            <p>Aggressive recompression can sometimes shift color subtly, especially when color profiles are stripped carelessly. A good photo compressor should preserve color fidelity at moderate-to-high quality settings, with visible artifacts appearing only at the lower end of the quality range.</p>
+            <h4>Predictable, controllable output</h4>
+            <p>Photographers generally prefer manual quality control over "smart" automatic presets, since automatic modes can behave inconsistently across different image content. A visible quality percentage and real before/after size comparison gives far more control than a vague "optimize" button.</p>
+            <h4>Protecting already-optimized files</h4>
+            <p>Re-compressing an already well-compressed export shouldn't make the file larger or visibly worse. Tools that compare compressed output to the original and automatically keep the original when compression doesn't help protect photographers from accidentally degrading delivered images.</p>
+            <h4>Frequently Asked Questions</h4>
+            <div class="blog-faq-item"><strong>What quality setting do professional photographers typically use for client delivery?</strong>Most stay in the 80–95% range for final delivery, depending on whether images are for web galleries or print.</div>
+            <div class="blog-faq-item"><strong>Should RAW files be compressed?</strong>RAW files are typically converted to JPEG, PNG, or WebP for delivery first; compression applies to that exported copy, not the RAW original.</div>
+            <div class="blog-faq-item"><strong>Is batch compression slower than individual compression?</strong>Per-image speed is similar; batch tools simply automate repeating the same process across many files instead of one at a time.</div>
+          </div>
+        </article>
+
+        <article class="blog-card" id="blog-10">
+          <div class="blog-meta">Tips & Tricks</div>
+          <h3>10 Online Image Compression Tips That Actually Save Space</h3>
+          <p class="blog-excerpt">A quick-reference list of practical compression habits, ranked from highest to lowest impact.</p>
+          <button class="blog-read-more" data-target="full-10" aria-expanded="false">Read More</button>
+          <div class="blog-full" id="full-10">
+            <p>Most guides to image compression bury the useful advice under technical detail. Here's the condensed, ranked version — start at the top for the biggest wins.</p>
+            <h4>1. Resize before compressing</h4>
+            <p>Matching pixel dimensions to actual display size typically saves more space than any quality setting adjustment.</p>
+            <h4>2. Pick the right format for the content</h4>
+            <p>Photos as JPEG/WebP, graphics and transparency as PNG/lossless WebP. Using the wrong format wastes bytes no matter how you tune quality.</p>
+            <h4>3. Use 70–85% quality as your default</h4>
+            <p>This range is the practical sweet spot for nearly all photographic content — higher settings add size with minimal visible benefit.</p>
+            <h4>4. Strip unnecessary metadata</h4>
+            <p>Camera EXIF data and embedded color profiles can add meaningful size with zero visual benefit for web use.</p>
+            <h4>5. Batch-process consistently</h4>
+            <p>Applying the same quality setting across a whole set of images keeps visual consistency and avoids re-processing files one at a time.</p>
+            <h4>6. Avoid repeated lossy re-saves</h4>
+            <p>Always compress from an original or master file, never from a file that's already been compressed once.</p>
+            <h4>7. Use WebP for web delivery where possible</h4>
+            <p>It consistently produces smaller files than JPEG or PNG at comparable visual quality.</p>
+            <h4>8. Check the result before publishing</h4>
+            <p>Zoom into detail-heavy areas to confirm no visible artifacts crept in at your chosen quality level.</p>
+            <h4>9. Protect against "negative" compression</h4>
+            <p>Use tools that detect when compression would make a file larger and automatically keep the original instead.</p>
+            <h4>10. Keep an uncompressed master copy</h4>
+            <p>Always retain one untouched original so you can re-export at different settings later without compounding quality loss.</p>
+            <h4>Frequently Asked Questions</h4>
+            <div class="blog-faq-item"><strong>What's the single highest-impact tip on this list?</strong>Resizing to actual display dimensions before compressing — it consistently produces the largest size reduction.</div>
+            <div class="blog-faq-item"><strong>Is there a "set and forget" quality setting?</strong>70–85% works well across most photographic content, though graphics-heavy images may need a case-by-case check.</div>
+            <div class="blog-faq-item"><strong>How often should I revisit my compression workflow?</strong>Whenever you adopt a new format (like WebP) or your output destination changes — print vs. web, for example.</div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a class="logo" href="#home"><img src="logo-icon.png" alt="" aria-hidden="true" style="height:22px;width:22px;display:block;" />Smart Compress</a>
+          <p>Premium dark UI browser compression platform. Fast, safe, secure optimization routines executing local calculations on devices directly.</p>
+          <p style="margin-top:.5rem;"><a href="mailto:balisettyprudhvi5@gmail.com" style="color: var(--accent2); text-decoration: none; font-family: var(--mono); font-size: .82rem;">balisettyprudhvi5@gmail.com</a></p>
+        </div>
+        <div class="footer-col">
+          <h4>Utility Options</h4>
+          <ul>
+            <li><a href="#tools-suite">Compression Engine</a></li>
+            <li><a href="#tools-suite">Pixel Resizer</a></li>
+            <li><a href="#tools-suite">Conversion Hub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Corporate Strategy</h4>
+          <ul>
+            <li><a href="#about">About Our Core Philosophy</a></li>
+            <li><a href="#blog">Blog Articles</a></li>
+            <li><a href="#privacy">Privacy Safeguards Matrix</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Help Desk Options</h4>
+          <ul>
+            <li><a href="#contact">Contact Infrastructure Channels</a></li>
+            <li><a href="#terms">Legal Terms Specifications</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>Copyright © 2026 Smart Compress. All Rights Reserved.</div>
+        <a href="#home" class="btn-totop" aria-label="Scroll back to top area header structure view node">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+      /* Blog "Read More" expandable sections */
+      document.querySelectorAll(".blog-read-more").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const target = document.getElementById(btn.getAttribute("data-target"));
+          if (!target) return;
+          const isOpen = target.classList.toggle("open");
+          btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+          btn.textContent = isOpen ? "Show Less" : "Read More";
+        });
+      });
+      
+      /* Mobile Menu Handler */
+      const toggleBtn = document.getElementById("nav-toggle");
+      const mainNavList = document.getElementById("main-nav");
+
+      toggleBtn.addEventListener("click", () => {
+        const isCurrentlyExpanded = toggleBtn.getAttribute("aria-expanded") === "true";
+        toggleBtn.setAttribute("aria-expanded", !isCurrentlyExpanded);
+        mainNavList.classList.toggle("open");
+      });
+
+      document.querySelectorAll(".nav-links a").forEach(linkElement => {
+        linkElement.addEventListener("click", () => {
+          toggleBtn.setAttribute("aria-expanded", "false");
+          mainNavList.classList.remove("open");
+        });
+      });
+
+      /* Tabs Logic Switcher */
+      const suiteTabButtons = document.querySelectorAll(".tool-tab-btn");
+      const workspacePanels = document.querySelectorAll(".tool-workspace");
+
+      suiteTabButtons.forEach(tabButtonElement => {
+        tabButtonElement.addEventListener("click", () => {
+          suiteTabButtons.forEach(btn => {
+            btn.classList.remove("active");
+            btn.setAttribute("aria-selected", "false");
+          });
+          workspacePanels.forEach(p => p.classList.remove("active"));
+
+          tabButtonElement.classList.add("active");
+          tabButtonElement.setAttribute("aria-selected", "true");
+          
+          const targetedPanelId = tabButtonElement.getAttribute("aria-controls");
+          document.getElementById(targetedPanelId).classList.add("active");
+        });
+      });
+
+      /* Simulated Ticket Submission Form */
+      const ticketForm = document.getElementById("help-ticket-form");
+      const ticketSuccessBox = document.getElementById("ticket-success-alert");
+      const ticketSubmitBtn = document.getElementById("btn-ticket-submit");
+
+      ticketForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        ticketSuccessBox.style.display = "block";
+        ticketSubmitBtn.style.display = "none";
+        ticketForm.reset();
+      });
+
+      /* Dropzone Drag/Drop Setup Utility Builder */
+      let originalImageMemoryBufferMap = {};
+
+      function setupDropzoneOperationalBinding(dropzoneId, fileInputId, processCallbackRoutine) {
+        const dropZoneUIElement = document.getElementById(dropzoneId);
+        const hiddenFileInputNode = document.getElementById(fileInputId);
+
+        if (!dropZoneUIElement || !hiddenFileInputNode) return;
+
+        dropZoneUIElement.addEventListener("click", () => hiddenFileInputNode.click());
+
+        dropZoneUIElement.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          dropZoneUIElement.classList.add("drag-over");
+        });
+
+        ["dragleave", "drop"].forEach(eventLabel => {
+          dropZoneUIElement.addEventListener(eventLabel, () => {
+            dropZoneUIElement.classList.remove("drag-over");
+          });
+        });
+
+        dropZoneUIElement.addEventListener("drop", (e) => {
+          e.preventDefault();
+          if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            hiddenFileInputNode.files = e.dataTransfer.files;
+            processCallbackRoutine(e.dataTransfer.files[0]);
+          }
+        });
+
+        hiddenFileInputNode.addEventListener("change", (e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            processCallbackRoutine(e.target.files[0]);
+          }
+        });
+      }
+
+      /* 1. COMPRESSOR LOGIC BLOCK — MULTI-IMAGE EDITION */
+      const compSliderQuality        = document.getElementById("comp-quality");
+      const compQualityLabelValue    = document.getElementById("comp-quality-lbl");
+      const forceFormatSelectionSelector = document.getElementById("comp-format");
+      const compTargetSizeSelector   = document.getElementById("comp-target-size");
+      const compCustomKbGroup        = document.getElementById("comp-custom-kb-group");
+      const compCustomKbInput        = document.getElementById("comp-custom-kb");
+      const compResultsList          = document.getElementById("comp-results-list");
+      const compProgressWrap         = document.getElementById("comp-progress-wrap");
+      const compProgressBar          = document.getElementById("comp-progress-bar");
+      const compProgressLabel        = document.getElementById("comp-progress-label");
+      const compSummary              = document.getElementById("comp-summary");
+      const dlAllBtn                 = document.getElementById("dl-all-compressor");
+
+      /* Stores { dataUrl, filename } for every processed image so Download All works */
+      let compressedResultsStore = [];
+
+      /* Show/hide custom KB input */
+      compTargetSizeSelector.addEventListener("change", () => {
+        compCustomKbGroup.style.display = compTargetSizeSelector.value === "custom" ? "flex" : "none";
+        /* Disable quality slider when a target size is active */
+        const hasTarget = compTargetSizeSelector.value !== "none";
+        compSliderQuality.disabled = hasTarget;
+        compSliderQuality.style.opacity = hasTarget ? "0.35" : "1";
+        if (originalImageMemoryBufferMap["compressor_files"] && originalImageMemoryBufferMap["compressor_files"].length) {
+          runBatchCompression(originalImageMemoryBufferMap["compressor_files"]);
+        }
+      });
+
+      compCustomKbInput.addEventListener("change", () => {
+        if (originalImageMemoryBufferMap["compressor_files"] && originalImageMemoryBufferMap["compressor_files"].length) {
+          runBatchCompression(originalImageMemoryBufferMap["compressor_files"]);
+        }
+      });
+
+      compSliderQuality.addEventListener("input", (e) => {
+        compQualityLabelValue.textContent = e.target.value + "%";
+        if (originalImageMemoryBufferMap["compressor_files"] && originalImageMemoryBufferMap["compressor_files"].length) {
+          runBatchCompression(originalImageMemoryBufferMap["compressor_files"]);
+        }
+      });
+
+      forceFormatSelectionSelector.addEventListener("change", () => {
+        if (originalImageMemoryBufferMap["compressor_files"] && originalImageMemoryBufferMap["compressor_files"].length) {
+          runBatchCompression(originalImageMemoryBufferMap["compressor_files"]);
+        }
+      });
+
+      /* ── Target-size compression engine ─────────────────────────────────────
+         Returns { dataUrl, bytes, scaledDown } given a canvas, mime, and target.
+         Strategy:
+           Pass 1  — Binary-search quality from 0.92 down to 0.05 (20 steps max).
+           Pass 2  — If still over target: iteratively scale dimensions by 10%
+                     until target is hit or width < MIN_DIM.
+         PNG: quality param is ignored by browsers, so we go straight to
+              dimension reduction for PNG targets.
+      ──────────────────────────────────────────────────────────────────────── */
+      function compressToTarget(img, mime, targetBytes) {
+        const MIN_DIM = 64; // px — never go below this on either axis
+
+        /* Helper: render canvas at given scale, return { dataUrl, bytes } */
+        function render(scale, q) {
+          const w = Math.max(MIN_DIM, Math.round(img.naturalWidth  * scale));
+          const h = Math.max(MIN_DIM, Math.round(img.naturalHeight * scale));
+          const cv = document.createElement("canvas");
+          cv.width = w; cv.height = h;
+          cv.getContext("2d").drawImage(img, 0, 0, w, h);
+          const url   = cv.toDataURL(mime, q);
+          const bytes = Math.round((url.length - 22) * 3 / 4);
+          return { dataUrl: url, bytes, width: w, height: h };
+        }
+
+        const isPng = mime === "image/png";
+
+        /* ── Pass 1: quality binary search (skip for PNG) ── */
+        let bestQ       = 0.92;
+        let bestResult  = render(1.0, bestQ);
+        let scaledDown  = false;
+
+        if (!isPng) {
+          let lo = 0.05, hi = 0.92;
+          for (let i = 0; i < 20; i++) {
+            const mid = (lo + hi) / 2;
+            const res = render(1.0, mid);
+            if (res.bytes <= targetBytes) {
+              bestQ = mid; bestResult = res; lo = mid;
+            } else {
+              hi = mid;
+            }
+            if ((hi - lo) < 0.01) break;
+          }
+        }
+
+        /* ── Pass 2: dimension reduction if still over target ── */
+        if (bestResult.bytes > targetBytes) {
+          let scale = 0.9;
+          const q   = isPng ? undefined : Math.max(0.05, bestQ);
+          while (scale > 0.01) {
+            const res = render(scale, q);
+            if (res.bytes <= targetBytes || (res.width <= MIN_DIM && res.height <= MIN_DIM)) {
+              bestResult = res; scaledDown = true; break;
+            }
+            bestResult = res; scaledDown = true;
+            scale = Math.round((scale - 0.1) * 100) / 100;
+          }
+        }
+
+        return { dataUrl: bestResult.dataUrl, bytes: bestResult.bytes, scaledDown };
+      }
+
+      /* Override dropzone for compressor to support multiple files */
+      (function setupCompressorMultiDropzone() {
+        const dropZone   = document.getElementById("dropzone-compressor");
+        const fileInput  = document.getElementById("file-compressor");
+        if (!dropZone || !fileInput) return;
+
+        dropZone.addEventListener("click", () => fileInput.click());
+
+        dropZone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          dropZone.classList.add("drag-over");
+        });
+        ["dragleave", "drop"].forEach(ev => {
+          dropZone.addEventListener(ev, () => dropZone.classList.remove("drag-over"));
+        });
+
+        dropZone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          const files = Array.from(e.dataTransfer.files).filter(f => /image\/(jpeg|png|webp)/.test(f.type));
+          if (!files.length) return;
+          originalImageMemoryBufferMap["compressor_files"] = files;
+          runBatchCompression(files);
+        });
+
+        fileInput.addEventListener("change", (e) => {
+          const files = Array.from(e.target.files).filter(f => /image\/(jpeg|png|webp)/.test(f.type));
+          if (!files.length) return;
+          originalImageMemoryBufferMap["compressor_files"] = files;
+          runBatchCompression(files);
+        });
+      })();
+
+      function runBatchCompression(files) {
+        /* Reset UI */
+        compResultsList.innerHTML = "";
+        compressedResultsStore = [];
+        dlAllBtn.style.display = "none";
+        compSummary.style.display = "none";
+
+        const quality    = parseInt(compSliderQuality.value) / 100;
+        const forcedFmt  = forceFormatSelectionSelector.value;
+        const total      = files.length;
+
+        /* Resolve target size in bytes (null = no target) */
+        const targetSel = compTargetSizeSelector.value;
+        let targetBytes = null;
+        if (targetSel !== "none") {
+          const kb = targetSel === "custom" ? parseFloat(compCustomKbInput.value) : parseFloat(targetSel);
+          if (kb > 0) targetBytes = kb * 1024;
+        }
+
+        /* Show progress only for multiple files */
+        if (total > 1) {
+          compProgressWrap.style.display = "block";
+          compProgressBar.style.width = "0%";
+          compProgressLabel.textContent = "Processing 0 / " + total;
+        } else {
+          compProgressWrap.style.display = "none";
+        }
+
+        let doneCount      = 0;
+        let totalOrigBytes = 0;
+        let totalCompBytes = 0;
+
+        /* Process each file sequentially via a recursive helper */
+        function processNext(idx) {
+          if (idx >= total) {
+            compProgressWrap.style.display = "none";
+            updateSummary(totalOrigBytes, totalCompBytes);
+            if (total > 1) dlAllBtn.style.display = "inline-flex";
+            return;
+          }
+
+          const file     = files[idx];
+          const mime     = forcedFmt !== "original" ? forcedFmt : file.type;
+          const origSize = file.size;
+          totalOrigBytes += origSize;
+
+          const reader = new FileReader();
+          reader.onload = function(re) {
+            const origDataUrl = re.target.result;
+
+            const img = new Image();
+            img.src = origDataUrl;
+            img.onload = function() {
+
+              let finalDataUrl, finalBytes, useOriginal, scaledDown = false, hitTarget = true, alreadyOptimal = false;
+
+              if (targetBytes !== null) {
+                /* ── TARGET SIZE MODE ── */
+                if (origSize <= targetBytes) {
+                  /* Already within target — keep original */
+                  finalDataUrl = origDataUrl;
+                  finalBytes   = origSize;
+                  useOriginal  = true;
+                  alreadyOptimal = true;
+                } else {
+                  const result = compressToTarget(img, mime, targetBytes);
+                  /* Never emit a file larger than the original */
+                  if (result.bytes >= origSize) {
+                    finalDataUrl = origDataUrl;
+                    finalBytes   = origSize;
+                    useOriginal  = true;
+                  } else {
+                    finalDataUrl = result.dataUrl;
+                    finalBytes   = result.bytes;
+                    useOriginal  = false;
+                    scaledDown   = result.scaledDown;
+                  }
+                  hitTarget = finalBytes <= targetBytes;
+                }
+              } else {
+                /* ── QUALITY SLIDER MODE (original behaviour) ── */
+                const canvas = document.createElement("canvas");
+                canvas.width  = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                canvas.getContext("2d").drawImage(img, 0, 0);
+                const compDataUrl = canvas.toDataURL(mime, quality);
+                const compBytes   = Math.round((compDataUrl.length - 22) * 3 / 4);
+                useOriginal  = compBytes >= origSize;
+                finalDataUrl = useOriginal ? origDataUrl : compDataUrl;
+                finalBytes   = useOriginal ? origSize : compBytes;
+                if (useOriginal) alreadyOptimal = true;
+              }
+
+              totalCompBytes += finalBytes;
+
+              /* Build filename */
+              const ext      = mime === "image/webp" ? "webp" : mime === "image/png" ? "png" : "jpg";
+              const baseName = file.name.replace(/\.[^.]+$/, "");
+              const dlName   = baseName + "_compressed." + ext;
+
+              compressedResultsStore.push({ dataUrl: finalDataUrl, filename: dlName });
+
+              /* Stats */
+              const origKB  = (origSize  / 1024).toFixed(1);
+              const compKB  = (finalBytes / 1024).toFixed(1);
+              const savings = (useOriginal || finalBytes >= origSize) ? 0 : Math.round(((origSize - finalBytes) / origSize) * 100);
+
+              /* Status line */
+              let statusHtml;
+              if (alreadyOptimal) {
+                statusHtml = `<div class="optimization-notice" style="display:block;margin-top:0;">This image is already optimized. Original file kept.</div>`;
+              } else if (useOriginal) {
+                statusHtml = `<div class="optimization-notice" style="display:block;margin-top:0;">This image is already optimized. Original file kept.</div>`;
+              } else {
+                let note = `<div style="font-family:var(--mono);font-size:.78rem;color:var(--accent);">Saved ${savings}% · ${origKB} KB → ${compKB} KB`;
+                if (scaledDown) note += ` <span style="color:var(--accent2);">(dimensions reduced)</span>`;
+                if (targetBytes !== null && !hitTarget) note += ` <span style="color:var(--danger);">· Could not reach target</span>`;
+                note += `</div>`;
+                statusHtml = note;
+              }
+
+              /* Card */
+              const card = document.createElement("div");
+              card.style.cssText = "background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;";
+              card.innerHTML = `
+                <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-start;">
+                  <div style="flex:0 0 auto;">
+                    <img src="${origDataUrl}" alt="original" style="max-width:120px;max-height:90px;border-radius:4px;object-fit:contain;background:#111;display:block;">
+                    <div class="meta-badge" style="margin-top:.4rem;text-align:center;">Orig: ${origKB} KB</div>
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <img src="${finalDataUrl}" alt="compressed" style="max-width:120px;max-height:90px;border-radius:4px;object-fit:contain;background:#111;display:block;">
+                    <div class="meta-badge" style="margin-top:.4rem;text-align:center;">${useOriginal ? origKB + " KB" : compKB + " KB (-" + savings + "%)"}</div>
+                  </div>
+                  <div style="flex:1 1 180px;display:flex;flex-direction:column;gap:.5rem;justify-content:center;">
+                    <div style="font-size:.88rem;font-weight:600;color:var(--text);word-break:break-all;">${file.name}</div>
+                    ${statusHtml}
+                    <a href="${finalDataUrl}" download="${dlName}" class="btn-primary" style="align-self:flex-start;padding:.5rem 1.1rem;font-size:.82rem;">⬇ Download</a>
+                  </div>
+                </div>`;
+              compResultsList.appendChild(card);
+
+              /* Progress */
+              doneCount++;
+              const pct = Math.round((doneCount / total) * 100);
+              compProgressBar.style.width = pct + "%";
+              compProgressLabel.textContent = "Processing " + doneCount + " / " + total;
+
+              processNext(idx + 1);
+            };
+          };
+          reader.readAsDataURL(file);
+        }
+
+        processNext(0);
+      }
+
+      function updateSummary(origBytes, compBytes) {
+        const saved = origBytes - compBytes;
+        const pct   = origBytes > 0 ? Math.round((saved / origBytes) * 100) : 0;
+        document.getElementById("sum-orig").textContent  = (origBytes / 1024).toFixed(1) + " KB";
+        document.getElementById("sum-comp").textContent  = (compBytes / 1024).toFixed(1) + " KB";
+        document.getElementById("sum-saved").textContent = (saved > 0 ? (saved / 1024).toFixed(1) : "0") + " KB (" + pct + "%)";
+        compSummary.style.display = "block";
+      }
+
+      /* Download All — trigger one-by-one anchor clicks with slight delay */
+      dlAllBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        compressedResultsStore.forEach((item, i) => {
+          setTimeout(() => {
+            const a = document.createElement("a");
+            a.href     = item.dataUrl;
+            a.download = item.filename;
+            a.click();
+          }, i * 120);
+        });
+      });
+
+      /* 2. RESIZER LOGIC WORKBENCH */
+      const resizerWidthInput = document.getElementById("resize-width");
+      const resizerHeightInput = document.getElementById("resize-height");
+      const resizerMaintainAspect = document.getElementById("resize-aspect");
+      const resizerPercentInput = document.getElementById("resize-percent");
+      const resizerFormatSelect = document.getElementById("resize-format");
+      const executeResizeActionBtn = document.getElementById("action-resize");
+      const downloadResizerActionBtn = document.getElementById("dl-resizer");
+      let resizerImageDimensionsAspectMultiplierRatio = 1.0;
+      let resizerOriginalNaturalW = 0, resizerOriginalNaturalH = 0;
+
+      setupDropzoneOperationalBinding("dropzone-resizer", "file-resizer", function(fileObj) {
+        originalImageMemoryBufferMap["resizer"] = fileObj;
+        document.getElementById("workbench-resizer").style.display = "grid";
+        executeResizeActionBtn.style.display = "inline-flex";
+
+        const tempImg = new Image();
+        tempImg.src = URL.createObjectURL(fileObj);
+        tempImg.onload = function() {
+          document.getElementById("prev-resize-orig").src = tempImg.src;
+          resizerWidthInput.value = tempImg.naturalWidth;
+          resizerHeightInput.value = tempImg.naturalHeight;
+          resizerOriginalNaturalW = tempImg.naturalWidth;
+          resizerOriginalNaturalH = tempImg.naturalHeight;
+          resizerImageDimensionsAspectMultiplierRatio = tempImg.naturalWidth / tempImg.naturalHeight;
+          resizerPercentInput.value = "";
+        };
+      });
+
+      resizerWidthInput.addEventListener("input", () => {
+        if (resizerMaintainAspect.checked && resizerImageDimensionsAspectMultiplierRatio) {
+          resizerHeightInput.value = Math.round(parseInt(resizerWidthInput.value) / resizerImageDimensionsAspectMultiplierRatio) || "";
+        }
+      });
+
+      resizerPercentInput.addEventListener("input", () => {
+        const pct = parseFloat(resizerPercentInput.value);
+        if (pct && resizerOriginalNaturalW && resizerOriginalNaturalH) {
+          resizerWidthInput.value = Math.round(resizerOriginalNaturalW * (pct / 100));
+          resizerHeightInput.value = Math.round(resizerOriginalNaturalH * (pct / 100));
+        }
+      });
+
+      executeResizeActionBtn.addEventListener("click", () => {
+        const fileTarget = originalImageMemoryBufferMap["resizer"];
+        if (!fileTarget) return;
+
+        const imgInstance = new Image();
+        imgInstance.src = URL.createObjectURL(fileTarget);
+        imgInstance.onload = function() {
+          const canvasElement = document.getElementById("canvas-resizer");
+          const ctx = canvasElement.getContext("2d");
+          
+          const targetW = parseInt(resizerWidthInput.value) || imgInstance.naturalWidth;
+          const targetH = parseInt(resizerHeightInput.value) || imgInstance.naturalHeight;
+          
+          canvasElement.width = targetW;
+          canvasElement.height = targetH;
+          ctx.drawImage(imgInstance, 0, 0, targetW, targetH);
+
+          const outFormat = resizerFormatSelect.value || "image/png";
+          const ext = outFormat === "image/jpeg" ? "jpg" : outFormat === "image/webp" ? "webp" : "png";
+          downloadResizerActionBtn.href = canvasElement.toDataURL(outFormat, 0.92);
+          downloadResizerActionBtn.setAttribute("download", `smartresize.${ext}`);
+          downloadResizerActionBtn.style.display = "inline-flex";
+        };
+      });
+
+      /* 3. CROP ENGINE INTERFACE SETUP */
+      const cropXInput = document.getElementById("crop-x");
+      const cropYInput = document.getElementById("crop-y");
+      const cropWInput = document.getElementById("crop-w");
+      const cropHInput = document.getElementById("crop-h");
+      const runCropRenderBtn = document.getElementById("action-crop");
+      const dlCropLinkBtn = document.getElementById("dl-crop");
+
+      setupDropzoneOperationalBinding("dropzone-crop", "file-crop", function(fileObj) {
+        originalImageMemoryBufferMap["crop"] = fileObj;
+        document.getElementById("workbench-crop").style.display = "grid";
+        runCropRenderBtn.style.display = "inline-flex";
+
+        const tempImg = new Image();
+        tempImg.src = URL.createObjectURL(fileObj);
+        tempImg.onload = function() {
+          document.getElementById("prev-crop-orig").src = tempImg.src;
+          cropWInput.value = Math.min(300, tempImg.naturalWidth);
+          cropHInput.value = Math.min(300, tempImg.naturalHeight);
+        };
+      });
+
+      runCropRenderBtn.addEventListener("click", () => {
+        const fileTarget = originalImageMemoryBufferMap["crop"];
+        if (!fileTarget) return;
+
+        const imgInstance = new Image();
+        imgInstance.src = URL.createObjectURL(fileTarget);
+        imgInstance.onload = function() {
+          const canvas = document.getElementById("canvas-crop");
+          const ctx = canvas.getContext("2d");
+          
+          const cX = parseInt(cropXInput.value) || 0;
+          const cY = parseInt(cropYInput.value) || 0;
+          const cW = parseInt(cropWInput.value) || 100;
+          const cH = parseInt(cropHInput.value) || 100;
+
+          canvas.width = cW;
+          canvas.height = cH;
+          
+          ctx.drawImage(imgInstance, cX, cY, cW, cH, 0, 0, cW, cH);
+          dlCropLinkBtn.href = canvas.toDataURL("image/png");
+          dlCropLinkBtn.style.display = "inline-flex";
+        };
+      });
+
+      /* 4. ROTATION TRANSFORMATION SETUP */
+      const rotateSelectorAngle = document.getElementById("rotate-angle");
+      const actionRotateButtonTrigger = document.getElementById("action-rotate");
+      const dlRotateLinkBtn = document.getElementById("dl-rotate");
+
+      setupDropzoneOperationalBinding("dropzone-rotate", "file-rotate", function(fileObj) {
+        originalImageMemoryBufferMap["rotate"] = fileObj;
+        document.getElementById("workbench-rotate").style.display = "grid";
+        actionRotateButtonTrigger.style.display = "inline-flex";
+        document.getElementById("prev-rotate-orig").src = URL.createObjectURL(fileObj);
+      });
+
+      actionRotateButtonTrigger.addEventListener("click", () => {
+        const fileTarget = originalImageMemoryBufferMap["rotate"];
+        if (!fileTarget) return;
+
+        const img = new Image();
+        img.src = URL.createObjectURL(fileTarget);
+        img.onload = function() {
+          const canvas = document.getElementById("canvas-rotate");
+          const ctx = canvas.getContext("2d");
+          const degrees = parseInt(rotateSelectorAngle.value);
+
+          if (degrees === 90 || degrees === 270) {
+            canvas.width = img.naturalHeight;
+            canvas.height = img.naturalWidth;
+          } else {
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+          }
+
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          ctx.translate(canvas.width/2, canvas.height/2);
+          ctx.rotate((degrees * Math.PI) / 180);
+          ctx.drawImage(img, -img.naturalWidth/2, -img.naturalHeight/2);
+
+          dlRotateLinkBtn.href = canvas.toDataURL("image/png");
+          dlRotateLinkBtn.style.display = "inline-flex";
+        };
+      });
+
+      /* 5. JPG TO PNG CONVERSION ROUTINE */
+      const dlJpgPngButtonNode = document.getElementById("dl-jpgpng");
+
+      setupDropzoneOperationalBinding("dropzone-jpgpng", "file-jpgpng", function(fileObj) {
+        document.getElementById("workbench-jpgpng").style.display = "grid";
+        
+        const img = new Image();
+        img.src = URL.createObjectURL(fileObj);
+        img.onload = function() {
+          document.getElementById("prev-jpgpng-orig").src = img.src;
+          const canvas = document.getElementById("canvas-jpgpng");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          canvas.getContext("2d").drawImage(img, 0, 0);
+
+          dlJpgPngButtonNode.href = canvas.toDataURL("image/png");
+          dlJpgPngButtonNode.style.display = "inline-flex";
+        };
+      });
+
+      /* 6. PNG TO JPG CONVERSION ROUTINE */
+      const dlPngJpgButtonNode = document.getElementById("dl-pngjpg");
+
+      setupDropzoneOperationalBinding("dropzone-pngjpg", "file-pngjpg", function(fileObj) {
+        document.getElementById("workbench-pngjpg").style.display = "grid";
+
+        const img = new Image();
+        img.src = URL.createObjectURL(fileObj);
+        img.onload = function() {
+          document.getElementById("prev-pngjpg-orig").src = img.src;
+          const canvas = document.getElementById("canvas-pngjpg");
+          const ctx = canvas.getContext("2d");
+          
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0);
+
+          dlPngJpgButtonNode.href = canvas.toDataURL("image/jpeg", 0.9);
+          dlPngJpgButtonNode.style.display = "inline-flex";
+        };
+      });
+
+      /* 7. WEBP ENCODER MAPPING ROUTINE */
+      const dlWebpButtonNode = document.getElementById("dl-webp");
+
+      setupDropzoneOperationalBinding("dropzone-webp", "file-webp", function(fileObj) {
+        document.getElementById("workbench-webp").style.display = "grid";
+
+        const img = new Image();
+        img.src = URL.createObjectURL(fileObj);
+        img.onload = function() {
+          document.getElementById("prev-webp-orig").src = img.src;
+          const canvas = document.getElementById("canvas-webp");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          canvas.getContext("2d").drawImage(img, 0, 0);
+
+          dlWebpButtonNode.href = canvas.toDataURL("image/webp", 0.8);
+          dlWebpButtonNode.style.display = "inline-flex";
+        };
+      });
+
+      /* 8. IMAGE TO PDF — multi image merge using jsPDF */
+      let pdfImageFiles = [];
+
+      function renderPdfImageList() {
+        const listEl = document.getElementById("pdf-image-list");
+        listEl.innerHTML = "";
+        pdfImageFiles.forEach((item, idx) => {
+          const card = document.createElement("div");
+          card.style.cssText = "width:140px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.6rem;text-align:center;";
+          card.innerHTML = `
+            <img src="${item.url}" style="width:100%;height:90px;object-fit:cover;border-radius:6px;transform:rotate(${item.rotation}deg);" />
+            <div style="font-family:var(--mono);font-size:.68rem;color:var(--muted);margin:.4rem 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.file.name}</div>
+            <div style="display:flex;gap:.3rem;justify-content:center;flex-wrap:wrap;">
+              <button type="button" data-act="left" data-idx="${idx}" class="btn-secondary" style="padding:.25rem .5rem;font-size:.7rem;">◀</button>
+              <button type="button" data-act="rotate" data-idx="${idx}" class="btn-secondary" style="padding:.25rem .5rem;font-size:.7rem;">⟳</button>
+              <button type="button" data-act="right" data-idx="${idx}" class="btn-secondary" style="padding:.25rem .5rem;font-size:.7rem;">▶</button>
+              <button type="button" data-act="del" data-idx="${idx}" class="btn-secondary" style="padding:.25rem .5rem;font-size:.7rem;color:var(--danger);">✕</button>
+            </div>`;
+          listEl.appendChild(card);
+        });
+        document.getElementById("action-pdf").style.display = pdfImageFiles.length ? "inline-flex" : "none";
+        document.getElementById("dl-pdf").style.display = "none";
+      }
+
+      document.getElementById("pdf-image-list").addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-act]");
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.idx, 10);
+        const act = btn.dataset.act;
+        if (act === "del") pdfImageFiles.splice(idx, 1);
+        if (act === "rotate") pdfImageFiles[idx].rotation = (pdfImageFiles[idx].rotation + 90) % 360;
+        if (act === "left" && idx > 0) [pdfImageFiles[idx - 1], pdfImageFiles[idx]] = [pdfImageFiles[idx], pdfImageFiles[idx - 1]];
+        if (act === "right" && idx < pdfImageFiles.length - 1) [pdfImageFiles[idx + 1], pdfImageFiles[idx]] = [pdfImageFiles[idx], pdfImageFiles[idx + 1]];
+        renderPdfImageList();
+      });
+
+      setupDropzoneOperationalBinding("dropzone-pdf", "file-pdf", function(fileObj) {
+        const inputEl = document.getElementById("file-pdf");
+        const files = (inputEl.files && inputEl.files.length) ? Array.from(inputEl.files) : [fileObj];
+        files.forEach(f => {
+          if (f && f.type.startsWith("image/")) {
+            pdfImageFiles.push({ file: f, url: URL.createObjectURL(f), rotation: 0 });
+          }
+        });
+        renderPdfImageList();
+      });
+
+      document.getElementById("action-pdf").addEventListener("click", async () => {
+        if (!pdfImageFiles.length || !window.jspdf) return;
+        const { jsPDF } = window.jspdf;
+        const pageSizeChoice = document.getElementById("pdf-page-size").value;
+        const orientationChoice = document.getElementById("pdf-orientation").value;
+        const marginMm = parseFloat(document.getElementById("pdf-margin").value) || 0;
+
+        const loadImage = (item) => new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.src = item.url;
+        });
+
+        let doc = null;
+
+        for (let i = 0; i < pdfImageFiles.length; i++) {
+          const item = pdfImageFiles[i];
+          const img = await loadImage(item);
+
+          const canvas = document.createElement("canvas");
+          const rotated = item.rotation % 180 !== 0;
+          canvas.width = rotated ? img.naturalHeight : img.naturalWidth;
+          canvas.height = rotated ? img.naturalWidth : img.naturalHeight;
+          const ctx = canvas.getContext("2d");
+          ctx.save();
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate((item.rotation * Math.PI) / 180);
+          ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+          ctx.restore();
+
+          const imgDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+          const imgWmm = canvas.width * 0.2646;
+          const imgHmm = canvas.height * 0.2646;
+
+          let isLandscape = imgWmm > imgHmm;
+          if (orientationChoice === "portrait") isLandscape = false;
+          if (orientationChoice === "landscape") isLandscape = true;
+
+          let format = pageSizeChoice === "auto" ? [imgWmm + marginMm * 2, imgHmm + marginMm * 2] : pageSizeChoice;
+          const orientationArg = isLandscape ? "l" : "p";
+
+          if (i === 0) {
+            doc = new jsPDF({ orientation: orientationArg, unit: "mm", format: format });
+          } else {
+            doc.addPage(format, orientationArg);
+          }
+
+          const pageW = doc.internal.pageSize.getWidth();
+          const pageH = doc.internal.pageSize.getHeight();
+          const availW = pageW - marginMm * 2;
+          const availH = pageH - marginMm * 2;
+          const scale = Math.min(availW / imgWmm, availH / imgHmm);
+          const drawW = imgWmm * scale;
+          const drawH = imgHmm * scale;
+          const x = (pageW - drawW) / 2;
+          const y = (pageH - drawH) / 2;
+
+          doc.addImage(imgDataUrl, "JPEG", x, y, drawW, drawH);
+        }
+
+        const blob = doc.output("blob");
+        const dlBtn = document.getElementById("dl-pdf");
+        dlBtn.href = URL.createObjectURL(blob);
+        dlBtn.style.display = "inline-flex";
+      });
+
+      /* 9. PDF TO IMAGE — using pdf.js */
+      if (window.pdfjsLib) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      }
+
+      let pdf2imgResultBlobs = [];
+
+      setupDropzoneOperationalBinding("dropzone-pdf2img", "file-pdf2img", async function(fileObj) {
+        if (!fileObj || !window.pdfjsLib) return;
+        pdf2imgResultBlobs = [];
+        const resultsEl = document.getElementById("pdf2img-results");
+        resultsEl.innerHTML = "";
+        document.getElementById("dl-all-pdf2img").style.display = "none";
+
+        const progWrap = document.getElementById("pdf2img-progress-wrap");
+        const progLabel = document.getElementById("pdf2img-progress-label");
+        const progBar = document.getElementById("pdf2img-progress-bar");
+        progWrap.style.display = "block";
+
+        const outFormat = document.getElementById("pdf2img-format").value;
+        const ext = outFormat === "image/png" ? "png" : "jpg";
+
+        const arrayBuffer = await fileObj.arrayBuffer();
+        const pdfDoc = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const total = pdfDoc.numPages;
+
+        for (let pageNum = 1; pageNum <= total; pageNum++) {
+          progLabel.textContent = `Processing ${pageNum} / ${total}`;
+          progBar.style.width = `${(pageNum / total) * 100}%`;
+
+          const page = await pdfDoc.getPage(pageNum);
+          const viewport = page.getViewport({ scale: 2 });
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext("2d");
+          await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+          const blob = await new Promise(res => canvas.toBlob(res, outFormat, 0.92));
+          const url = URL.createObjectURL(blob);
+          pdf2imgResultBlobs.push({ blob, name: `page-${pageNum}.${ext}` });
+
+          const card = document.createElement("div");
+          card.style.cssText = "width:150px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.6rem;text-align:center;";
+          card.innerHTML = `
+            <img src="${url}" style="width:100%;height:100px;object-fit:cover;border-radius:6px;" />
+            <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin:.4rem 0;">Page ${pageNum}</div>
+            <a href="${url}" download="page-${pageNum}.${ext}" class="btn-secondary" style="display:inline-block;padding:.3rem .6rem;font-size:.7rem;">Download</a>`;
+          resultsEl.appendChild(card);
+        }
+
+        progLabel.textContent = `Done — ${total} / ${total} pages`;
+        if (pdf2imgResultBlobs.length) document.getElementById("dl-all-pdf2img").style.display = "inline-flex";
+      });
+
+      document.getElementById("dl-all-pdf2img").addEventListener("click", async (e) => {
+        e.preventDefault();
+        if (!window.JSZip || !pdf2imgResultBlobs.length) return;
+        const zip = new JSZip();
+        pdf2imgResultBlobs.forEach(item => zip.file(item.name, item.blob));
+        const content = await zip.generateAsync({ type: "blob" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(content);
+        a.download = "smartcompress-pdf-pages.zip";
+        a.click();
+      });
+
+      /* 10. AI PROMPT STUDIO — Prompt Generator + Image -> Prompt (rule-based, no paid API) */
+      const psStyleDescriptors = {
+        realistic: "photorealistic, ultra-detailed, natural lighting, DSLR photo, sharp focus, true-to-life textures",
+        cinematic: "cinematic lighting, dramatic shadows, anamorphic lens flare, film grain, color graded, movie still",
+        anime: "anime style, vibrant cel-shaded colors, clean linework, Japanese animation aesthetic",
+        ghibli: "Studio Ghibli inspired, soft painterly background, whimsical atmosphere, hand-drawn warmth",
+        pixar: "Pixar 3D animation style, smooth rounded shapes, expressive characters, vibrant rendering",
+        fantasy: "epic fantasy art, mystical atmosphere, intricate detail, dramatic composition, concept art quality",
+        product: "professional product photography, studio lighting, clean background, commercial advertising quality",
+        logo: "minimal vector logo design, flat design, clean lines, scalable iconography, brand identity",
+        wallpaper: "high resolution wallpaper, ultra-wide composition, immersive detail, 4K quality",
+        poster: "graphic poster design, bold typography space, striking composition, eye-catching layout",
+        thumbnail: "high-CTR YouTube thumbnail style, bold contrast, expressive focal point, vibrant colors",
+        social: "social media optimized, eye-catching, trendy aesthetic, square or vertical composition"
+      };
+
+      function buildGeneratedPrompt(idea, style) {
+        const styleDesc = psStyleDescriptors[style] || psStyleDescriptors.realistic;
+        return `${idea.trim()}, ${styleDesc}, highly detailed, professional composition, balanced lighting, sharp focus, high quality, trending on artstation\n\nNegative prompt: blurry, low quality, distorted, watermark, text, oversaturated, extra limbs, deformed`;
+      }
+
+      document.getElementById("ps-generate-btn").addEventListener("click", () => {
+        const idea = document.getElementById("ps-input").value.trim();
+        if (!idea) return;
+        const style = document.getElementById("ps-style").value;
+        const output = buildGeneratedPrompt(idea, style);
+        document.getElementById("ps-output").value = output;
+        document.getElementById("ps-output-wrap").style.display = "block";
+        const blob = new Blob([output], { type: "text/plain" });
+        document.getElementById("ps-download-btn").href = URL.createObjectURL(blob);
+      });
+
+      document.getElementById("ps-clear-btn").addEventListener("click", () => {
+        document.getElementById("ps-input").value = "";
+        document.getElementById("ps-output").value = "";
+        document.getElementById("ps-output-wrap").style.display = "none";
+      });
+
+      document.getElementById("ps-copy-btn").addEventListener("click", () => {
+        const out = document.getElementById("ps-output");
+        out.select();
+        navigator.clipboard.writeText(out.value);
+      });
+
+      /* Prompt Studio sub-tab switching */
+      const psTabGenerator = document.getElementById("ps-tab-generator");
+      const psTabImage = document.getElementById("ps-tab-image");
+      const psPanelGenerator = document.getElementById("ps-panel-generator");
+      const psPanelImage = document.getElementById("ps-panel-image");
+
+      psTabGenerator.addEventListener("click", () => {
+        psTabGenerator.classList.add("active");
+        psTabImage.classList.remove("active");
+        psPanelGenerator.style.display = "block";
+        psPanelImage.style.display = "none";
+      });
+      psTabImage.addEventListener("click", () => {
+        psTabImage.classList.add("active");
+        psTabGenerator.classList.remove("active");
+        psPanelImage.style.display = "block";
+        psPanelGenerator.style.display = "none";
+      });
+
+      /* Image -> Prompt analysis (client-side heuristic, no paid API) */
+      function analyzeImageForPrompt(img, canvas) {
+        const ctx = canvas.getContext("2d");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        ctx.drawImage(img, 0, 0);
+
+        let data;
+        try {
+          data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        } catch (e) {
+          data = null;
+        }
+
+        const aspect = img.naturalWidth / img.naturalHeight;
+        let composition = "balanced centered composition";
+        if (aspect > 1.4) composition = "wide landscape composition";
+        else if (aspect < 0.75) composition = "vertical portrait composition";
+
+        let colorDesc = "balanced color palette";
+        let brightness = 128;
+        if (data) {
+          let r = 0, g = 0, b = 0, count = 0;
+          for (let i = 0; i < data.length; i += 400) {
+            r += data[i]; g += data[i + 1]; b += data[i + 2];
+            count++;
+          }
+          r /= count; g /= count; b /= count;
+          brightness = (r + g + b) / 3;
+          if (r > g && r > b) colorDesc = "warm tones with reds and oranges";
+          else if (b > r && b > g) colorDesc = "cool tones with blues and teals";
+          else if (g > r && g > b) colorDesc = "natural tones with greens";
+          else colorDesc = "neutral, balanced color palette";
+        }
+        const lighting = brightness > 170 ? "bright, high-key lighting" : brightness < 85 ? "moody, low-key lighting" : "soft, even natural lighting";
+
+        return {
+          subject: "the main subject captured in the uploaded image",
+          environment: "a contextually fitting environment matching the scene",
+          angle: aspect > 1.2 ? "wide-angle perspective" : "eye-level perspective",
+          lens: "50mm equivalent lens, shallow depth of field",
+          lighting,
+          colors: colorDesc,
+          composition,
+          style: "photorealistic, highly detailed digital rendering",
+          quality: "ultra-detailed, sharp focus, high resolution, professional quality",
+          negative: "blurry, low quality, distorted, watermark, text, oversaturated, extra limbs, deformed"
+        };
+      }
+
+      setupDropzoneOperationalBinding("dropzone-ps-image", "file-ps-image", function(fileObj) {
+        const img = new Image();
+        img.onload = function() {
+          document.getElementById("workbench-ps-image").style.display = "grid";
+          document.getElementById("prev-ps-image").src = img.src;
+
+          const tmpCanvas = document.createElement("canvas");
+          const result = analyzeImageForPrompt(img, tmpCanvas);
+
+          const promptText = `Subject: ${result.subject}\nEnvironment: ${result.environment}\nCamera Angle: ${result.angle}\nLens: ${result.lens}\nLighting: ${result.lighting}\nColors: ${result.colors}\nComposition: ${result.composition}\nStyle: ${result.style}\nQuality Keywords: ${result.quality}\n\nFull Prompt: ${result.subject}, ${result.environment}, ${result.angle}, ${result.lens}, ${result.lighting}, ${result.colors}, ${result.composition}, ${result.style}, ${result.quality}. Compatible with ChatGPT Images, Gemini, Midjourney, Stable Diffusion and FLUX.\n\nNegative Prompt: ${result.negative}`;
+
+          document.getElementById("ps-image-output").value = promptText;
+          document.getElementById("ps-image-copy-btn").style.display = "inline-flex";
+          document.getElementById("ps-image-clear-btn").style.display = "inline-flex";
+          const dlBtn = document.getElementById("ps-image-download-btn");
+          dlBtn.href = URL.createObjectURL(new Blob([promptText], { type: "text/plain" }));
+          dlBtn.style.display = "inline-flex";
+        };
+        img.src = URL.createObjectURL(fileObj);
+      });
+
+      document.getElementById("ps-image-copy-btn").addEventListener("click", () => {
+        const out = document.getElementById("ps-image-output");
+        out.select();
+        navigator.clipboard.writeText(out.value);
+      });
+
+      document.getElementById("ps-image-clear-btn").addEventListener("click", () => {
+        document.getElementById("workbench-ps-image").style.display = "none";
+        document.getElementById("ps-image-output").value = "";
+        document.getElementById("ps-image-copy-btn").style.display = "none";
+        document.getElementById("ps-image-download-btn").style.display = "none";
+        document.getElementById("ps-image-clear-btn").style.display = "none";
+      });
+
+    });
+  </script>
+</body>
+</html>
