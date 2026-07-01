@@ -1,0 +1,32 @@
+{
+  "name": "Smart Compress — Free Image Compressor",
+  "short_name": "Smart Compress",
+  "description": "Free online image compressor and editing suite. Compress, crop, resize, rotate, and convert images entirely in your browser — 100% client-side and private.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0d0d0f",
+  "theme_color": "#0d0d0f",
+  "categories": ["photo", "utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/logo-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -16,7 +16,7 @@
   <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
   <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
-  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="manifest" href="/manifest.json" />
 
   <meta property="og:title" content="Smart Compress — Free Instant Image Compression & Editing Tools" />
   <meta property="og:description" content="Compress JPG, PNG, and WebP images instantly in your browser. Nothing leaves your device. Free forever." />
@@ -634,6 +634,15 @@
         <li><a href="#privacy">Privacy Policy</a></li>
         <li><a href="#contact">Contact Us</a></li>
         <li><a href="#terms">Terms & Conditions</a></li>
+        <li>
+          <button
+            type="button"
+            id="pwa-install-btn"
+            class="pwa-install-btn"
+            style="display:none;background:var(--accent);color:#0d0d0f;border:none;border-radius:var(--radius-sm);padding:.45rem .9rem;font-weight:600;font-family:var(--sans);font-size:.85rem;cursor:pointer;white-space:nowrap;"
+            aria-label="Install Smart Compress as an app"
+          >📲 Install App</button>
+        </li>
       </ul>
     </nav>
   </header>
@@ -645,6 +654,7 @@
     <div class="hero-buttons">
       <a href="#tools-suite" class="btn-primary" role="button">Compress Now</a>
       <a href="#about" class="btn-secondary" role="button">Learn More</a>
+      <button type="button" class="btn-secondary pwa-install-btn" style="display:none;cursor:pointer;">📲 Install App</button>
     </div>
   </section>
 
@@ -2563,6 +2573,66 @@
       });
 
     });
+  </script>
+
+  <!-- PWA install flow: uses the native beforeinstallprompt event only.
+       No file (APK/ZIP/etc) is ever downloaded when the button is clicked. -->
+  <script>
+    (function () {
+      let deferredInstallPrompt = null;
+      const installButtons = Array.from(document.querySelectorAll('.pwa-install-btn'));
+
+      function showInstallButtons() {
+        installButtons.forEach((btn) => { btn.style.display = 'inline-flex'; });
+      }
+      function hideInstallButtons() {
+        installButtons.forEach((btn) => { btn.style.display = 'none'; });
+      }
+
+      // If the app is already installed / running standalone, never show the button.
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+      if (isStandalone) hideInstallButtons();
+
+      // Chrome/Android (and other Chromium browsers) fire this when the PWA
+      // is installable. We intercept it, stash it, and only trigger it from
+      // our own button click — this IS the standard install flow.
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        if (!isStandalone) showInstallButtons();
+      });
+
+      installButtons.forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (!deferredInstallPrompt) return;
+          btn.disabled = true;
+          deferredInstallPrompt.prompt();
+          try {
+            await deferredInstallPrompt.userChoice;
+          } finally {
+            deferredInstallPrompt = null;
+            hideInstallButtons();
+            btn.disabled = false;
+          }
+        });
+      });
+
+      window.addEventListener('appinstalled', () => {
+        deferredInstallPrompt = null;
+        hideInstallButtons();
+      });
+
+      // Register the service worker so the app is installable and works offline.
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js').catch(() => {
+            /* registration failure shouldn't break the page */
+          });
+        });
+      }
+    })();
   </script>
 </body>
 </html>
