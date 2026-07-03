@@ -3,15 +3,9 @@
    build instead of a stale cached shell), cache-first for static assets
    (icons, manifest, fonts, etc.), with an offline fallback to the last
    cached homepage. All image processing already happens 100% client-side,
-   so this only needs to keep the shell itself available offline.
+   so this only needs to keep the shell itself available offline. */
 
-   Update flow: a new SW installs and caches assets, but deliberately does
-   NOT call self.skipWaiting() automatically — it waits until the page
-   explicitly asks it to (via a SKIP_WAITING message), which the page does
-   after the user clicks "Update Now" on the update banner. This avoids
-   yanking a user's in-progress compression/edit out from under them. */
-
-const CACHE_NAME = "smartcompress-v4";
+const CACHE_NAME = "smartcompress-v3";
 
 /* Only truly static, versioned-by-content-ish assets go here. index.html
    is deliberately excluded — it must never be served cache-first, since
@@ -45,18 +39,9 @@ self.addEventListener("install", (event) => {
       .then((cache) => cache.addAll(STATIC_ASSETS))
       .catch(() => { /* Missing individual assets shouldn't block install */ })
   );
-  // Intentionally no self.skipWaiting() here — this build sits in the
-  // "waiting" state until the page tells us to activate (see the
-  // SKIP_WAITING message handler below), which lets the app show an
-  // "Update available" banner instead of silently swapping code underneath
-  // an in-progress task. The very first install (no prior controller) has
-  // no old tab to disrupt, so the browser activates it right away regardless.
-});
-
-self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
+  // Activate this new SW as soon as it finishes installing, instead of
+  // waiting for all old tabs to close.
+  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
