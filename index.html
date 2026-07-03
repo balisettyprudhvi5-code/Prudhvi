@@ -3458,5 +3458,38 @@
     });
   })();
   </script>
+
+  <script>
+  // Service worker registration + auto-update handling.
+  // Ensures every open tab (and the installed PWA) picks up a new deployed
+  // version automatically instead of getting stuck on an old cached build.
+  (function () {
+    if (!("serviceWorker" in navigator)) return;
+
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/sw.js").catch(function () {
+        /* Registration failures shouldn't break the app itself. */
+      });
+    });
+
+    // When the new service worker takes control, reload once so the page
+    // (and any inline assets it references) reflect the latest version.
+    // The `refreshed` guard prevents an infinite reload loop.
+    var refreshed = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (refreshed) return;
+      refreshed = true;
+      window.location.reload();
+    });
+
+    // Notification hook: fires in every open tab as soon as the new
+    // service worker has activated there.
+    navigator.serviceWorker.addEventListener("message", function (event) {
+      if (event.data && event.data.type === "SW_UPDATED") {
+        console.info("Smart Compress updated to a new version:", event.data.version);
+      }
+    });
+  })();
+  </script>
 </body>
 </html>
