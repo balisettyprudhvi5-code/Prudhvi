@@ -1,6 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    /* Applied synchronously, before CSS paints, so returning visitors never see a flash
+       of the default theme. First-time visitors (no saved settings) are untouched. */
+    (function () {
+      try {
+        var raw = localStorage.getItem("sc_settings_v1");
+        if (!raw) return;
+        var s = JSON.parse(raw);
+        var html = document.documentElement;
+        if (s.theme && s.theme !== "default")      html.setAttribute("data-sc-theme", s.theme);
+        if (s.accent && s.accent !== "green")       html.setAttribute("data-sc-accent", s.accent);
+        if (s.fontSize && s.fontSize !== "medium")  html.setAttribute("data-sc-fontsize", s.fontSize);
+        if (s.compactMode)                          html.setAttribute("data-sc-compact", "on");
+        if (s.highContrast)                         html.setAttribute("data-sc-contrast", "on");
+        if (s.reduceAnimations)                     html.setAttribute("data-sc-motion", "reduced");
+        if (s.corners && s.corners !== "rounded")   html.setAttribute("data-sc-corners", s.corners);
+      } catch (e) { /* corrupted storage — fall back to default theme silently */ }
+    })();
+  </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7807604506939349"
      crossorigin="anonymous"></script>
   <meta charset="UTF-8" />
@@ -16,7 +35,7 @@
   <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
   <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
-  <link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" href="/site.webmanifest" />
 
   <meta property="og:title" content="Smart Compress — Free Instant Image Compression & Editing Tools" />
   <meta property="og:description" content="Compress JPG, PNG, and WebP images instantly in your browser. Nothing leaves your device. Free forever." />
@@ -393,6 +412,193 @@
     }
     .control-group input:focus, .control-group select:focus { border-color: var(--accent2); }
 
+    .target-size-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .target-size-row select { flex: 1; min-width: 0; }
+
+    .camera-btn {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: .5rem .75rem;
+      font-family: var(--sans);
+      font-size: .85rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .2s ease;
+    }
+    .camera-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--surface2);
+    }
+    .camera-btn:active { transform: translateY(1px); }
+
+    @media (max-width: 480px) {
+      .target-size-row { flex-wrap: wrap; }
+      .target-size-row select { flex: 1 1 100%; }
+      .camera-btn { flex: 1 1 100%; justify-content: center; }
+    }
+
+    /* Camera capture modal */
+    .camera-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.75);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1.2rem;
+    }
+    .camera-modal-overlay.open { display: flex; }
+    .camera-modal-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      width: 100%;
+      max-width: 520px;
+      padding: 1.2rem;
+      position: relative;
+    }
+    .camera-modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .camera-modal-head h3 {
+      font-size: 1rem;
+      color: var(--text);
+      font-family: var(--sans);
+    }
+    .camera-modal-close {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s ease;
+    }
+    .camera-modal-close:hover { color: var(--accent); border-color: var(--accent); }
+    .camera-modal-video-wrap {
+      position: relative;
+      background: #000;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+    }
+    .camera-modal-video-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .camera-loading {
+      display: none;
+      position: absolute;
+      inset: 0;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13,13,15,.6);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: .8rem;
+      letter-spacing: .03em;
+      text-align: center;
+      padding: 1rem;
+    }
+    .camera-loading.show { display: flex; }
+    .camera-modal-error {
+      display: none;
+      text-align: center;
+      padding: 1.5rem 1rem;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: .85rem;
+      line-height: 1.6;
+    }
+    .camera-modal-error .err-icon { font-size: 1.8rem; display: block; margin-bottom: .6rem; }
+    .camera-modal-error-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .6rem;
+      margin-top: 1rem;
+    }
+    .camera-modal-error-actions .btn-primary,
+    .camera-modal-error-actions .btn-secondary {
+      padding: .6rem 1.3rem;
+      font-size: .85rem;
+    }
+    .camera-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .camera-zoom-wrap {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      flex: 1;
+      min-width: 160px;
+    }
+    .camera-zoom-wrap label {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .camera-zoom-wrap input[type="range"] { margin: 0; }
+    .camera-toggle-btns { display: flex; gap: .5rem; }
+    .camera-icon-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: .95rem;
+      transition: all .2s ease;
+    }
+    .camera-icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .camera-icon-btn.active { background: var(--accent); color: #0d0d0f; border-color: var(--accent); }
+    #camera-hdr-btn { width: auto; padding: 0 .7rem; border-radius: 99px; font-family: var(--mono); font-size: .7rem; font-weight: 700; }
+    .camera-modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: .8rem;
+      margin-top: 1.1rem;
+    }
+    .camera-modal-actions .btn-secondary { padding: .65rem 1.4rem; font-size: .85rem; }
+
     .range-label-wrap { display: flex; justify-content: space-between; align-items: center; }
     .range-val-lbl { color: var(--accent); font-family: var(--mono); font-size: .85rem; }
 
@@ -611,6 +817,268 @@
     .blog-faq-item { border-top: 1px solid var(--border); padding: .8rem 0; }
     .blog-faq-item:first-of-type { border-top: none; }
     .blog-faq-item strong { display: block; color: var(--text); font-size: .92rem; margin-bottom: .35rem; }
+
+    /* ══════════════════════════════════════════════════════════
+       THEME / ACCENT / ACCESSIBILITY OVERRIDES
+       Defaults above are the original Smart Compress look.
+       Nothing below fires unless a user explicitly saves a
+       preference — first-time visitors always see the default.
+       ══════════════════════════════════════════════════════════ */
+
+    /* Themes */
+    html[data-sc-theme="dark"] {
+      --bg: #0b0d12; --surface: #14161c; --surface2: #1b1e26; --border: #2a2e3a; --text: #e9ebf2; --muted: #7a7f92;
+    }
+    html[data-sc-theme="light"] {
+      --bg: #f6f7f9; --surface: #ffffff; --surface2: #eef0f3; --border: #dcdfe5; --text: #14151a; --muted: #61636e;
+    }
+    html[data-sc-theme="amoled"] {
+      --bg: #000000; --surface: #0a0a0a; --surface2: #121212; --border: #232323; --text: #f2f2f2; --muted: #7a7a7a;
+    }
+
+    /* Accent colors (apply on top of any theme) */
+    html[data-sc-accent="blue"]   { --accent: #5b9dff; --accent2: #3dd0ff; }
+    html[data-sc-accent="purple"] { --accent: #b083ff; --accent2: #7f5cff; }
+    html[data-sc-accent="orange"] { --accent: #ff9f4d; --accent2: #ffcb3d; }
+    html[data-sc-accent="red"]    { --accent: #ff6161; --accent2: #ff3d7a; }
+
+    /* Font size */
+    html[data-sc-fontsize="small"]  body { font-size: .92rem; }
+    html[data-sc-fontsize="large"]  body { font-size: 1.1rem; }
+
+    /* Compact mode */
+    html[data-sc-compact="on"] .tool-controls-panel { padding: .8rem; gap: .8rem; }
+    html[data-sc-compact="on"] .tool-title-row { margin-bottom: .9rem; padding-bottom: .6rem; }
+    html[data-sc-compact="on"] header { padding: .7rem 1.4rem; }
+    html[data-sc-compact="on"] .control-group { gap: .25rem; }
+    html[data-sc-compact="on"] .btn-primary,
+    html[data-sc-compact="on"] .btn-secondary { padding: .55rem 1.3rem; }
+    html[data-sc-compact="on"] section { padding-top: 2rem; padding-bottom: 2rem; }
+
+    /* High contrast */
+    html[data-sc-contrast="on"] { --border: #6b6b7e; --muted: #b7b9c6; }
+    html[data-sc-contrast="on"] header { background: var(--bg); backdrop-filter: none; -webkit-backdrop-filter: none; border-bottom-width: 2px; }
+    html[data-sc-contrast="on"] .control-group input,
+    html[data-sc-contrast="on"] .control-group select,
+    html[data-sc-contrast="on"] .tool-drop-zone,
+    html[data-sc-contrast="on"] .blog-card,
+    html[data-sc-contrast="on"] .camera-btn { border-width: 2px; }
+
+    /* Reduce animations */
+    html[data-sc-motion="reduced"] *, html[data-sc-motion="reduced"] *::before, html[data-sc-motion="reduced"] *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    /* Rounded corners */
+    html[data-sc-corners="sharp"]  { --radius: 0px; --radius-sm: 0px; }
+    html[data-sc-corners="extra"]  { --radius: 26px; --radius-sm: 16px; }
+
+    /* ══════════════════════════════════════════════════════════
+       SETTINGS PANEL
+       ══════════════════════════════════════════════════════════ */
+    .settings-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.75);
+      z-index: 1100;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 3.5rem 1.2rem 2rem;
+      overflow-y: auto;
+    }
+    .settings-overlay.open { display: flex; }
+    .settings-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 640px;
+      padding: 0;
+      animation: fadeUp .3s ease both;
+    }
+    .settings-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.3rem 1.6rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--surface2);
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .settings-head h2 { font-size: 1.15rem; color: var(--text); }
+    .settings-close {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s ease;
+    }
+    .settings-close:hover { color: var(--accent); border-color: var(--accent); }
+    .settings-body { padding: 1.6rem; display: flex; flex-direction: column; gap: 2rem; }
+    .settings-section h3 {
+      font-family: var(--mono);
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--accent2);
+      margin-bottom: 1rem;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .8rem 0;
+      border-top: 1px solid var(--border);
+    }
+    .settings-row:first-of-type { border-top: none; padding-top: 0; }
+    .settings-row-label { display: flex; flex-direction: column; gap: .15rem; }
+    .settings-row-label span.title { font-size: .92rem; color: var(--text); font-weight: 600; }
+    .settings-row-label span.desc { font-size: .78rem; color: var(--muted); font-family: var(--mono); }
+
+    .segmented {
+      display: inline-flex;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 2px;
+      flex-wrap: wrap;
+    }
+    .segmented button {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: .8rem;
+      font-weight: 600;
+      padding: .45rem .8rem;
+      border-radius: calc(var(--radius-sm) - 3px);
+      cursor: pointer;
+      transition: all .2s ease;
+      white-space: nowrap;
+    }
+    .segmented button:hover { color: var(--text); }
+    .segmented button.active { background: var(--accent); color: #0d0d0f; }
+
+    .swatch-row { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .swatch-btn {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      position: relative;
+      transition: all .2s ease;
+    }
+    .swatch-btn.active { border-color: var(--text); transform: scale(1.1); }
+    .swatch-btn.active::after {
+      content: "✓";
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: #0d0d0f;
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    .toggle-switch { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 100%; height: 100%; position: absolute; margin: 0; cursor: pointer; z-index: 2; }
+    .toggle-switch .track {
+      position: absolute; inset: 0;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      transition: all .2s ease;
+    }
+    .toggle-switch .thumb {
+      position: absolute; top: 2px; left: 3px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: all .2s ease;
+    }
+    .toggle-switch input:checked ~ .track { background: var(--accent); border-color: var(--accent); }
+    .toggle-switch input:checked ~ .thumb { left: 23px; background: #0d0d0f; }
+
+    .perm-status-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .8rem 0; border-top: 1px solid var(--border); gap: 1rem; flex-wrap: wrap;
+    }
+    .perm-status-row:first-of-type { border-top: none; padding-top: 0; }
+    .perm-badge {
+      font-family: var(--mono);
+      font-size: .78rem;
+      font-weight: 700;
+      padding: .3rem .7rem;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+    .perm-badge.allowed { background: rgba(127,255,110,.12); color: var(--accent); }
+    .perm-badge.denied  { background: rgba(255,92,92,.12); color: var(--danger); }
+    .perm-badge.unknown { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+    .perm-open-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--text);
+      font-family: var(--sans); font-size: .78rem; font-weight: 600;
+      padding: .4rem .8rem; border-radius: var(--radius-sm); cursor: pointer; transition: all .2s ease;
+    }
+    .perm-open-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .perm-instructions {
+      display: none;
+      margin-top: .6rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: .8rem 1rem;
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--muted);
+      line-height: 1.6;
+      width: 100%;
+    }
+    .perm-instructions.show { display: block; }
+
+    .app-info-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .7rem 0; border-top: 1px solid var(--border); gap: 1rem; flex-wrap: wrap;
+    }
+    .app-info-row:first-of-type { border-top: none; padding-top: 0; }
+    .app-info-row .info-val { font-family: var(--mono); font-size: .82rem; color: var(--accent2); }
+    .settings-action-btn {
+      background: var(--bg); border: 1px solid var(--border); color: var(--text);
+      font-family: var(--sans); font-size: .82rem; font-weight: 600;
+      padding: .5rem 1rem; border-radius: var(--radius-sm); cursor: pointer; transition: all .2s ease;
+    }
+    .settings-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .settings-action-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+    .settings-toast {
+      position: fixed;
+      bottom: 1.4rem; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      font-family: var(--sans); font-size: .85rem;
+      padding: .7rem 1.2rem; border-radius: var(--radius-sm);
+      opacity: 0; pointer-events: none;
+      transition: all .25s ease;
+      z-index: 1200;
+      box-shadow: 0 8px 30px rgba(0,0,0,.4);
+    }
+    .settings-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 560px) {
+      .settings-row, .perm-status-row, .app-info-row { flex-direction: column; align-items: flex-start; }
+      .settings-overlay { padding: 1.4rem .8rem 2rem; }
+    }
   </style>
 </head>
 <body>
@@ -634,18 +1102,168 @@
         <li><a href="#privacy">Privacy Policy</a></li>
         <li><a href="#contact">Contact Us</a></li>
         <li><a href="#terms">Terms & Conditions</a></li>
-        <li>
-          <button
-            type="button"
-            id="pwa-install-btn"
-            class="pwa-install-btn"
-            style="display:none;background:var(--accent);color:#0d0d0f;border:none;border-radius:var(--radius-sm);padding:.45rem .9rem;font-weight:600;font-family:var(--sans);font-size:.85rem;cursor:pointer;white-space:nowrap;"
-            aria-label="Install Smart Compress as an app"
-          >📲 Install App</button>
-        </li>
+        <li><a href="#" id="nav-settings-btn">⚙ Settings</a></li>
       </ul>
     </nav>
   </header>
+
+  <!-- ══════════ SETTINGS PANEL ══════════ -->
+  <div class="settings-overlay" id="settings-overlay" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="settings-box">
+      <div class="settings-head">
+        <h2 id="settings-title">⚙ Settings</h2>
+        <button type="button" class="settings-close" id="settings-close-btn" aria-label="Close settings">✕</button>
+      </div>
+
+      <div class="settings-body">
+
+        <!-- Appearance -->
+        <div class="settings-section">
+          <h3>Appearance</h3>
+
+          <div class="settings-row">
+            <div class="settings-row-label">
+              <span class="title">Theme</span>
+              <span class="desc">Default view matches the original Smart Compress design</span>
+            </div>
+            <div class="segmented" id="theme-segmented" role="group" aria-label="Theme">
+              <button type="button" data-value="default">Default</button>
+              <button type="button" data-value="dark">Dark</button>
+              <button type="button" data-value="light">Light</button>
+              <button type="button" data-value="amoled">AMOLED</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row-label">
+              <span class="title">Accent Color</span>
+              <span class="desc">Recolors buttons, highlights and links</span>
+            </div>
+            <div class="swatch-row" id="accent-swatch-row" role="group" aria-label="Accent color">
+              <button type="button" class="swatch-btn" data-value="green"  style="background:#7fff6e;" title="Green (Default)" aria-label="Green"></button>
+              <button type="button" class="swatch-btn" data-value="blue"   style="background:#5b9dff;" title="Blue" aria-label="Blue"></button>
+              <button type="button" class="swatch-btn" data-value="purple" style="background:#b083ff;" title="Purple" aria-label="Purple"></button>
+              <button type="button" class="swatch-btn" data-value="orange" style="background:#ff9f4d;" title="Orange" aria-label="Orange"></button>
+              <button type="button" class="swatch-btn" data-value="red"    style="background:#ff6161;" title="Red" aria-label="Red"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accessibility -->
+        <div class="settings-section">
+          <h3>Accessibility</h3>
+
+          <div class="settings-row">
+            <div class="settings-row-label"><span class="title">Font Size</span></div>
+            <div class="segmented" id="fontsize-segmented" role="group" aria-label="Font size">
+              <button type="button" data-value="small">Small</button>
+              <button type="button" data-value="medium">Medium</button>
+              <button type="button" data-value="large">Large</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row-label">
+              <span class="title">Compact Mode</span>
+              <span class="desc">Tighter spacing across the app</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-compact">
+              <span class="track"></span><span class="thumb"></span>
+            </label>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row-label">
+              <span class="title">High Contrast Mode</span>
+              <span class="desc">Stronger borders and text contrast</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-contrast">
+              <span class="track"></span><span class="thumb"></span>
+            </label>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row-label">
+              <span class="title">Reduce Animations</span>
+              <span class="desc">Minimizes transitions and motion</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-motion">
+              <span class="track"></span><span class="thumb"></span>
+            </label>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row-label"><span class="title">Rounded Corners</span></div>
+            <div class="segmented" id="corners-segmented" role="group" aria-label="Corner roundness">
+              <button type="button" data-value="sharp">Sharp</button>
+              <button type="button" data-value="rounded">Rounded</button>
+              <button type="button" data-value="extra">Extra Rounded</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Permissions -->
+        <div class="settings-section">
+          <h3>Permissions</h3>
+
+          <div class="perm-status-row">
+            <div class="settings-row-label"><span class="title">📷 Camera</span></div>
+            <div style="display:flex; align-items:center; gap:.6rem; flex-wrap:wrap;">
+              <span class="perm-badge unknown" id="perm-badge-camera">⏳ Not Requested</span>
+              <button type="button" class="perm-open-btn" id="perm-open-camera" style="display:none;">Open Permission Settings</button>
+            </div>
+          </div>
+          <div class="perm-instructions" id="perm-instructions-camera"></div>
+
+          <div class="perm-status-row">
+            <div class="settings-row-label"><span class="title">🔔 Notifications</span></div>
+            <div style="display:flex; align-items:center; gap:.6rem; flex-wrap:wrap;">
+              <span class="perm-badge unknown" id="perm-badge-notifications">⏳ Not Requested</span>
+              <button type="button" class="perm-open-btn" id="perm-open-notifications" style="display:none;">Open Permission Settings</button>
+            </div>
+          </div>
+          <div class="perm-instructions" id="perm-instructions-notifications"></div>
+        </div>
+
+        <!-- App -->
+        <div class="settings-section">
+          <h3>App</h3>
+
+          <div class="app-info-row">
+            <span class="title">Clear Cache</span>
+            <button type="button" class="settings-action-btn" id="btn-clear-cache">Clear Cache</button>
+          </div>
+          <div class="app-info-row">
+            <span class="title">Reset User Preferences</span>
+            <button type="button" class="settings-action-btn" id="btn-reset-prefs">Reset</button>
+          </div>
+          <div class="app-info-row">
+            <span class="title">Restore Default Settings</span>
+            <button type="button" class="settings-action-btn danger" id="btn-restore-defaults">Restore Defaults</button>
+          </div>
+          <div class="app-info-row">
+            <span class="title">App Version</span>
+            <span class="info-val" id="app-version-val">v1.0.0</span>
+          </div>
+          <div class="app-info-row">
+            <span class="title">PWA Status</span>
+            <span class="info-val" id="pwa-status-val">Checking…</span>
+          </div>
+          <div class="app-info-row">
+            <span class="title">Storage Usage</span>
+            <span class="info-val" id="storage-usage-val">Checking…</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-toast" id="settings-toast"></div>
+  <!-- ══════════ /SETTINGS PANEL ══════════ -->
 
   <section class="hero" id="home" aria-labelledby="hero-title">
     <p class="hero-eyebrow">100% Client-Side · Private · Blazing Fast</p>
@@ -654,7 +1272,6 @@
     <div class="hero-buttons">
       <a href="#tools-suite" class="btn-primary" role="button">Compress Now</a>
       <a href="#about" class="btn-secondary" role="button">Learn More</a>
-      <button type="button" class="btn-secondary pwa-install-btn" style="display:none;cursor:pointer;">📲 Install App</button>
     </div>
   </section>
 
@@ -728,13 +1345,16 @@
             </div>
             <div class="control-group">
               <label for="comp-target-size">Target File Size</label>
-              <select id="comp-target-size">
-                <option value="none">No Target (Use Quality Slider)</option>
-                <option value="50">Under 50 KB</option>
-                <option value="100">Under 100 KB</option>
-                <option value="200">Under 200 KB</option>
-                <option value="custom">Custom KB…</option>
-              </select>
+              <div class="target-size-row">
+                <select id="comp-target-size">
+                  <option value="none">No Target (Use Quality Slider)</option>
+                  <option value="50">Under 50 KB</option>
+                  <option value="100">Under 100 KB</option>
+                  <option value="200">Under 200 KB</option>
+                  <option value="custom">Custom KB…</option>
+                </select>
+                <button type="button" id="comp-camera-btn" class="camera-btn" title="Take a photo with your camera">📷 Camera</button>
+              </div>
             </div>
             <div class="control-group" id="comp-custom-kb-group" style="display:none;">
               <label for="comp-custom-kb">Custom Target (KB)</label>
@@ -747,6 +1367,54 @@
             <p>Drag & drop one or more images or <span>browse local directory</span></p>
             <input type="file" id="file-compressor" class="file-input-hidden" accept="image/jpeg, image/png, image/webp" multiple />
           </div>
+
+          <!-- Camera capture modal -->
+          <div class="camera-modal-overlay" id="camera-modal-overlay">
+            <div class="camera-modal-box">
+              <div class="camera-modal-head">
+                <h3>📷 Capture Photo</h3>
+                <button type="button" class="camera-modal-close" id="camera-modal-close" aria-label="Close camera">✕</button>
+              </div>
+
+              <div class="camera-modal-video-wrap" id="camera-video-wrap">
+                <video id="camera-video-feed" autoplay playsinline muted></video>
+                <div class="camera-loading" id="camera-loading">Starting camera…</div>
+              </div>
+
+              <div class="camera-modal-error" id="camera-modal-error">
+                <span class="err-icon">🚫</span>
+                <span id="camera-error-text">Camera access was denied. Please allow camera permission in your browser settings and try again.</span>
+                <div class="perm-instructions" id="camera-perm-instructions"></div>
+                <div class="camera-modal-error-actions">
+                  <button type="button" class="btn-primary" id="camera-grant-btn">🔓 Grant Camera Access</button>
+                  <button type="button" class="btn-secondary" id="camera-fallback-btn">📁 Upload Photo Instead</button>
+                  <button type="button" class="btn-secondary" id="camera-error-cancel-btn">Cancel</button>
+                </div>
+              </div>
+
+              <canvas id="camera-capture-canvas" style="display:none;"></canvas>
+
+              <div class="camera-controls-row" id="camera-controls-row">
+                <div class="camera-zoom-wrap" id="camera-zoom-wrap" style="display:none;">
+                  <label for="camera-zoom-slider">🔍 Zoom</label>
+                  <input type="range" id="camera-zoom-slider" min="1" max="1" step="0.1" value="1">
+                </div>
+                <div class="camera-toggle-btns">
+                  <button type="button" class="camera-icon-btn" id="camera-switch-btn" title="Switch camera" style="display:none;">🔄</button>
+                  <button type="button" class="camera-icon-btn" id="camera-focus-btn" title="Refocus" style="display:none;">🎯</button>
+                  <button type="button" class="camera-icon-btn" id="camera-hdr-btn" title="Toggle HDR" style="display:none;">HDR</button>
+                </div>
+              </div>
+
+              <div class="camera-modal-actions" id="camera-modal-actions">
+                <button type="button" class="btn-secondary" id="camera-cancel-btn">Cancel</button>
+                <button type="button" class="btn-primary" id="camera-shutter-btn">📸 Capture</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Native camera-app fallback for browsers without MediaDevices support -->
+          <input type="file" id="camera-fallback-input" accept="image/*" capture="environment" class="file-input-hidden" style="display:none;" />
 
           <!-- Progress bar (hidden until needed) -->
           <div id="comp-progress-wrap" style="display:none; margin-top:1.2rem;">
@@ -1845,6 +2513,365 @@
         });
       })();
 
+      /* ── Camera capture for Image Compressor ── */
+      (function setupCompressorCamera() {
+        const cameraBtn      = document.getElementById("comp-camera-btn");
+        const overlay        = document.getElementById("camera-modal-overlay");
+        const closeBtn       = document.getElementById("camera-modal-close");
+        const cancelBtn      = document.getElementById("camera-cancel-btn");
+        const shutterBtn     = document.getElementById("camera-shutter-btn");
+        const videoWrap      = document.getElementById("camera-video-wrap");
+        const video          = document.getElementById("camera-video-feed");
+        const loadingBox     = document.getElementById("camera-loading");
+        const errorBox       = document.getElementById("camera-modal-error");
+        const errorText      = document.getElementById("camera-error-text");
+        const grantBtn       = document.getElementById("camera-grant-btn");
+        const fallbackBtn    = document.getElementById("camera-fallback-btn");
+        const errorCancelBtn = document.getElementById("camera-error-cancel-btn");
+        const permInstrBox   = document.getElementById("camera-perm-instructions");
+        const captureCanvas  = document.getElementById("camera-capture-canvas");
+        const controlsRow    = document.getElementById("camera-controls-row");
+        const zoomWrap       = document.getElementById("camera-zoom-wrap");
+        const zoomSlider     = document.getElementById("camera-zoom-slider");
+        const switchBtn      = document.getElementById("camera-switch-btn");
+        const focusBtn       = document.getElementById("camera-focus-btn");
+        const hdrBtn         = document.getElementById("camera-hdr-btn");
+        const fallbackInput  = document.getElementById("camera-fallback-input");
+
+        if (!cameraBtn || !overlay || !video) return;
+
+        const mediaDevicesSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
+        let activeStream     = null;
+        let currentTrack     = null;
+        let currentFacing    = "environment"; // rear camera by default
+        let multipleCameras  = false;
+        let hdrOn            = false;
+
+        /* ── Native camera-app fallback (used when MediaDevices isn't supported) ── */
+        function loadFileIntoCompressor(file) {
+          originalImageMemoryBufferMap["compressor_files"] = [file];
+          runBatchCompression([file]);
+        }
+
+        fallbackInput.addEventListener("change", (e) => {
+          const file = e.target.files && e.target.files[0];
+          fallbackInput.value = "";
+          if (!file) return;
+          loadFileIntoCompressor(file);
+        });
+
+        /* ── Stream lifecycle ── */
+        function stopStream() {
+          if (activeStream) {
+            activeStream.getTracks().forEach(track => track.stop());
+          }
+          activeStream = null;
+          currentTrack = null;
+          video.srcObject = null;
+        }
+
+        function showLoading() { loadingBox.classList.add("show"); }
+        function hideLoading() { loadingBox.classList.remove("show"); }
+
+        function showError(message, opts) {
+          opts = opts || {};
+          videoWrap.style.display    = "none";
+          controlsRow.style.display  = "none";
+          errorBox.style.display     = "block";
+          errorText.textContent      = message;
+          shutterBtn.style.display   = "none";
+          grantBtn.style.display     = opts.allowRetry === false ? "none" : "inline-flex";
+          if (opts.instructions) {
+            permInstrBox.innerHTML = opts.instructions;
+            permInstrBox.classList.add("show");
+          } else {
+            permInstrBox.classList.remove("show");
+            permInstrBox.innerHTML = "";
+          }
+        }
+
+        function resetModalUI() {
+          videoWrap.style.display   = "flex";
+          controlsRow.style.display = "flex";
+          errorBox.style.display    = "none";
+          shutterBtn.style.display  = "inline-flex";
+          hideLoading();
+          zoomWrap.style.display    = "none";
+          switchBtn.style.display   = "none";
+          focusBtn.style.display    = "none";
+          hdrBtn.style.display      = "none";
+          hdrBtn.classList.remove("active");
+          hdrOn = false;
+        }
+
+        /* ── Inspect track capabilities: zoom / focus / HDR / multi-camera ── */
+        async function setupTrackFeatures(track) {
+          let caps = {};
+          try { caps = (typeof track.getCapabilities === "function") ? track.getCapabilities() : {}; }
+          catch (e) { caps = {}; }
+
+          /* Zoom */
+          if (caps.zoom && caps.zoom.max > caps.zoom.min) {
+            zoomWrap.style.display = "flex";
+            zoomSlider.min  = caps.zoom.min;
+            zoomSlider.max  = caps.zoom.max;
+            zoomSlider.step = caps.zoom.step || 0.1;
+            let settings = {};
+            try { settings = track.getSettings(); } catch (e) {}
+            zoomSlider.value = settings.zoom || caps.zoom.min;
+          } else {
+            zoomWrap.style.display = "none";
+          }
+
+          /* Continuous autofocus (applied automatically) + manual refocus trigger */
+          if (caps.focusMode && caps.focusMode.length) {
+            if (caps.focusMode.includes("continuous")) {
+              try { await track.applyConstraints({ advanced: [{ focusMode: "continuous" }] }); } catch (e) {}
+            }
+            focusBtn.style.display = "inline-flex";
+          } else {
+            focusBtn.style.display = "none";
+          }
+
+          /* HDR — only shown if the device/browser actually exposes an HDR capability */
+          if (caps.hdr || (Array.isArray(caps.hdr) && caps.hdr.length)) {
+            hdrBtn.style.display = "inline-flex";
+          } else {
+            hdrBtn.style.display = "none";
+          }
+
+          /* Front/rear switch — only shown if more than one camera exists */
+          switchBtn.style.display = multipleCameras ? "inline-flex" : "none";
+        }
+
+        async function detectMultipleCameras() {
+          try {
+            if (!navigator.mediaDevices.enumerateDevices) { multipleCameras = false; return; }
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            multipleCameras = devices.filter(d => d.kind === "videoinput").length > 1;
+          } catch (e) {
+            multipleCameras = false;
+          }
+        }
+
+        /* ── Check whether camera permission is already permanently denied,
+               so we can show clear settings instructions instead of a silent failure ── */
+        async function checkPermanentDenial() {
+          if (!navigator.permissions || !navigator.permissions.query) return false;
+          try {
+            const status = await navigator.permissions.query({ name: "camera" });
+            return status.state === "denied";
+          } catch (e) {
+            return false; // Permissions API doesn't support 'camera' in this browser (e.g. Firefox) — fall through to getUserMedia
+          }
+        }
+
+        /* ── Start / restart the camera stream at the highest supported resolution ── */
+        async function startStream(facingMode) {
+          stopStream();
+          showLoading();
+          errorBox.style.display    = "none";
+          videoWrap.style.display   = "flex";
+          controlsRow.style.display = "flex";
+          shutterBtn.style.display  = "inline-flex";
+
+          if (!mediaDevicesSupported) {
+            hideLoading();
+            showError("Camera access isn't supported in this browser. Please try a different browser or use the button below to take a photo instead.", { allowRetry: false });
+            return;
+          }
+
+          const permanentlyDenied = await checkPermanentDenial();
+          if (permanentlyDenied) {
+            hideLoading();
+            showError(
+              "Camera access is blocked for this site. Enable it from your browser or app settings, then try again.",
+              { allowRetry: true, instructions: window.scPermissionInstructions ? window.scPermissionInstructions("camera") : "" }
+            );
+            return;
+          }
+
+          const constraints = {
+            video: {
+              facingMode: { ideal: facingMode },
+              width:  { ideal: 4096 },
+              height: { ideal: 2160 }
+            },
+            audio: false
+          };
+
+          try {
+            activeStream = await navigator.mediaDevices.getUserMedia(constraints);
+            currentTrack = activeStream.getVideoTracks()[0];
+            currentFacing = facingMode;
+            video.srcObject = activeStream;
+            await video.play().catch(() => {});
+            await detectMultipleCameras();
+            await setupTrackFeatures(currentTrack);
+            hideLoading();
+          } catch (err) {
+            hideLoading();
+            let msg = "We couldn't access your camera. Please check your device and try again.";
+            let allowRetry = true;
+            if (err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
+              msg = "Camera access was denied. Grant permission to keep using your camera, or upload a photo instead.";
+              showError(msg, { allowRetry: true, instructions: window.scPermissionInstructions ? window.scPermissionInstructions("camera") : "" });
+              return;
+            } else if (err && err.name === "NotFoundError") {
+              msg = "No camera was found on this device.";
+              allowRetry = true;
+            } else if (err && err.name === "NotReadableError") {
+              msg = "Your camera is already in use by another app. Please close it and try again.";
+            } else if (err && err.name === "OverconstrainedError") {
+              /* Retry once with relaxed constraints if the ideal resolution/facing mode isn't supported */
+              try {
+                activeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: false });
+                currentTrack = activeStream.getVideoTracks()[0];
+                currentFacing = facingMode;
+                video.srcObject = activeStream;
+                await video.play().catch(() => {});
+                await detectMultipleCameras();
+                await setupTrackFeatures(currentTrack);
+                return;
+              } catch (err2) {
+                msg = "We couldn't access your camera. Please check your device and try again.";
+              }
+            }
+            showError(msg, { allowRetry });
+          }
+        }
+
+        /* ── Open / close modal ── */
+        function openCamera() {
+          if (!mediaDevicesSupported) {
+            /* Skip the modal entirely — hand off straight to the device's native camera app */
+            fallbackInput.click();
+            return;
+          }
+          resetModalUI();
+          overlay.classList.add("open");
+          showLoading();
+          startStream(currentFacing);
+        }
+
+        function closeCamera() {
+          stopStream();
+          overlay.classList.remove("open");
+        }
+
+        /* ── Capture at native resolution, preserving full quality ── */
+        async function capturePhoto() {
+          if (!activeStream || !currentTrack) return;
+
+          shutterBtn.disabled = true;
+
+          try {
+            let blob = null;
+
+            /* Prefer ImageCapture.takePhoto() — captures the sensor's native still-photo
+               resolution rather than being limited to the live preview stream size */
+            if (window.ImageCapture) {
+              try {
+                const imageCapture = new ImageCapture(currentTrack);
+                blob = await imageCapture.takePhoto();
+              } catch (icErr) {
+                blob = null;
+              }
+            }
+
+            /* Fallback: grab the current frame from the video element at its native size */
+            if (!blob) {
+              if (!video.videoWidth) { shutterBtn.disabled = false; return; }
+              captureCanvas.width  = video.videoWidth;
+              captureCanvas.height = video.videoHeight;
+              const ctx = captureCanvas.getContext("2d");
+              ctx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
+              blob = await new Promise(resolve => captureCanvas.toBlob(resolve, "image/jpeg", 1.0));
+            }
+
+            shutterBtn.disabled = false;
+            if (!blob) { closeCamera(); return; }
+
+            const ext  = blob.type === "image/png" ? "png" : "jpg";
+            const file = new File([blob], "camera-capture-" + Date.now() + "." + ext, { type: blob.type || "image/jpeg" });
+
+            closeCamera();
+
+            /* Feed straight into the existing compressor pipeline — no extra steps needed */
+            loadFileIntoCompressor(file);
+          } catch (e) {
+            shutterBtn.disabled = false;
+          }
+        }
+
+        /* ── Front / rear switch ── */
+        function switchCamera() {
+          const next = currentFacing === "environment" ? "user" : "environment";
+          startStream(next);
+        }
+
+        /* ── Zoom ── */
+        zoomSlider.addEventListener("input", async () => {
+          if (!currentTrack) return;
+          try {
+            await currentTrack.applyConstraints({ advanced: [{ zoom: parseFloat(zoomSlider.value) }] });
+          } catch (e) {}
+        });
+
+        /* ── Manual refocus trigger (re-applies continuous autofocus) ── */
+        focusBtn.addEventListener("click", async () => {
+          if (!currentTrack) return;
+          try {
+            await currentTrack.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+            focusBtn.classList.add("active");
+            setTimeout(() => focusBtn.classList.remove("active"), 400);
+          } catch (e) {}
+        });
+
+        /* ── HDR toggle (only visible when the device exposes the capability) ── */
+        hdrBtn.addEventListener("click", async () => {
+          if (!currentTrack) return;
+          hdrOn = !hdrOn;
+          try {
+            await currentTrack.applyConstraints({ advanced: [{ hdr: hdrOn }] });
+            hdrBtn.classList.toggle("active", hdrOn);
+          } catch (e) {
+            hdrOn = !hdrOn;
+          }
+        });
+
+        cameraBtn.addEventListener("click", openCamera);
+        closeBtn.addEventListener("click", closeCamera);
+        cancelBtn.addEventListener("click", closeCamera);
+        shutterBtn.addEventListener("click", capturePhoto);
+        switchBtn.addEventListener("click", switchCamera);
+
+        /* Permission was denied — retry the prompt instead of leaving a dead end */
+        grantBtn.addEventListener("click", () => startStream(currentFacing));
+
+        /* Permission blocked or unsupported — hand off to the native camera app */
+        fallbackBtn.addEventListener("click", () => {
+          closeCamera();
+          fallbackInput.click();
+        });
+
+        /* Cancel from the error/denied state */
+        errorCancelBtn.addEventListener("click", closeCamera);
+
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) closeCamera();
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && overlay.classList.contains("open")) closeCamera();
+        });
+
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden && overlay.classList.contains("open")) closeCamera();
+        });
+      })();
+
       function runBatchCompression(files) {
         /* Reset UI */
         compResultsList.innerHTML = "";
@@ -2575,64 +3602,291 @@
     });
   </script>
 
-  <!-- PWA install flow: uses the native beforeinstallprompt event only.
-       No file (APK/ZIP/etc) is ever downloaded when the button is clicked. -->
+  <!-- ══════════════════════════════════════════════════════════
+       SETTINGS · PERMISSIONS · PWA MODULE
+       Self-contained — does not touch any existing tool code.
+       ══════════════════════════════════════════════════════════ -->
   <script>
-    (function () {
-      let deferredInstallPrompt = null;
-      const installButtons = Array.from(document.querySelectorAll('.pwa-install-btn'));
+    /* ── Browser-specific "enable permission" instructions (best effort, no fake actions) ── */
+    window.scPermissionInstructions = function (type) {
+      const ua = navigator.userAgent || "";
+      const label = type === "camera" ? "Camera" : "Notifications";
+      const isAndroid  = /Android/i.test(ua);
+      const isIOS      = /iPhone|iPad|iPod/i.test(ua);
+      const isSamsung  = /SamsungBrowser/i.test(ua);
+      const isEdge     = /Edg\//i.test(ua);
+      const isFirefox  = /Firefox/i.test(ua);
+      const isChrome   = /Chrome/i.test(ua) && !isEdge && !isSamsung;
+      const standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
 
-      function showInstallButtons() {
-        installButtons.forEach((btn) => { btn.style.display = 'inline-flex'; });
+      if (standalone && isAndroid) {
+        return "This app is installed as a PWA. Open your device <b>Settings → Apps → Smart Compress → Permissions → " + label + "</b> and allow it.";
       }
-      function hideInstallButtons() {
-        installButtons.forEach((btn) => { btn.style.display = 'none'; });
+      if (isSamsung) {
+        return "Open <b>Samsung Internet → Menu (☰) → Settings → Sites and downloads → " + label + "</b>, find Smart Compress and set it to Allow.";
+      }
+      if (isEdge) {
+        return "Tap the lock/site-info icon in the address bar → <b>Permissions</b> → set " + label + " to Allow. On Android: <b>Edge menu → Settings → Site permissions → " + label + "</b>.";
+      }
+      if (isFirefox) {
+        return "Tap the lock icon in the address bar → <b>Permissions</b> → clear the " + label + " block, then reload and try again.";
+      }
+      if (isChrome && isAndroid) {
+        return "Tap the lock icon in the address bar → <b>Permissions → " + label + "</b> → Allow. Or go to <b>Chrome menu → Settings → Site settings → " + label + "</b>.";
+      }
+      if (isIOS) {
+        return "Open iOS <b>Settings → Safari → " + label + "</b> (or Settings → your browser app) and allow access for this site.";
+      }
+      return "Click the lock/site-info icon next to the address bar and set " + label + " to Allow, then reload the page.";
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+      /* ══════════ SETTINGS: STATE ══════════ */
+      const SETTINGS_KEY = "sc_settings_v1";
+      const DEFAULTS = {
+        theme: "default",
+        accent: "green",
+        fontSize: "medium",
+        compactMode: false,
+        highContrast: false,
+        reduceAnimations: false,
+        corners: "rounded"
+      };
+
+      function loadSettings() {
+        try {
+          const raw = localStorage.getItem(SETTINGS_KEY);
+          if (!raw) return Object.assign({}, DEFAULTS);
+          return Object.assign({}, DEFAULTS, JSON.parse(raw));
+        } catch (e) {
+          return Object.assign({}, DEFAULTS);
+        }
       }
 
-      // If the app is already installed / running standalone, never show the button.
-      const isStandalone =
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true;
-      if (isStandalone) hideInstallButtons();
+      function saveSettings(s) {
+        try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch (e) { /* storage unavailable — settings just won't persist */ }
+      }
 
-      // Chrome/Android (and other Chromium browsers) fire this when the PWA
-      // is installable. We intercept it, stash it, and only trigger it from
-      // our own button click — this IS the standard install flow.
-      window.addEventListener('beforeinstallprompt', (event) => {
-        event.preventDefault();
-        deferredInstallPrompt = event;
-        if (!isStandalone) showInstallButtons();
-      });
+      let settings = loadSettings();
 
-      installButtons.forEach((btn) => {
-        btn.addEventListener('click', async () => {
-          if (!deferredInstallPrompt) return;
-          btn.disabled = true;
-          deferredInstallPrompt.prompt();
-          try {
-            await deferredInstallPrompt.userChoice;
-          } finally {
-            deferredInstallPrompt = null;
-            hideInstallButtons();
-            btn.disabled = false;
-          }
+      /* ══════════ APPLY TO DOM (instant, no reload) ══════════ */
+      function applySettings(s) {
+        const html = document.documentElement;
+
+        s.theme === "default" ? html.removeAttribute("data-sc-theme") : html.setAttribute("data-sc-theme", s.theme);
+        s.accent === "green"  ? html.removeAttribute("data-sc-accent") : html.setAttribute("data-sc-accent", s.accent);
+        s.fontSize === "medium" ? html.removeAttribute("data-sc-fontsize") : html.setAttribute("data-sc-fontsize", s.fontSize);
+        s.compactMode ? html.setAttribute("data-sc-compact", "on") : html.removeAttribute("data-sc-compact");
+        s.highContrast ? html.setAttribute("data-sc-contrast", "on") : html.removeAttribute("data-sc-contrast");
+        s.reduceAnimations ? html.setAttribute("data-sc-motion", "reduced") : html.removeAttribute("data-sc-motion");
+        s.corners === "rounded" ? html.removeAttribute("data-sc-corners") : html.setAttribute("data-sc-corners", s.corners);
+
+        syncControlsToSettings();
+      }
+
+      function updateSetting(key, value) {
+        settings[key] = value;
+        saveSettings(settings);
+        applySettings(settings);
+      }
+
+      /* ══════════ UI WIRING ══════════ */
+      const themeSeg   = document.getElementById("theme-segmented");
+      const accentRow  = document.getElementById("accent-swatch-row");
+      const fontSeg    = document.getElementById("fontsize-segmented");
+      const cornersSeg = document.getElementById("corners-segmented");
+      const compactToggle  = document.getElementById("toggle-compact");
+      const contrastToggle = document.getElementById("toggle-contrast");
+      const motionToggle   = document.getElementById("toggle-motion");
+
+      function wireSegmented(container, settingKey) {
+        if (!container) return;
+        container.querySelectorAll("button").forEach(btn => {
+          btn.addEventListener("click", () => updateSetting(settingKey, btn.getAttribute("data-value")));
         });
+      }
+      wireSegmented(themeSeg, "theme");
+      wireSegmented(fontSeg, "fontSize");
+      wireSegmented(cornersSeg, "corners");
+
+      if (accentRow) {
+        accentRow.querySelectorAll(".swatch-btn").forEach(btn => {
+          btn.addEventListener("click", () => updateSetting("accent", btn.getAttribute("data-value")));
+        });
+      }
+
+      if (compactToggle)  compactToggle.addEventListener("change", () => updateSetting("compactMode", compactToggle.checked));
+      if (contrastToggle) contrastToggle.addEventListener("change", () => updateSetting("highContrast", contrastToggle.checked));
+      if (motionToggle)   motionToggle.addEventListener("change", () => updateSetting("reduceAnimations", motionToggle.checked));
+
+      function syncControlsToSettings() {
+        if (themeSeg)   themeSeg.querySelectorAll("button").forEach(b => b.classList.toggle("active", b.getAttribute("data-value") === settings.theme));
+        if (fontSeg)    fontSeg.querySelectorAll("button").forEach(b => b.classList.toggle("active", b.getAttribute("data-value") === settings.fontSize));
+        if (cornersSeg) cornersSeg.querySelectorAll("button").forEach(b => b.classList.toggle("active", b.getAttribute("data-value") === settings.corners));
+        if (accentRow)  accentRow.querySelectorAll(".swatch-btn").forEach(b => b.classList.toggle("active", b.getAttribute("data-value") === settings.accent));
+        if (compactToggle)  compactToggle.checked = !!settings.compactMode;
+        if (contrastToggle) contrastToggle.checked = !!settings.highContrast;
+        if (motionToggle)   motionToggle.checked = !!settings.reduceAnimations;
+      }
+
+      /* Apply once on load (covers cases where the very-early <head> script couldn't run,
+         e.g. localStorage briefly unavailable) and sync the visible controls */
+      applySettings(settings);
+
+      /* ══════════ TOAST ══════════ */
+      const toastEl = document.getElementById("settings-toast");
+      let toastTimer = null;
+      function toast(msg) {
+        if (!toastEl) return;
+        toastEl.textContent = msg;
+        toastEl.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2600);
+      }
+
+      /* ══════════ OPEN / CLOSE PANEL ══════════ */
+      const overlay   = document.getElementById("settings-overlay");
+      const openBtn   = document.getElementById("nav-settings-btn");
+      const closeBtn  = document.getElementById("settings-close-btn");
+
+      function openSettings(e) {
+        if (e) e.preventDefault();
+        overlay.classList.add("open");
+        refreshPermissionStatuses();
+        refreshAppInfo();
+        document.getElementById("main-nav") && document.getElementById("main-nav").classList.remove("open");
+      }
+      function closeSettings() { overlay.classList.remove("open"); }
+
+      if (openBtn) openBtn.addEventListener("click", openSettings);
+      if (closeBtn) closeBtn.addEventListener("click", closeSettings);
+      if (overlay) overlay.addEventListener("click", (e) => { if (e.target === overlay) closeSettings(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && overlay && overlay.classList.contains("open")) closeSettings(); });
+
+      /* ══════════ PERMISSIONS STATUS ══════════ */
+      function renderPermBadge(type, state) {
+        const badge = document.getElementById("perm-badge-" + type);
+        const openBtn2 = document.getElementById("perm-open-" + type);
+        const instrBox = document.getElementById("perm-instructions-" + type);
+        if (!badge) return;
+
+        badge.classList.remove("allowed", "denied", "unknown");
+        if (state === "granted") {
+          badge.textContent = "Allowed ✅";
+          badge.classList.add("allowed");
+          openBtn2.style.display = "none";
+          instrBox.classList.remove("show");
+        } else if (state === "denied") {
+          badge.textContent = "Denied ❌";
+          badge.classList.add("denied");
+          openBtn2.style.display = "inline-flex";
+        } else {
+          badge.textContent = "Not Requested ⏳";
+          badge.classList.add("unknown");
+          openBtn2.style.display = "none";
+          instrBox.classList.remove("show");
+        }
+      }
+
+      async function refreshPermissionStatuses() {
+        /* Camera */
+        if (navigator.permissions && navigator.permissions.query) {
+          try {
+            const camStatus = await navigator.permissions.query({ name: "camera" });
+            renderPermBadge("camera", camStatus.state);
+            camStatus.onchange = () => renderPermBadge("camera", camStatus.state);
+          } catch (e) {
+            renderPermBadge("camera", "unsupported");
+          }
+        } else {
+          renderPermBadge("camera", "unsupported");
+        }
+
+        /* Notifications */
+        if ("Notification" in window) {
+          const nPerm = Notification.permission; // "granted" | "denied" | "default"
+          renderPermBadge("notifications", nPerm === "default" ? "prompt" : nPerm);
+        } else {
+          renderPermBadge("notifications", "unsupported");
+        }
+      }
+
+      const permOpenCamera = document.getElementById("perm-open-camera");
+      const permOpenNotifications = document.getElementById("perm-open-notifications");
+      const permInstrCamera = document.getElementById("perm-instructions-camera");
+      const permInstrNotifications = document.getElementById("perm-instructions-notifications");
+
+      if (permOpenCamera) permOpenCamera.addEventListener("click", () => {
+        permInstrCamera.innerHTML = window.scPermissionInstructions("camera");
+        permInstrCamera.classList.toggle("show");
+      });
+      if (permOpenNotifications) permOpenNotifications.addEventListener("click", () => {
+        permInstrNotifications.innerHTML = window.scPermissionInstructions("notifications");
+        permInstrNotifications.classList.toggle("show");
       });
 
-      window.addEventListener('appinstalled', () => {
-        deferredInstallPrompt = null;
-        hideInstallButtons();
+      /* ══════════ APP SECTION ══════════ */
+      const APP_VERSION = "v1.4.0";
+      document.getElementById("app-version-val").textContent = APP_VERSION;
+
+      function refreshAppInfo() {
+        /* PWA status */
+        const pwaEl = document.getElementById("pwa-status-val");
+        const isStandalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+        pwaEl.textContent = isStandalone ? "Installed (running standalone)" : "Running in browser";
+
+        /* Storage usage */
+        const storageEl = document.getElementById("storage-usage-val");
+        if (navigator.storage && navigator.storage.estimate) {
+          navigator.storage.estimate().then(est => {
+            const usedMB = ((est.usage || 0) / (1024 * 1024)).toFixed(1);
+            const quotaMB = ((est.quota || 0) / (1024 * 1024)).toFixed(0);
+            storageEl.textContent = usedMB + " MB used" + (quotaMB > 0 ? " of ~" + quotaMB + " MB" : "");
+          }).catch(() => { storageEl.textContent = "Unavailable"; });
+        } else {
+          storageEl.textContent = "Not supported in this browser";
+        }
+      }
+
+      document.getElementById("btn-clear-cache").addEventListener("click", async () => {
+        try {
+          if (window.caches && caches.keys) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+          }
+          toast("Cache cleared");
+          refreshAppInfo();
+        } catch (e) {
+          toast("Could not clear cache");
+        }
       });
 
-      // Register the service worker so the app is installable and works offline.
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js').catch(() => {
-            /* registration failure shouldn't break the page */
+      document.getElementById("btn-reset-prefs").addEventListener("click", () => {
+        try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {}
+        settings = Object.assign({}, DEFAULTS);
+        applySettings(settings);
+        toast("Preferences reset");
+      });
+
+      document.getElementById("btn-restore-defaults").addEventListener("click", () => {
+        settings = Object.assign({}, DEFAULTS);
+        saveSettings(settings);
+        applySettings(settings);
+        toast("Default settings restored");
+      });
+
+      /* ══════════ PWA: SERVICE WORKER REGISTRATION ══════════ */
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js").catch(() => {
+            /* Registration can fail harmlessly (e.g. file not deployed yet, or running from file://) —
+               the rest of the app must keep working either way */
           });
         });
       }
-    })();
+
+    });
   </script>
 </body>
 </html>
