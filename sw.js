@@ -4,7 +4,7 @@
    processing already happens 100% client-side, so this only needs
    to keep the shell itself available offline. */
 
-const CACHE_NAME = "smart-compress-v1.5.0";
+const CACHE_NAME = "smartcompress-v2";
 
 const APP_SHELL = [
   "/",
