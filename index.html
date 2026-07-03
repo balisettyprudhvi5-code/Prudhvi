@@ -775,7 +775,65 @@
       .settings-card-row { flex-direction: column; align-items: flex-start; }
       .settings-value { text-align: left; }
     }
+    /* ===================== Settings Modal (appended — reuses #settings section) ===================== */
+    #sc-settings-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.62);
+      backdrop-filter: blur(2px);
+      z-index: 1000;
+    }
+    body.sc-settings-modal-open #sc-settings-backdrop { display: block; }
+
+    body.sc-settings-modal-open { overflow: hidden; }
+
+    body.sc-settings-modal-open #settings.page-section {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(760px, 92vw);
+      max-height: 88vh;
+      overflow-y: auto;
+      z-index: 1001;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.55);
+      padding-top: 2.5rem;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #sc-settings-close-btn {
+      position: sticky;
+      top: .5rem;
+      float: right;
+      margin: 0 1rem 0 0;
+      background: var(--surface, transparent);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      line-height: 1;
+      z-index: 2;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    body.sc-settings-modal-open #sc-settings-close-btn { display: flex; }
+
+    @media (max-width: 640px) {
+      body.sc-settings-modal-open #settings.page-section {
+        width: 94vw;
+        max-height: 92vh;
+      }
+    }
   </style>
+
 </head>
 <body>
 
@@ -801,7 +859,7 @@
         <li><a href="#privacy">Privacy Policy</a></li>
         <li><a href="#contact">Contact Us</a></li>
         <li><a href="#terms">Terms & Conditions</a></li>
-        <li><a href="#settings">⚙️ Settings</a></li>
+        <li><a href="#settings" id="nav-settings-link" data-settings-trigger="true">⚙️ Settings</a></li>
       </ul>
     </nav>
   </header>
@@ -3289,6 +3347,115 @@
 
     /* Apply appearance ASAP (before full DOMContentLoaded) to avoid theme flash */
     applyAppearance();
+  })();
+  </script>
+
+  <!-- ===================== Settings Modal Wiring (appended) =====================
+       Reuses the existing #settings section (already implements Theme, Accent,
+       Wallpaper upload, Font Size, App Version, PWA Status, Storage Usage,
+       Restore Defaults, and Reset User Preferences) and presents it as a modal
+       instead of a page-jump. No settings logic is duplicated or altered. -->
+  <div id="sc-settings-backdrop"></div>
+  <script>
+  (function () {
+    "use strict";
+
+    var settingsSection = document.getElementById("settings");
+    if (!settingsSection) return;
+
+    var backdrop = document.getElementById("sc-settings-backdrop");
+    var lastFocusedEl = null;
+    var closeBtn = null;
+
+    function ensureCloseButton() {
+      if (closeBtn) return closeBtn;
+      closeBtn = document.createElement("button");
+      closeBtn.type = "button";
+      closeBtn.id = "sc-settings-close-btn";
+      closeBtn.setAttribute("aria-label", "Close settings");
+      closeBtn.innerHTML = "&times;";
+      closeBtn.addEventListener("click", closeSettingsModal);
+      settingsSection.insertBefore(closeBtn, settingsSection.firstChild);
+      return closeBtn;
+    }
+
+    function openSettingsModal(e) {
+      if (e) e.preventDefault();
+      lastFocusedEl = document.activeElement;
+      ensureCloseButton();
+      document.body.classList.add("sc-settings-modal-open");
+      settingsSection.setAttribute("role", "dialog");
+      settingsSection.setAttribute("aria-modal", "true");
+      settingsSection.setAttribute("aria-labelledby", "settings-heading");
+
+      // Close the mobile hamburger menu if it was open
+      var mainNavList = document.getElementById("main-nav");
+      var toggleBtn = document.getElementById("nav-toggle");
+      if (mainNavList && mainNavList.classList.contains("open")) {
+        mainNavList.classList.remove("open");
+        if (toggleBtn) toggleBtn.setAttribute("aria-expanded", "false");
+      }
+
+      window.requestAnimationFrame(function () {
+        if (closeBtn) closeBtn.focus();
+      });
+    }
+
+    function closeSettingsModal() {
+      document.body.classList.remove("sc-settings-modal-open");
+      settingsSection.removeAttribute("role");
+      settingsSection.removeAttribute("aria-modal");
+      if (lastFocusedEl && typeof lastFocusedEl.focus === "function") {
+        lastFocusedEl.focus();
+      }
+    }
+
+    function isModalOpen() {
+      return document.body.classList.contains("sc-settings-modal-open");
+    }
+
+    // Wire every link that points at #settings (top nav + mobile hamburger share
+    // the same list, so this also covers task 2 automatically; querySelectorAll
+    // keeps this safe even if more Settings entry points are added later).
+    document.querySelectorAll('a[href="#settings"]').forEach(function (link) {
+      link.addEventListener("click", openSettingsModal);
+    });
+
+    if (backdrop) {
+      backdrop.addEventListener("click", closeSettingsModal);
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && isModalOpen()) closeSettingsModal();
+    });
+
+    // Simple focus trap while the modal is open
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Tab" || !isModalOpen()) return;
+      var focusable = settingsSection.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) return;
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
+
+    // Deep-link support: if the page is loaded/navigated directly to #settings,
+    // open it as a modal too, so behavior stays consistent everywhere.
+    function checkHashOnLoad() {
+      if (window.location.hash === "#settings") openSettingsModal();
+    }
+    document.addEventListener("DOMContentLoaded", checkHashOnLoad);
+    window.addEventListener("hashchange", function () {
+      if (window.location.hash === "#settings") openSettingsModal();
+    });
   })();
   </script>
 </body>
