@@ -34,15 +34,8 @@
   <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="48x48" />
   <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
   <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
-  <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
   <link rel="manifest" href="/site.webmanifest" />
-
-  <!-- iOS "Add to Home Screen" support (Android/Edge installability comes from the manifest above) -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Smart Compress" />
-  <meta name="mobile-web-app-capable" content="yes" />
 
   <meta property="og:title" content="Smart Compress — Free Instant Image Compression & Editing Tools" />
   <meta property="og:description" content="Compress JPG, PNG, and WebP images instantly in your browser. Nothing leaves your device. Free forever." />
@@ -210,31 +203,6 @@
     .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
     .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-    /* PWA install button - hidden by default, only revealed by JS when a beforeinstallprompt
-       event has actually fired (i.e. the browser has confirmed the app is installable). */
-    .pwa-install-btn {
-      display: none;
-      align-items: center;
-      gap: .4rem;
-      padding: .45rem .9rem;
-      font-family: inherit;
-      font-size: .85rem;
-      font-weight: 600;
-      color: #0d0d0f;
-      background: var(--accent);
-      border: none;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-      transition: opacity .15s, transform .15s;
-    }
-    .pwa-install-btn:hover { opacity: .9; transform: translateY(-1px); }
-    .pwa-install-btn.show { display: inline-flex; }
-    @media (max-width: 860px) {
-      .pwa-install-btn { padding: .4rem .7rem; font-size: .8rem; }
-    }
 
     .hero {
       text-align: center;
@@ -1122,7 +1090,6 @@
       <img src="logo-icon.png" alt="" aria-hidden="true" style="height:22px;width:22px;display:block;" />
       Smart Compress
     </a>
-    <button type="button" class="pwa-install-btn" id="pwa-install-btn-header" aria-label="Install Smart Compress app">⬇ Install App</button>
     <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="main-nav" id="nav-toggle" type="button">
       <span></span><span></span><span></span>
     </button>
@@ -1265,10 +1232,6 @@
         <div class="settings-section">
           <h3>App</h3>
 
-          <div class="app-info-row" id="pwa-install-row" style="display:none;">
-            <span class="title">Install App</span>
-            <button type="button" class="settings-action-btn" id="pwa-install-btn-settings">⬇ Install</button>
-          </div>
           <div class="app-info-row">
             <span class="title">Clear Cache</span>
             <button type="button" class="settings-action-btn" id="btn-clear-cache">Clear Cache</button>
@@ -3922,62 +3885,6 @@
           });
         });
       }
-
-      /* ══════════ PWA: INSTALL PROMPT HANDLING ══════════ */
-      (function () {
-        let deferredInstallPrompt = null;
-        const headerBtn = document.getElementById("pwa-install-btn-header");
-        const settingsRow = document.getElementById("pwa-install-row");
-        const settingsBtn = document.getElementById("pwa-install-btn-settings");
-
-        function isStandaloneMode() {
-          return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
-                 window.navigator.standalone === true;
-        }
-
-        function showInstallUI() {
-          if (isStandaloneMode()) return;
-          if (headerBtn) headerBtn.classList.add("show");
-          if (settingsRow) settingsRow.style.display = "";
-        }
-
-        function hideInstallUI() {
-          if (headerBtn) headerBtn.classList.remove("show");
-          if (settingsRow) settingsRow.style.display = "none";
-        }
-
-        /* Chrome/Edge on Android (and desktop) fire this only once the browser has verified
-           the manifest + service worker meet install criteria. Capturing it — instead of letting
-           the browser show its own mini-infobar — lets us drive install from our own UI. */
-        window.addEventListener("beforeinstallprompt", (event) => {
-          event.preventDefault();
-          deferredInstallPrompt = event;
-          showInstallUI();
-        });
-
-        async function triggerInstall() {
-          if (!deferredInstallPrompt) return;
-          hideInstallUI();
-          deferredInstallPrompt.prompt();
-          try {
-            await deferredInstallPrompt.userChoice;
-          } catch (e) { /* ignore */ }
-          deferredInstallPrompt = null;
-        }
-
-        if (headerBtn) headerBtn.addEventListener("click", triggerInstall);
-        if (settingsBtn) settingsBtn.addEventListener("click", triggerInstall);
-
-        window.addEventListener("appinstalled", () => {
-          deferredInstallPrompt = null;
-          hideInstallUI();
-          try { toast("Smart Compress installed"); } catch (e) {}
-          refreshAppInfo();
-        });
-
-        /* Already running standalone (installed) on load — keep install UI hidden. */
-        if (isStandaloneMode()) hideInstallUI();
-      })();
 
     });
   </script>
