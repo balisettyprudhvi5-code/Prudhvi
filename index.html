@@ -10,7 +10,16 @@
   <meta name="author" content="Smart Compress" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#0d0d0f" />
-  
+
+  <!-- PWA / installed-app + splash screen support -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Smart Compress" />
+  <meta name="application-name" content="Smart Compress" />
+  <meta name="msapplication-TileColor" content="#0d0d0f" />
+  <meta name="msapplication-tap-highlight" content="no" />
+
   <meta name="google-site-verification" content="psA8MfKKF78GGiesEYnI_M-4c1n1z2ePlYbKt9MMhHk" />
   <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="48x48" />
   <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
@@ -163,6 +172,26 @@
     }
 
     .nav-links a.active { color: var(--accent); }
+
+    .nav-install-btn {
+      display: block;
+      padding: .4rem .75rem;
+      font-size: .88rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--bg);
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: filter .15s, transform .15s;
+      white-space: nowrap;
+    }
+    .nav-install-btn:hover, .nav-install-btn:focus {
+      filter: brightness(1.08);
+      outline: none;
+    }
+    .nav-install-btn:active { transform: scale(.97); }
 
     .nav-toggle {
       display: none;
@@ -583,7 +612,8 @@
         gap: .2rem;
       }
       .nav-links.open { display: flex; }
-      .nav-links a { padding: .7rem 1rem; font-size: .95rem; }
+      .nav-links a, .nav-links .nav-install-btn { padding: .7rem 1rem; font-size: .95rem; }
+      .nav-links .nav-install-btn { width: 100%; text-align: left; }
       .nav-toggle { display: flex; }
     }
 
@@ -775,6 +805,61 @@
       .settings-card-row { flex-direction: column; align-items: flex-start; }
       .settings-value { text-align: left; }
     }
+
+    /* ===================== PWA Update Banner ===================== */
+    #sc-update-banner {
+      position: fixed;
+      left: 1rem;
+      right: 1rem;
+      bottom: 1rem;
+      z-index: 2000;
+      max-width: 480px;
+      margin: 0 auto;
+      display: none;
+      align-items: center;
+      gap: .9rem;
+      padding: .9rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 40px rgba(0,0,0,.5);
+      color: var(--text);
+      font-family: var(--sans);
+    }
+    #sc-update-banner.show { display: flex; }
+    #sc-update-banner .sc-update-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--accent2);
+      box-shadow: 0 0 10px var(--accent2);
+      flex-shrink: 0;
+    }
+    #sc-update-banner .sc-update-text {
+      flex: 1;
+      font-size: .88rem;
+      line-height: 1.4;
+    }
+    #sc-update-banner .sc-update-text strong { display: block; font-size: .92rem; margin-bottom: .1rem; }
+    #sc-update-banner .sc-update-actions { display: flex; gap: .5rem; flex-shrink: 0; }
+    #sc-update-banner button {
+      font-family: var(--sans);
+      font-size: .82rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      padding: .45rem .8rem;
+      cursor: pointer;
+      border: none;
+      white-space: nowrap;
+    }
+    #sc-update-now-btn { background: var(--accent); color: #0d0d0f; }
+    #sc-update-now-btn:hover { filter: brightness(1.08); }
+    #sc-update-later-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    #sc-update-later-btn:hover { color: var(--text); }
+
+    @media (max-width: 480px) {
+      #sc-update-banner { flex-wrap: wrap; }
+      #sc-update-banner .sc-update-actions { width: 100%; justify-content: flex-end; }
+    }
+
     /* ===================== Settings Modal (appended — reuses #settings section) ===================== */
     #sc-settings-backdrop {
       display: none;
@@ -836,6 +921,17 @@
 
 </head>
 <body>
+  <div id="sc-update-banner" role="status" aria-live="polite">
+    <span class="sc-update-dot" aria-hidden="true"></span>
+    <span class="sc-update-text">
+      <strong>Update available</strong>
+      A newer version of Smart Compress is ready.
+    </span>
+    <span class="sc-update-actions">
+      <button type="button" id="sc-update-later-btn">Later</button>
+      <button type="button" id="sc-update-now-btn">Update Now</button>
+    </span>
+  </div>
 
   <div id="sc-wallpaper" aria-hidden="true"></div>
   <div class="settings-toast" id="sc-toast" role="status" aria-live="polite"></div>
@@ -859,6 +955,7 @@
         <li><a href="#privacy">Privacy Policy</a></li>
         <li><a href="#contact">Contact Us</a></li>
         <li><a href="#terms">Terms & Conditions</a></li>
+        <li><button type="button" class="nav-install-btn" id="nav-install-btn" style="display:none;">📲 Install App</button></li>
         <li><a href="#settings" id="nav-settings-link" data-settings-trigger="true">⚙️ Settings</a></li>
       </ul>
     </nav>
@@ -1998,7 +2095,7 @@
         mainNavList.classList.toggle("open");
       });
 
-      document.querySelectorAll(".nav-links a").forEach(linkElement => {
+      document.querySelectorAll(".nav-links a, .nav-links .nav-install-btn").forEach(linkElement => {
         linkElement.addEventListener("click", () => {
           toggleBtn.setAttribute("aria-expanded", "false");
           mainNavList.classList.remove("open");
@@ -3079,43 +3176,65 @@
     }
 
     var deferredInstallPrompt = null;
+
+    function installButtons() {
+      return [
+        document.getElementById("set-install-btn"),
+        document.getElementById("nav-install-btn")
+      ].filter(Boolean);
+    }
+
+    function showInstallButtons() {
+      if (isStandalone()) return;
+      installButtons().forEach(function (btn) {
+        btn.style.display = (btn.id === "nav-install-btn") ? "block" : "inline-flex";
+      });
+    }
+
+    function hideInstallButtons() {
+      installButtons().forEach(function (btn) { btn.style.display = "none"; });
+    }
+
     window.addEventListener("beforeinstallprompt", function (e) {
       e.preventDefault();
       deferredInstallPrompt = e;
-      var btn = document.getElementById("set-install-btn");
-      if (btn && !isStandalone()) btn.style.display = "inline-flex";
+      showInstallButtons();
     });
+
+    function triggerInstallPrompt(btn) {
+      if (!deferredInstallPrompt) {
+        toast("Use your browser's \"Install App\" or \"Add to Home Screen\" option");
+        return;
+      }
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.finally(function () {
+        deferredInstallPrompt = null;
+        hideInstallButtons();
+      });
+    }
 
     function initPwaStatus() {
       var statusEl = document.getElementById("set-pwa-status");
       var descEl = document.getElementById("set-pwa-desc");
-      var installBtn = document.getElementById("set-install-btn");
       if (!statusEl) return;
 
       if (isStandalone()) {
         statusEl.textContent = "Installed (Standalone)";
         if (descEl) descEl.textContent = "You're running Smart Compress as an installed app.";
+        hideInstallButtons();
       } else {
         statusEl.textContent = "Running in Browser";
         if (descEl) descEl.textContent = "Install Smart Compress for a faster, app-like experience with offline access.";
       }
 
-      if (installBtn) {
-        installBtn.addEventListener("click", function () {
-          if (!deferredInstallPrompt) {
-            toast("Use your browser's \"Install App\" or \"Add to Home Screen\" option");
-            return;
-          }
-          deferredInstallPrompt.prompt();
-          deferredInstallPrompt.userChoice.finally(function () {
-            deferredInstallPrompt = null;
-            installBtn.style.display = "none";
-          });
-        });
-      }
+      installButtons().forEach(function (btn) {
+        btn.addEventListener("click", function () { triggerInstallPrompt(btn); });
+      });
 
       window.addEventListener("appinstalled", function () {
         toast("Smart Compress installed");
+        deferredInstallPrompt = null;
+        hideInstallButtons();
         initPwaStatus();
       });
     }
@@ -3460,30 +3579,97 @@
   </script>
 
   <script>
-  // Service worker registration + auto-update handling.
-  // Ensures every open tab (and the installed PWA) picks up a new deployed
-  // version automatically instead of getting stuck on an old cached build.
+  // Service worker registration + "Update Available" banner handling.
+  //
+  // Flow:
+  //  1. Register the SW. It caches static assets and always serves
+  //     index.html network-first, so the shell itself never goes stale.
+  //  2. New SW versions install but deliberately do NOT auto-activate
+  //     (no automatic skipWaiting on the SW side) — they wait until this
+  //     page tells them to via SKIP_WAITING, so we can prompt the user
+  //     instead of yanking the rug out from under an in-progress compress.
+  //  3. When a new version is waiting, show the "Update available" banner.
+  //     Clicking "Update Now" tells the waiting worker to activate; once it
+  //     takes control (controllerchange) we reload once to load the new code.
+  //  4. We also actively poll for updates (on load, on regaining visibility,
+  //     and periodically) so long-lived open tabs still get offered updates.
   (function () {
     if (!("serviceWorker" in navigator)) return;
 
+    var reg = null;
+    var refreshing = false;
+    var banner = document.getElementById("sc-update-banner");
+    var updateNowBtn = document.getElementById("sc-update-now-btn");
+    var updateLaterBtn = document.getElementById("sc-update-later-btn");
+
+    function showBanner() {
+      if (banner) banner.classList.add("show");
+    }
+    function hideBanner() {
+      if (banner) banner.classList.remove("show");
+    }
+
+    function promptUpdate(worker) {
+      if (!worker) return;
+      showBanner();
+      if (updateNowBtn) {
+        updateNowBtn.onclick = function () {
+          updateNowBtn.disabled = true;
+          updateNowBtn.textContent = "Updating…";
+          worker.postMessage({ type: "SKIP_WAITING" });
+        };
+      }
+      if (updateLaterBtn) {
+        updateLaterBtn.onclick = function () { hideBanner(); };
+      }
+    }
+
+    function trackInstallingWorker(worker) {
+      if (!worker) return;
+      worker.addEventListener("statechange", function () {
+        // "installed" + an existing controller means this is an update to an
+        // already-running app (not the very first install) — safe to prompt.
+        if (worker.state === "installed" && navigator.serviceWorker.controller) {
+          promptUpdate(worker);
+        }
+      });
+    }
+
     window.addEventListener("load", function () {
-      navigator.serviceWorker.register("/sw.js").catch(function () {
+      navigator.serviceWorker.register("/sw.js").then(function (registration) {
+        reg = registration;
+
+        // A worker may already be sitting in "waiting" (e.g. update found
+        // while the tab was in the background).
+        if (registration.waiting && navigator.serviceWorker.controller) {
+          promptUpdate(registration.waiting);
+        }
+
+        registration.addEventListener("updatefound", function () {
+          trackInstallingWorker(registration.installing);
+        });
+
+        // Periodically ask the browser to check for a new sw.js so tabs left
+        // open for a long time still get offered updates.
+        setInterval(function () { registration.update().catch(function () {}); }, 60 * 60 * 1000);
+        document.addEventListener("visibilitychange", function () {
+          if (document.visibilityState === "visible") {
+            registration.update().catch(function () {});
+          }
+        });
+      }).catch(function () {
         /* Registration failures shouldn't break the app itself. */
       });
     });
 
-    // When the new service worker takes control, reload once so the page
-    // (and any inline assets it references) reflect the latest version.
-    // The `refreshed` guard prevents an infinite reload loop.
-    var refreshed = false;
+    // Fires once the worker we told to SKIP_WAITING actually takes control.
+    // Reload exactly once so the page picks up whatever changed.
     navigator.serviceWorker.addEventListener("controllerchange", function () {
-      if (refreshed) return;
-      refreshed = true;
+      if (refreshing) return;
+      refreshing = true;
       window.location.reload();
     });
 
-    // Notification hook: fires in every open tab as soon as the new
-    // service worker has activated there.
     navigator.serviceWorker.addEventListener("message", function (event) {
       if (event.data && event.data.type === "SW_UPDATED") {
         console.info("Smart Compress updated to a new version:", event.data.version);
