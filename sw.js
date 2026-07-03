@@ -4,7 +4,7 @@
    processing already happens 100% client-side, so this only needs
    to keep the shell itself available offline. */
 
-const CACHE_NAME = "smart-compress-v1.4.0";
+const CACHE_NAME = "smart-compress-v1.5.0";
 
 const APP_SHELL = [
   "/",
@@ -13,6 +13,9 @@ const APP_SHELL = [
   "/favicon-16x16.png",
   "/favicon-32x32.png",
   "/apple-touch-icon.png",
+  "/icon-192.png",
+  "/icon-192-maskable.png",
+  "/icon-512-maskable.png",
   "/logo-icon.png",
   "/site.webmanifest"
 ];
