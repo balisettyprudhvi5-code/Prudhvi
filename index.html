@@ -1,25 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-    /* Applied synchronously, before CSS paints, so returning visitors never see a flash
-       of the default theme. First-time visitors (no saved settings) are untouched. */
-    (function () {
-      try {
-        var raw = localStorage.getItem("sc_settings_v1");
-        if (!raw) return;
-        var s = JSON.parse(raw);
-        var html = document.documentElement;
-        if (s.theme && s.theme !== "default")      html.setAttribute("data-sc-theme", s.theme);
-        if (s.accent && s.accent !== "green")       html.setAttribute("data-sc-accent", s.accent);
-        if (s.fontSize && s.fontSize !== "medium")  html.setAttribute("data-sc-fontsize", s.fontSize);
-        if (s.compactMode)                          html.setAttribute("data-sc-compact", "on");
-        if (s.highContrast)                         html.setAttribute("data-sc-contrast", "on");
-        if (s.reduceAnimations)                     html.setAttribute("data-sc-motion", "reduced");
-        if (s.corners && s.corners !== "rounded")   html.setAttribute("data-sc-corners", s.corners);
-      } catch (e) { /* corrupted storage — fall back to default theme silently */ }
-    })();
-  </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7807604506939349"
      crossorigin="anonymous"></script>
   <meta charset="UTF-8" />
@@ -34,15 +15,8 @@
   <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="48x48" />
   <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
   <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
-  <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
   <link rel="manifest" href="/site.webmanifest" />
-
-  <!-- iOS "Add to Home Screen" support (Android/Edge installability comes from the manifest above) -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Smart Compress" />
-  <meta name="mobile-web-app-capable" content="yes" />
 
   <meta property="og:title" content="Smart Compress — Free Instant Image Compression & Editing Tools" />
   <meta property="og:description" content="Compress JPG, PNG, and WebP images instantly in your browser. Nothing leaves your device. Free forever." />
@@ -210,31 +184,6 @@
     .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
     .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-    /* PWA install button - hidden by default, only revealed by JS when a beforeinstallprompt
-       event has actually fired (i.e. the browser has confirmed the app is installable). */
-    .pwa-install-btn {
-      display: none;
-      align-items: center;
-      gap: .4rem;
-      padding: .45rem .9rem;
-      font-family: inherit;
-      font-size: .85rem;
-      font-weight: 600;
-      color: #0d0d0f;
-      background: var(--accent);
-      border: none;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-      transition: opacity .15s, transform .15s;
-    }
-    .pwa-install-btn:hover { opacity: .9; transform: translateY(-1px); }
-    .pwa-install-btn.show { display: inline-flex; }
-    @media (max-width: 860px) {
-      .pwa-install-btn { padding: .4rem .7rem; font-size: .8rem; }
-    }
 
     .hero {
       text-align: center;
@@ -443,193 +392,6 @@
       outline: none;
     }
     .control-group input:focus, .control-group select:focus { border-color: var(--accent2); }
-
-    .target-size-row {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-    }
-    .target-size-row select { flex: 1; min-width: 0; }
-
-    .camera-btn {
-      flex-shrink: 0;
-      display: inline-flex;
-      align-items: center;
-      gap: .4rem;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: .5rem .75rem;
-      font-family: var(--sans);
-      font-size: .85rem;
-      font-weight: 600;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all .2s ease;
-    }
-    .camera-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: var(--surface2);
-    }
-    .camera-btn:active { transform: translateY(1px); }
-
-    @media (max-width: 480px) {
-      .target-size-row { flex-wrap: wrap; }
-      .target-size-row select { flex: 1 1 100%; }
-      .camera-btn { flex: 1 1 100%; justify-content: center; }
-    }
-
-    /* Camera capture modal */
-    .camera-modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.75);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 1.2rem;
-    }
-    .camera-modal-overlay.open { display: flex; }
-    .camera-modal-box {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      width: 100%;
-      max-width: 520px;
-      padding: 1.2rem;
-      position: relative;
-    }
-    .camera-modal-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    .camera-modal-head h3 {
-      font-size: 1rem;
-      color: var(--text);
-      font-family: var(--sans);
-    }
-    .camera-modal-close {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1rem;
-      line-height: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: all .2s ease;
-    }
-    .camera-modal-close:hover { color: var(--accent); border-color: var(--accent); }
-    .camera-modal-video-wrap {
-      position: relative;
-      background: #000;
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      aspect-ratio: 4 / 3;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--border);
-    }
-    .camera-modal-video-wrap video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .camera-loading {
-      display: none;
-      position: absolute;
-      inset: 0;
-      align-items: center;
-      justify-content: center;
-      background: rgba(13,13,15,.6);
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: .8rem;
-      letter-spacing: .03em;
-      text-align: center;
-      padding: 1rem;
-    }
-    .camera-loading.show { display: flex; }
-    .camera-modal-error {
-      display: none;
-      text-align: center;
-      padding: 1.5rem 1rem;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: .85rem;
-      line-height: 1.6;
-    }
-    .camera-modal-error .err-icon { font-size: 1.8rem; display: block; margin-bottom: .6rem; }
-    .camera-modal-error-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .6rem;
-      margin-top: 1rem;
-    }
-    .camera-modal-error-actions .btn-primary,
-    .camera-modal-error-actions .btn-secondary {
-      padding: .6rem 1.3rem;
-      font-size: .85rem;
-    }
-    .camera-controls-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      margin-top: 1rem;
-      flex-wrap: wrap;
-    }
-    .camera-zoom-wrap {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      flex: 1;
-      min-width: 160px;
-    }
-    .camera-zoom-wrap label {
-      font-family: var(--mono);
-      font-size: .75rem;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    .camera-zoom-wrap input[type="range"] { margin: 0; }
-    .camera-toggle-btns { display: flex; gap: .5rem; }
-    .camera-icon-btn {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: .95rem;
-      transition: all .2s ease;
-    }
-    .camera-icon-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .camera-icon-btn.active { background: var(--accent); color: #0d0d0f; border-color: var(--accent); }
-    #camera-hdr-btn { width: auto; padding: 0 .7rem; border-radius: 99px; font-family: var(--mono); font-size: .7rem; font-weight: 700; }
-    .camera-modal-actions {
-      display: flex;
-      justify-content: center;
-      gap: .8rem;
-      margin-top: 1.1rem;
-    }
-    .camera-modal-actions .btn-secondary { padding: .65rem 1.4rem; font-size: .85rem; }
 
     .range-label-wrap { display: flex; justify-content: space-between; align-items: center; }
     .range-val-lbl { color: var(--accent); font-family: var(--mono); font-size: .85rem; }
@@ -850,270 +612,174 @@
     .blog-faq-item:first-of-type { border-top: none; }
     .blog-faq-item strong { display: block; color: var(--text); font-size: .92rem; margin-bottom: .35rem; }
 
-    /* ══════════════════════════════════════════════════════════
-       THEME / ACCENT / ACCESSIBILITY OVERRIDES
-       Defaults above are the original Smart Compress look.
-       Nothing below fires unless a user explicitly saves a
-       preference — first-time visitors always see the default.
-       ══════════════════════════════════════════════════════════ */
-
-    /* Themes */
+    /* ===================== Settings — Theme Presets ===================== */
     html[data-sc-theme="dark"] {
-      --bg: #0b0d12; --surface: #14161c; --surface2: #1b1e26; --border: #2a2e3a; --text: #e9ebf2; --muted: #7a7f92;
+      --bg: #0b0b0d; --surface: #151519; --surface2: #1c1c22; --border: #27272f; --text: #e6e6ee; --muted: #75758a;
     }
     html[data-sc-theme="light"] {
-      --bg: #f6f7f9; --surface: #ffffff; --surface2: #eef0f3; --border: #dcdfe5; --text: #14151a; --muted: #61636e;
+      --bg: #f4f5f8; --surface: #ffffff; --surface2: #eceef2; --border: #dcdfe5; --text: #14141c; --muted: #5c5c6b;
     }
     html[data-sc-theme="amoled"] {
-      --bg: #000000; --surface: #0a0a0a; --surface2: #121212; --border: #232323; --text: #f2f2f2; --muted: #7a7a7a;
+      --bg: #000000; --surface: #070707; --surface2: #101012; --border: #1c1c1f; --text: #f2f2f5; --muted: #86869a;
     }
-
-    /* Accent colors (apply on top of any theme) */
-    html[data-sc-accent="blue"]   { --accent: #5b9dff; --accent2: #3dd0ff; }
-    html[data-sc-accent="purple"] { --accent: #b083ff; --accent2: #7f5cff; }
-    html[data-sc-accent="orange"] { --accent: #ff9f4d; --accent2: #ffcb3d; }
-    html[data-sc-accent="red"]    { --accent: #ff6161; --accent2: #ff3d7a; }
-
-    /* Font size */
-    html[data-sc-fontsize="small"]  body { font-size: .92rem; }
-    html[data-sc-fontsize="large"]  body { font-size: 1.1rem; }
-
-    /* Compact mode */
-    html[data-sc-compact="on"] .tool-controls-panel { padding: .8rem; gap: .8rem; }
-    html[data-sc-compact="on"] .tool-title-row { margin-bottom: .9rem; padding-bottom: .6rem; }
-    html[data-sc-compact="on"] header { padding: .7rem 1.4rem; }
-    html[data-sc-compact="on"] .control-group { gap: .25rem; }
-    html[data-sc-compact="on"] .btn-primary,
-    html[data-sc-compact="on"] .btn-secondary { padding: .55rem 1.3rem; }
-    html[data-sc-compact="on"] section { padding-top: 2rem; padding-bottom: 2rem; }
-
-    /* High contrast */
-    html[data-sc-contrast="on"] { --border: #6b6b7e; --muted: #b7b9c6; }
-    html[data-sc-contrast="on"] header { background: var(--bg); backdrop-filter: none; -webkit-backdrop-filter: none; border-bottom-width: 2px; }
-    html[data-sc-contrast="on"] .control-group input,
-    html[data-sc-contrast="on"] .control-group select,
-    html[data-sc-contrast="on"] .tool-drop-zone,
-    html[data-sc-contrast="on"] .blog-card,
-    html[data-sc-contrast="on"] .camera-btn { border-width: 2px; }
-
-    /* Reduce animations */
-    html[data-sc-motion="reduced"] *, html[data-sc-motion="reduced"] *::before, html[data-sc-motion="reduced"] *::after {
-      animation-duration: .001ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: .001ms !important;
-      scroll-behavior: auto !important;
-    }
+    /* Accent overrides (layer on top of any theme) */
+    html[data-sc-accent="blue"]   { --accent: #4d9fff; --accent2: #3dd0ff; }
+    html[data-sc-accent="purple"] { --accent: #b98bff; --accent2: #e23dff; }
+    html[data-sc-accent="orange"] { --accent: #ff9f4d; --accent2: #ffd23d; }
+    html[data-sc-accent="red"]    { --accent: #ff5c5c; --accent2: #ff3d84; }
 
     /* Rounded corners */
-    html[data-sc-corners="sharp"]  { --radius: 0px; --radius-sm: 0px; }
-    html[data-sc-corners="extra"]  { --radius: 26px; --radius-sm: 16px; }
+    html[data-sc-radius="sharp"]     { --radius: 3px;  --radius-sm: 3px; }
+    html[data-sc-radius="rounded"]   { --radius: 14px; --radius-sm: 8px; }
+    html[data-sc-radius="xrounded"]  { --radius: 28px; --radius-sm: 18px; }
 
-    /* ══════════════════════════════════════════════════════════
-       SETTINGS PANEL
-       ══════════════════════════════════════════════════════════ */
-    .settings-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.75);
-      z-index: 1100;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 3.5rem 1.2rem 2rem;
-      overflow-y: auto;
-    }
-    .settings-overlay.open { display: flex; }
-    .settings-box {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      width: 100%;
-      max-width: 640px;
-      padding: 0;
-      animation: fadeUp .3s ease both;
-    }
-    .settings-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.3rem 1.6rem;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--surface2);
-      border-radius: var(--radius) var(--radius) 0 0;
-    }
-    .settings-head h2 { font-size: 1.15rem; color: var(--text); }
-    .settings-close {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: all .2s ease;
-    }
-    .settings-close:hover { color: var(--accent); border-color: var(--accent); }
-    .settings-body { padding: 1.6rem; display: flex; flex-direction: column; gap: 2rem; }
-    .settings-section h3 {
-      font-family: var(--mono);
-      font-size: .78rem;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      color: var(--accent2);
-      margin-bottom: 1rem;
-    }
-    .settings-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: .8rem 0;
-      border-top: 1px solid var(--border);
-    }
-    .settings-row:first-of-type { border-top: none; padding-top: 0; }
-    .settings-row-label { display: flex; flex-direction: column; gap: .15rem; }
-    .settings-row-label span.title { font-size: .92rem; color: var(--text); font-weight: 600; }
-    .settings-row-label span.desc { font-size: .78rem; color: var(--muted); font-family: var(--mono); }
+    /* Font size (scales rem-based layout) */
+    html[data-sc-fontsize="small"]  { font-size: 14px; }
+    html[data-sc-fontsize="medium"] { font-size: 16px; }
+    html[data-sc-fontsize="large"]  { font-size: 18px; }
 
-    .segmented {
-      display: inline-flex;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 3px;
-      gap: 2px;
-      flex-wrap: wrap;
-    }
-    .segmented button {
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      font-family: var(--sans);
-      font-size: .8rem;
-      font-weight: 600;
-      padding: .45rem .8rem;
-      border-radius: calc(var(--radius-sm) - 3px);
-      cursor: pointer;
-      transition: all .2s ease;
-      white-space: nowrap;
-    }
-    .segmented button:hover { color: var(--text); }
-    .segmented button.active { background: var(--accent); color: #0d0d0f; }
-
-    .swatch-row { display: flex; gap: .6rem; flex-wrap: wrap; }
-    .swatch-btn {
-      width: 34px; height: 34px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      cursor: pointer;
-      position: relative;
-      transition: all .2s ease;
-    }
-    .swatch-btn.active { border-color: var(--text); transform: scale(1.1); }
-    .swatch-btn.active::after {
-      content: "✓";
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      color: #0d0d0f;
-      font-size: .8rem;
-      font-weight: 700;
+    /* Animations off */
+    html[data-sc-anim="off"] *, html[data-sc-anim="off"] *::before, html[data-sc-anim="off"] *::after {
+      animation-duration: 0.001ms !important; animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important; scroll-behavior: auto !important;
     }
 
-    .toggle-switch { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
-    .toggle-switch input { opacity: 0; width: 100%; height: 100%; position: absolute; margin: 0; cursor: pointer; z-index: 2; }
-    .toggle-switch .track {
-      position: absolute; inset: 0;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 99px;
-      transition: all .2s ease;
-    }
-    .toggle-switch .thumb {
-      position: absolute; top: 2px; left: 3px;
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      background: var(--muted);
-      transition: all .2s ease;
-    }
-    .toggle-switch input:checked ~ .track { background: var(--accent); border-color: var(--accent); }
-    .toggle-switch input:checked ~ .thumb { left: 23px; background: #0d0d0f; }
+    /* Compact mode */
+    html[data-sc-compact="on"] .page-section { padding: 3.2rem 1.5rem; }
+    html[data-sc-compact="on"] .hero { padding: 3rem 1.5rem 2rem; }
+    html[data-sc-compact="on"] .about-card,
+    html[data-sc-compact="on"] .privacy-block,
+    html[data-sc-compact="on"] .settings-card { padding: 1.1rem; }
+    html[data-sc-compact="on"] .section-lead { margin-bottom: 1.6rem; }
 
-    .perm-status-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .8rem 0; border-top: 1px solid var(--border); gap: 1rem; flex-wrap: wrap;
-    }
-    .perm-status-row:first-of-type { border-top: none; padding-top: 0; }
-    .perm-badge {
-      font-family: var(--mono);
-      font-size: .78rem;
-      font-weight: 700;
-      padding: .3rem .7rem;
-      border-radius: 99px;
-      white-space: nowrap;
-    }
-    .perm-badge.allowed { background: rgba(127,255,110,.12); color: var(--accent); }
-    .perm-badge.denied  { background: rgba(255,92,92,.12); color: var(--danger); }
-    .perm-badge.unknown { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
-    .perm-open-btn {
-      background: transparent; border: 1px solid var(--border); color: var(--text);
-      font-family: var(--sans); font-size: .78rem; font-weight: 600;
-      padding: .4rem .8rem; border-radius: var(--radius-sm); cursor: pointer; transition: all .2s ease;
-    }
-    .perm-open-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .perm-instructions {
-      display: none;
-      margin-top: .6rem;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: .8rem 1rem;
-      font-family: var(--mono);
-      font-size: .78rem;
-      color: var(--muted);
-      line-height: 1.6;
-      width: 100%;
-    }
-    .perm-instructions.show { display: block; }
+    /* High contrast */
+    html[data-sc-contrast="high"] { --muted: #c9c9d6; --border: #6a6a7d; }
+    html[data-sc-contrast="high"] a { text-decoration: underline; }
+    html[data-sc-contrast="high"] .btn-secondary { border-width: 2px; }
 
-    .app-info-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .7rem 0; border-top: 1px solid var(--border); gap: 1rem; flex-wrap: wrap;
+    /* Wallpaper layer — sits behind all content */
+    #sc-wallpaper {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background: var(--bg); transition: background .3s ease;
     }
-    .app-info-row:first-of-type { border-top: none; padding-top: 0; }
-    .app-info-row .info-val { font-family: var(--mono); font-size: .82rem; color: var(--accent2); }
-    .settings-action-btn {
-      background: var(--bg); border: 1px solid var(--border); color: var(--text);
-      font-family: var(--sans); font-size: .82rem; font-weight: 600;
-      padding: .5rem 1rem; border-radius: var(--radius-sm); cursor: pointer; transition: all .2s ease;
+    body.sc-wallpaper-gradient #sc-wallpaper {
+      background: radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--accent) 16%, var(--bg)) 0%, var(--bg) 45%),
+                  radial-gradient(circle at 85% 90%, color-mix(in srgb, var(--accent2) 14%, var(--bg)) 0%, var(--bg) 50%),
+                  var(--bg);
     }
-    .settings-action-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .settings-action-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+    body.sc-wallpaper-glass #sc-wallpaper {
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, var(--bg)) 0%, var(--bg) 40%, color-mix(in srgb, var(--accent2) 8%, var(--bg)) 100%);
+    }
+    body.sc-wallpaper-glass .about-card,
+    body.sc-wallpaper-glass .settings-card,
+    body.sc-wallpaper-glass .privacy-block,
+    body.sc-wallpaper-glass header {
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      background: color-mix(in srgb, var(--surface) 78%, transparent);
+    }
+    body.sc-wallpaper-nature #sc-wallpaper {
+      background: linear-gradient(160deg, #0e2a1c 0%, #163d24 35%, var(--bg) 100%);
+    }
+    body.sc-wallpaper-space #sc-wallpaper {
+      background:
+        radial-gradient(1.5px 1.5px at 20% 30%, #fff 100%, transparent 0),
+        radial-gradient(1.5px 1.5px at 65% 15%, #fff 100%, transparent 0),
+        radial-gradient(1px 1px at 80% 60%, #fff 100%, transparent 0),
+        radial-gradient(1.5px 1.5px at 40% 80%, #fff 100%, transparent 0),
+        radial-gradient(1px 1px at 90% 85%, #fff 100%, transparent 0),
+        radial-gradient(1px 1px at 10% 65%, #fff 100%, transparent 0),
+        linear-gradient(180deg, #05050c 0%, #0b0b18 100%);
+      background-size: 220px 220px, 260px 260px, 240px 240px, 200px 200px, 280px 280px, 190px 190px, cover;
+    }
+    body.sc-wallpaper-custom #sc-wallpaper {
+      background-size: cover; background-position: center; background-repeat: no-repeat;
+    }
+
+    /* Settings page */
+    .settings-group { margin-bottom: 2.6rem; }
+    .settings-group h3.settings-group-title {
+      font-family: var(--mono); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--accent2); margin-bottom: 1rem;
+    }
+    .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+    .settings-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.4rem; display: flex; flex-direction: column; gap: .7rem;
+    }
+    .settings-card-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .settings-card h4 { font-size: .95rem; font-weight: 600; color: var(--text); }
+    .settings-card p.settings-desc { font-size: .82rem; color: var(--muted); line-height: 1.55; }
+    .settings-value { font-family: var(--mono); font-size: .82rem; color: var(--accent); text-align: right; }
+
+    .pill-group { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .pill-btn {
+      background: var(--bg); border: 1px solid var(--border); color: var(--muted);
+      font-family: var(--sans); font-size: .82rem; font-weight: 500; padding: .5rem .95rem;
+      border-radius: var(--radius-sm); cursor: pointer; transition: all .15s ease; display: inline-flex; align-items: center; gap: .5rem;
+    }
+    .pill-btn:hover { border-color: var(--muted); color: var(--text); }
+    .pill-btn.active { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--bg)); }
+    .pill-swatch { width: 14px; height: 14px; border-radius: 50%; display: inline-block; border: 1px solid rgba(255,255,255,.25); flex-shrink: 0; }
+
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch-track {
+      position: absolute; cursor: pointer; inset: 0; background: var(--border);
+      border-radius: 999px; transition: background .2s ease;
+    }
+    .switch-track::before {
+      content: ""; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px;
+      background: var(--text); border-radius: 50%; transition: transform .2s ease;
+    }
+    .switch input:checked + .switch-track { background: var(--accent); }
+    .switch input:checked + .switch-track::before { transform: translateX(20px); background: #0d0d0f; }
+    .switch input:focus-visible + .switch-track { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .settings-btnbar { display: flex; flex-wrap: wrap; gap: .8rem; }
+    .btn-danger {
+      background: transparent; border: 1px solid var(--danger); color: var(--danger);
+      padding: .65rem 1.3rem; border-radius: var(--radius-sm); font-weight: 600; font-size: .85rem;
+      cursor: pointer; transition: all .2s ease; font-family: var(--sans);
+    }
+    .btn-danger:hover { background: rgba(255,92,92,0.1); }
+
+    .perm-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 0; border-top: 1px solid var(--border); }
+    .perm-row:first-of-type { border-top: none; }
+    .perm-badge { font-family: var(--mono); font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: .3rem .65rem; border-radius: 99px; }
+    .perm-badge.allowed { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+    .perm-badge.denied { color: var(--danger); background: rgba(255,92,92,0.12); }
+    .perm-badge.unknown { color: var(--muted); background: var(--surface2); }
+    .perm-guidance { font-size: .8rem; color: var(--muted); line-height: 1.6; margin-top: .5rem; display: none; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .8rem 1rem; }
+    .perm-guidance.show { display: block; }
+
     .settings-toast {
-      position: fixed;
-      bottom: 1.4rem; left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
-      font-family: var(--sans); font-size: .85rem;
-      padding: .7rem 1.2rem; border-radius: var(--radius-sm);
-      opacity: 0; pointer-events: none;
-      transition: all .25s ease;
-      z-index: 1200;
+      position: fixed; bottom: 1.4rem; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface2); border: 1px solid var(--accent); color: var(--text);
+      padding: .75rem 1.3rem; border-radius: var(--radius-sm); font-size: .85rem; z-index: 999;
+      opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
       box-shadow: 0 8px 30px rgba(0,0,0,.4);
     }
     .settings-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    @media (max-width: 560px) {
-      .settings-row, .perm-status-row, .app-info-row { flex-direction: column; align-items: flex-start; }
-      .settings-overlay { padding: 1.4rem .8rem 2rem; }
+    .wallpaper-upload-row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+    .file-btn {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      padding: .55rem 1rem; border-radius: var(--radius-sm); font-size: .82rem; cursor: pointer;
+      font-family: var(--sans); transition: all .15s ease;
+    }
+    .file-btn:hover { border-color: var(--accent); }
+
+    @media (max-width: 640px) {
+      .settings-card-row { flex-direction: column; align-items: flex-start; }
+      .settings-value { text-align: left; }
     }
   </style>
 </head>
 <body>
+  <div id="sc-wallpaper" aria-hidden="true"></div>
+  <div class="settings-toast" id="sc-toast" role="status" aria-live="polite"></div>
 
   <a href="#suite-workspace-block" class="skip-link">Skip to operational image tools</a>
 
@@ -1122,7 +788,6 @@
       <img src="logo-icon.png" alt="" aria-hidden="true" style="height:22px;width:22px;display:block;" />
       Smart Compress
     </a>
-    <button type="button" class="pwa-install-btn" id="pwa-install-btn-header" aria-label="Install Smart Compress app">⬇ Install App</button>
     <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="main-nav" id="nav-toggle" type="button">
       <span></span><span></span><span></span>
     </button>
@@ -1135,172 +800,10 @@
         <li><a href="#privacy">Privacy Policy</a></li>
         <li><a href="#contact">Contact Us</a></li>
         <li><a href="#terms">Terms & Conditions</a></li>
-        <li><a href="#" id="nav-settings-btn">⚙ Settings</a></li>
+        <li><a href="#settings">⚙️ Settings</a></li>
       </ul>
     </nav>
   </header>
-
-  <!-- ══════════ SETTINGS PANEL ══════════ -->
-  <div class="settings-overlay" id="settings-overlay" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-    <div class="settings-box">
-      <div class="settings-head">
-        <h2 id="settings-title">⚙ Settings</h2>
-        <button type="button" class="settings-close" id="settings-close-btn" aria-label="Close settings">✕</button>
-      </div>
-
-      <div class="settings-body">
-
-        <!-- Appearance -->
-        <div class="settings-section">
-          <h3>Appearance</h3>
-
-          <div class="settings-row">
-            <div class="settings-row-label">
-              <span class="title">Theme</span>
-              <span class="desc">Default view matches the original Smart Compress design</span>
-            </div>
-            <div class="segmented" id="theme-segmented" role="group" aria-label="Theme">
-              <button type="button" data-value="default">Default</button>
-              <button type="button" data-value="dark">Dark</button>
-              <button type="button" data-value="light">Light</button>
-              <button type="button" data-value="amoled">AMOLED</button>
-            </div>
-          </div>
-
-          <div class="settings-row">
-            <div class="settings-row-label">
-              <span class="title">Accent Color</span>
-              <span class="desc">Recolors buttons, highlights and links</span>
-            </div>
-            <div class="swatch-row" id="accent-swatch-row" role="group" aria-label="Accent color">
-              <button type="button" class="swatch-btn" data-value="green"  style="background:#7fff6e;" title="Green (Default)" aria-label="Green"></button>
-              <button type="button" class="swatch-btn" data-value="blue"   style="background:#5b9dff;" title="Blue" aria-label="Blue"></button>
-              <button type="button" class="swatch-btn" data-value="purple" style="background:#b083ff;" title="Purple" aria-label="Purple"></button>
-              <button type="button" class="swatch-btn" data-value="orange" style="background:#ff9f4d;" title="Orange" aria-label="Orange"></button>
-              <button type="button" class="swatch-btn" data-value="red"    style="background:#ff6161;" title="Red" aria-label="Red"></button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Accessibility -->
-        <div class="settings-section">
-          <h3>Accessibility</h3>
-
-          <div class="settings-row">
-            <div class="settings-row-label"><span class="title">Font Size</span></div>
-            <div class="segmented" id="fontsize-segmented" role="group" aria-label="Font size">
-              <button type="button" data-value="small">Small</button>
-              <button type="button" data-value="medium">Medium</button>
-              <button type="button" data-value="large">Large</button>
-            </div>
-          </div>
-
-          <div class="settings-row">
-            <div class="settings-row-label">
-              <span class="title">Compact Mode</span>
-              <span class="desc">Tighter spacing across the app</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-compact">
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </div>
-
-          <div class="settings-row">
-            <div class="settings-row-label">
-              <span class="title">High Contrast Mode</span>
-              <span class="desc">Stronger borders and text contrast</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-contrast">
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </div>
-
-          <div class="settings-row">
-            <div class="settings-row-label">
-              <span class="title">Reduce Animations</span>
-              <span class="desc">Minimizes transitions and motion</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-motion">
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </div>
-
-          <div class="settings-row">
-            <div class="settings-row-label"><span class="title">Rounded Corners</span></div>
-            <div class="segmented" id="corners-segmented" role="group" aria-label="Corner roundness">
-              <button type="button" data-value="sharp">Sharp</button>
-              <button type="button" data-value="rounded">Rounded</button>
-              <button type="button" data-value="extra">Extra Rounded</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Permissions -->
-        <div class="settings-section">
-          <h3>Permissions</h3>
-
-          <div class="perm-status-row">
-            <div class="settings-row-label"><span class="title">📷 Camera</span></div>
-            <div style="display:flex; align-items:center; gap:.6rem; flex-wrap:wrap;">
-              <span class="perm-badge unknown" id="perm-badge-camera">⏳ Not Requested</span>
-              <button type="button" class="perm-open-btn" id="perm-open-camera" style="display:none;">Open Permission Settings</button>
-            </div>
-          </div>
-          <div class="perm-instructions" id="perm-instructions-camera"></div>
-
-          <div class="perm-status-row">
-            <div class="settings-row-label"><span class="title">🔔 Notifications</span></div>
-            <div style="display:flex; align-items:center; gap:.6rem; flex-wrap:wrap;">
-              <span class="perm-badge unknown" id="perm-badge-notifications">⏳ Not Requested</span>
-              <button type="button" class="perm-open-btn" id="perm-open-notifications" style="display:none;">Open Permission Settings</button>
-            </div>
-          </div>
-          <div class="perm-instructions" id="perm-instructions-notifications"></div>
-        </div>
-
-        <!-- App -->
-        <div class="settings-section">
-          <h3>App</h3>
-
-          <div class="app-info-row" id="pwa-install-row" style="display:none;">
-            <span class="title">Install App</span>
-            <button type="button" class="settings-action-btn" id="pwa-install-btn-settings">⬇ Install</button>
-          </div>
-          <div class="app-info-row">
-            <span class="title">Clear Cache</span>
-            <button type="button" class="settings-action-btn" id="btn-clear-cache">Clear Cache</button>
-          </div>
-          <div class="app-info-row">
-            <span class="title">Reset User Preferences</span>
-            <button type="button" class="settings-action-btn" id="btn-reset-prefs">Reset</button>
-          </div>
-          <div class="app-info-row">
-            <span class="title">Restore Default Settings</span>
-            <button type="button" class="settings-action-btn danger" id="btn-restore-defaults">Restore Defaults</button>
-          </div>
-          <div class="app-info-row">
-            <span class="title">App Version</span>
-            <span class="info-val" id="app-version-val">v1.0.0</span>
-          </div>
-          <div class="app-info-row">
-            <span class="title">PWA Status</span>
-            <span class="info-val" id="pwa-status-val">Checking…</span>
-          </div>
-          <div class="app-info-row">
-            <span class="title">Storage Usage</span>
-            <span class="info-val" id="storage-usage-val">Checking…</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="settings-toast" id="settings-toast"></div>
-  <!-- ══════════ /SETTINGS PANEL ══════════ -->
 
   <section class="hero" id="home" aria-labelledby="hero-title">
     <p class="hero-eyebrow">100% Client-Side · Private · Blazing Fast</p>
@@ -1382,16 +885,13 @@
             </div>
             <div class="control-group">
               <label for="comp-target-size">Target File Size</label>
-              <div class="target-size-row">
-                <select id="comp-target-size">
-                  <option value="none">No Target (Use Quality Slider)</option>
-                  <option value="50">Under 50 KB</option>
-                  <option value="100">Under 100 KB</option>
-                  <option value="200">Under 200 KB</option>
-                  <option value="custom">Custom KB…</option>
-                </select>
-                <button type="button" id="comp-camera-btn" class="camera-btn" title="Take a photo with your camera">📷 Camera</button>
-              </div>
+              <select id="comp-target-size">
+                <option value="none">No Target (Use Quality Slider)</option>
+                <option value="50">Under 50 KB</option>
+                <option value="100">Under 100 KB</option>
+                <option value="200">Under 200 KB</option>
+                <option value="custom">Custom KB…</option>
+              </select>
             </div>
             <div class="control-group" id="comp-custom-kb-group" style="display:none;">
               <label for="comp-custom-kb">Custom Target (KB)</label>
@@ -1404,54 +904,6 @@
             <p>Drag & drop one or more images or <span>browse local directory</span></p>
             <input type="file" id="file-compressor" class="file-input-hidden" accept="image/jpeg, image/png, image/webp" multiple />
           </div>
-
-          <!-- Camera capture modal -->
-          <div class="camera-modal-overlay" id="camera-modal-overlay">
-            <div class="camera-modal-box">
-              <div class="camera-modal-head">
-                <h3>📷 Capture Photo</h3>
-                <button type="button" class="camera-modal-close" id="camera-modal-close" aria-label="Close camera">✕</button>
-              </div>
-
-              <div class="camera-modal-video-wrap" id="camera-video-wrap">
-                <video id="camera-video-feed" autoplay playsinline muted></video>
-                <div class="camera-loading" id="camera-loading">Starting camera…</div>
-              </div>
-
-              <div class="camera-modal-error" id="camera-modal-error">
-                <span class="err-icon">🚫</span>
-                <span id="camera-error-text">Camera access was denied. Please allow camera permission in your browser settings and try again.</span>
-                <div class="perm-instructions" id="camera-perm-instructions"></div>
-                <div class="camera-modal-error-actions">
-                  <button type="button" class="btn-primary" id="camera-grant-btn">🔓 Grant Camera Access</button>
-                  <button type="button" class="btn-secondary" id="camera-fallback-btn">📁 Upload Photo Instead</button>
-                  <button type="button" class="btn-secondary" id="camera-error-cancel-btn">Cancel</button>
-                </div>
-              </div>
-
-              <canvas id="camera-capture-canvas" style="display:none;"></canvas>
-
-              <div class="camera-controls-row" id="camera-controls-row">
-                <div class="camera-zoom-wrap" id="camera-zoom-wrap" style="display:none;">
-                  <label for="camera-zoom-slider">🔍 Zoom</label>
-                  <input type="range" id="camera-zoom-slider" min="1" max="1" step="0.1" value="1">
-                </div>
-                <div class="camera-toggle-btns">
-                  <button type="button" class="camera-icon-btn" id="camera-switch-btn" title="Switch camera" style="display:none;">🔄</button>
-                  <button type="button" class="camera-icon-btn" id="camera-focus-btn" title="Refocus" style="display:none;">🎯</button>
-                  <button type="button" class="camera-icon-btn" id="camera-hdr-btn" title="Toggle HDR" style="display:none;">HDR</button>
-                </div>
-              </div>
-
-              <div class="camera-modal-actions" id="camera-modal-actions">
-                <button type="button" class="btn-secondary" id="camera-cancel-btn">Cancel</button>
-                <button type="button" class="btn-primary" id="camera-shutter-btn">📸 Capture</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Native camera-app fallback for browsers without MediaDevices support -->
-          <input type="file" id="camera-fallback-input" accept="image/*" capture="environment" class="file-input-hidden" style="display:none;" />
 
           <!-- Progress bar (hidden until needed) -->
           <div id="comp-progress-wrap" style="display:none; margin-top:1.2rem;">
@@ -1991,6 +1443,161 @@
           <p>Because the image compression application lifecycle computes completely inside individual decentralized browser clients, user data handling liabilities remain entirely controlled by the user's terminal environment configuration space management policies.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="page-section" id="settings" aria-labelledby="settings-heading">
+    <div class="section-inner">
+      <p class="section-eyebrow">Local Device Preferences · Nothing Leaves Your Browser</p>
+      <h2 id="settings-heading" class="section-title">Settings</h2>
+      <p class="section-lead">Customize the look, behavior, and permissions of Smart Compress. All preferences are stored only on this device and apply the same way whether you're using the website or the installed app.</p>
+
+      <!-- GENERAL -->
+      <div class="settings-group">
+        <h3 class="settings-group-title">General</h3>
+        <div class="settings-grid">
+          <div class="settings-card">
+            <div class="settings-card-row"><h4>App Version</h4><span class="settings-value" id="set-app-version">—</span></div>
+            <p class="settings-desc">Version of the installed Smart Compress app shell.</p>
+          </div>
+          <div class="settings-card">
+            <div class="settings-card-row"><h4>Website Version</h4><span class="settings-value" id="set-site-version">—</span></div>
+            <p class="settings-desc">Current build served at smartcompress.app.</p>
+          </div>
+          <div class="settings-card">
+            <div class="settings-card-row"><h4>PWA Status</h4><span class="settings-value" id="set-pwa-status">—</span></div>
+            <p class="settings-desc" id="set-pwa-desc">Whether the app is running installed (standalone) or in a browser tab.</p>
+            <div class="settings-btnbar"><button class="btn-secondary" id="set-install-btn" type="button" style="display:none;">Install App</button></div>
+          </div>
+          <div class="settings-card">
+            <div class="settings-card-row"><h4>Storage Usage</h4><span class="settings-value" id="set-storage-usage">—</span></div>
+            <p class="settings-desc">Estimated cache and local data used by Smart Compress on this device.</p>
+          </div>
+        </div>
+        <div class="settings-btnbar" style="margin-top:1rem;">
+          <button class="btn-danger" id="set-clear-cache" type="button">Clear Cache</button>
+          <button class="btn-danger" id="set-restore-defaults" type="button">Restore Default Settings</button>
+          <button class="btn-danger" id="set-reset-prefs" type="button">Reset User Preferences</button>
+        </div>
+      </div>
+
+      <!-- APPEARANCE -->
+      <div class="settings-group">
+        <h3 class="settings-group-title">Appearance</h3>
+        <div class="settings-grid">
+
+          <div class="settings-card">
+            <h4>Theme</h4>
+            <p class="settings-desc">Choose the overall color scheme.</p>
+            <div class="pill-group" id="set-theme-group" role="group" aria-label="Theme options">
+              <button class="pill-btn" data-theme="default" type="button">Smart Compress Default</button>
+              <button class="pill-btn" data-theme="dark" type="button">Dark</button>
+              <button class="pill-btn" data-theme="light" type="button">Light</button>
+              <button class="pill-btn" data-theme="amoled" type="button">AMOLED Black</button>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h4>Accent Color</h4>
+            <p class="settings-desc">Highlight color used across buttons and links.</p>
+            <div class="pill-group" id="set-accent-group" role="group" aria-label="Accent color options">
+              <button class="pill-btn" data-accent="green" type="button"><span class="pill-swatch" style="background:#7fff6e;"></span>Green</button>
+              <button class="pill-btn" data-accent="blue" type="button"><span class="pill-swatch" style="background:#4d9fff;"></span>Blue</button>
+              <button class="pill-btn" data-accent="purple" type="button"><span class="pill-swatch" style="background:#b98bff;"></span>Purple</button>
+              <button class="pill-btn" data-accent="orange" type="button"><span class="pill-swatch" style="background:#ff9f4d;"></span>Orange</button>
+              <button class="pill-btn" data-accent="red" type="button"><span class="pill-swatch" style="background:#ff5c5c;"></span>Red</button>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h4>Background Wallpaper</h4>
+            <p class="settings-desc">Subtle backdrop shown behind the interface.</p>
+            <div class="pill-group" id="set-wallpaper-group" role="group" aria-label="Wallpaper options">
+              <button class="pill-btn" data-wallpaper="default" type="button">Default</button>
+              <button class="pill-btn" data-wallpaper="gradient" type="button">Gradient</button>
+              <button class="pill-btn" data-wallpaper="glass" type="button">Glass</button>
+              <button class="pill-btn" data-wallpaper="nature" type="button">Nature</button>
+              <button class="pill-btn" data-wallpaper="space" type="button">Space</button>
+            </div>
+            <div class="wallpaper-upload-row">
+              <label class="file-btn" for="set-wallpaper-upload">Upload Custom Wallpaper</label>
+              <input type="file" id="set-wallpaper-upload" accept="image/*" style="display:none;">
+              <button class="pill-btn" id="set-wallpaper-clear-custom" type="button" style="display:none;">Remove Custom</button>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h4>Font Size</h4>
+            <p class="settings-desc">Adjusts overall text scale across the site.</p>
+            <div class="pill-group" id="set-fontsize-group" role="group" aria-label="Font size options">
+              <button class="pill-btn" data-fontsize="small" type="button">Small</button>
+              <button class="pill-btn" data-fontsize="medium" type="button">Medium</button>
+              <button class="pill-btn" data-fontsize="large" type="button">Large</button>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h4>Rounded Corners</h4>
+            <p class="settings-desc">Corner radius used for cards and buttons.</p>
+            <div class="pill-group" id="set-radius-group" role="group" aria-label="Rounded corner options">
+              <button class="pill-btn" data-radius="sharp" type="button">Sharp</button>
+              <button class="pill-btn" data-radius="rounded" type="button">Rounded</button>
+              <button class="pill-btn" data-radius="xrounded" type="button">Extra Rounded</button>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <div class="settings-card-row">
+              <div><h4>Animations</h4><p class="settings-desc">Enable interface motion and transitions.</p></div>
+              <label class="switch"><input type="checkbox" id="set-animations" checked><span class="switch-track"></span></label>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <div class="settings-card-row">
+              <div><h4>Compact Mode</h4><p class="settings-desc">Reduces spacing for a denser layout.</p></div>
+              <label class="switch"><input type="checkbox" id="set-compact"><span class="switch-track"></span></label>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <div class="settings-card-row">
+              <div><h4>High Contrast Mode</h4><p class="settings-desc">Increases text and border contrast for readability.</p></div>
+              <label class="switch"><input type="checkbox" id="set-contrast"><span class="switch-track"></span></label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- PERMISSIONS -->
+      <div class="settings-group">
+        <h3 class="settings-group-title">Permissions</h3>
+        <div class="settings-card">
+          <div class="perm-row">
+            <div>
+              <h4>Notifications</h4>
+              <p class="settings-desc">Used for optional export/compression completion alerts.</p>
+              <div class="perm-guidance" id="set-perm-notif-guidance">To enable notifications, open your browser's site settings for smartcompress.app (usually via the padlock icon in the address bar) and set Notifications to "Allow", then reload this page.</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:.5rem;">
+              <span class="perm-badge unknown" id="set-perm-notif-badge">Checking…</span>
+              <button class="pill-btn" id="set-perm-notif-request" type="button" style="display:none;">Request Access</button>
+            </div>
+          </div>
+          <div class="perm-row">
+            <div>
+              <h4>Clipboard</h4>
+              <p class="settings-desc">Used by "Copy" buttons across tools (e.g. Prompt Studio).</p>
+              <div class="perm-guidance" id="set-perm-clip-guidance">To enable clipboard access, open your browser's site settings for smartcompress.app and set Clipboard to "Allow", then reload this page.</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:.5rem;">
+              <span class="perm-badge unknown" id="set-perm-clip-badge">Checking…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -2547,365 +2154,6 @@
           if (!files.length) return;
           originalImageMemoryBufferMap["compressor_files"] = files;
           runBatchCompression(files);
-        });
-      })();
-
-      /* ── Camera capture for Image Compressor ── */
-      (function setupCompressorCamera() {
-        const cameraBtn      = document.getElementById("comp-camera-btn");
-        const overlay        = document.getElementById("camera-modal-overlay");
-        const closeBtn       = document.getElementById("camera-modal-close");
-        const cancelBtn      = document.getElementById("camera-cancel-btn");
-        const shutterBtn     = document.getElementById("camera-shutter-btn");
-        const videoWrap      = document.getElementById("camera-video-wrap");
-        const video          = document.getElementById("camera-video-feed");
-        const loadingBox     = document.getElementById("camera-loading");
-        const errorBox       = document.getElementById("camera-modal-error");
-        const errorText      = document.getElementById("camera-error-text");
-        const grantBtn       = document.getElementById("camera-grant-btn");
-        const fallbackBtn    = document.getElementById("camera-fallback-btn");
-        const errorCancelBtn = document.getElementById("camera-error-cancel-btn");
-        const permInstrBox   = document.getElementById("camera-perm-instructions");
-        const captureCanvas  = document.getElementById("camera-capture-canvas");
-        const controlsRow    = document.getElementById("camera-controls-row");
-        const zoomWrap       = document.getElementById("camera-zoom-wrap");
-        const zoomSlider     = document.getElementById("camera-zoom-slider");
-        const switchBtn      = document.getElementById("camera-switch-btn");
-        const focusBtn       = document.getElementById("camera-focus-btn");
-        const hdrBtn         = document.getElementById("camera-hdr-btn");
-        const fallbackInput  = document.getElementById("camera-fallback-input");
-
-        if (!cameraBtn || !overlay || !video) return;
-
-        const mediaDevicesSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-
-        let activeStream     = null;
-        let currentTrack     = null;
-        let currentFacing    = "environment"; // rear camera by default
-        let multipleCameras  = false;
-        let hdrOn            = false;
-
-        /* ── Native camera-app fallback (used when MediaDevices isn't supported) ── */
-        function loadFileIntoCompressor(file) {
-          originalImageMemoryBufferMap["compressor_files"] = [file];
-          runBatchCompression([file]);
-        }
-
-        fallbackInput.addEventListener("change", (e) => {
-          const file = e.target.files && e.target.files[0];
-          fallbackInput.value = "";
-          if (!file) return;
-          loadFileIntoCompressor(file);
-        });
-
-        /* ── Stream lifecycle ── */
-        function stopStream() {
-          if (activeStream) {
-            activeStream.getTracks().forEach(track => track.stop());
-          }
-          activeStream = null;
-          currentTrack = null;
-          video.srcObject = null;
-        }
-
-        function showLoading() { loadingBox.classList.add("show"); }
-        function hideLoading() { loadingBox.classList.remove("show"); }
-
-        function showError(message, opts) {
-          opts = opts || {};
-          videoWrap.style.display    = "none";
-          controlsRow.style.display  = "none";
-          errorBox.style.display     = "block";
-          errorText.textContent      = message;
-          shutterBtn.style.display   = "none";
-          grantBtn.style.display     = opts.allowRetry === false ? "none" : "inline-flex";
-          if (opts.instructions) {
-            permInstrBox.innerHTML = opts.instructions;
-            permInstrBox.classList.add("show");
-          } else {
-            permInstrBox.classList.remove("show");
-            permInstrBox.innerHTML = "";
-          }
-        }
-
-        function resetModalUI() {
-          videoWrap.style.display   = "flex";
-          controlsRow.style.display = "flex";
-          errorBox.style.display    = "none";
-          shutterBtn.style.display  = "inline-flex";
-          hideLoading();
-          zoomWrap.style.display    = "none";
-          switchBtn.style.display   = "none";
-          focusBtn.style.display    = "none";
-          hdrBtn.style.display      = "none";
-          hdrBtn.classList.remove("active");
-          hdrOn = false;
-        }
-
-        /* ── Inspect track capabilities: zoom / focus / HDR / multi-camera ── */
-        async function setupTrackFeatures(track) {
-          let caps = {};
-          try { caps = (typeof track.getCapabilities === "function") ? track.getCapabilities() : {}; }
-          catch (e) { caps = {}; }
-
-          /* Zoom */
-          if (caps.zoom && caps.zoom.max > caps.zoom.min) {
-            zoomWrap.style.display = "flex";
-            zoomSlider.min  = caps.zoom.min;
-            zoomSlider.max  = caps.zoom.max;
-            zoomSlider.step = caps.zoom.step || 0.1;
-            let settings = {};
-            try { settings = track.getSettings(); } catch (e) {}
-            zoomSlider.value = settings.zoom || caps.zoom.min;
-          } else {
-            zoomWrap.style.display = "none";
-          }
-
-          /* Continuous autofocus (applied automatically) + manual refocus trigger */
-          if (caps.focusMode && caps.focusMode.length) {
-            if (caps.focusMode.includes("continuous")) {
-              try { await track.applyConstraints({ advanced: [{ focusMode: "continuous" }] }); } catch (e) {}
-            }
-            focusBtn.style.display = "inline-flex";
-          } else {
-            focusBtn.style.display = "none";
-          }
-
-          /* HDR — only shown if the device/browser actually exposes an HDR capability */
-          if (caps.hdr || (Array.isArray(caps.hdr) && caps.hdr.length)) {
-            hdrBtn.style.display = "inline-flex";
-          } else {
-            hdrBtn.style.display = "none";
-          }
-
-          /* Front/rear switch — only shown if more than one camera exists */
-          switchBtn.style.display = multipleCameras ? "inline-flex" : "none";
-        }
-
-        async function detectMultipleCameras() {
-          try {
-            if (!navigator.mediaDevices.enumerateDevices) { multipleCameras = false; return; }
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            multipleCameras = devices.filter(d => d.kind === "videoinput").length > 1;
-          } catch (e) {
-            multipleCameras = false;
-          }
-        }
-
-        /* ── Check whether camera permission is already permanently denied,
-               so we can show clear settings instructions instead of a silent failure ── */
-        async function checkPermanentDenial() {
-          if (!navigator.permissions || !navigator.permissions.query) return false;
-          try {
-            const status = await navigator.permissions.query({ name: "camera" });
-            return status.state === "denied";
-          } catch (e) {
-            return false; // Permissions API doesn't support 'camera' in this browser (e.g. Firefox) — fall through to getUserMedia
-          }
-        }
-
-        /* ── Start / restart the camera stream at the highest supported resolution ── */
-        async function startStream(facingMode) {
-          stopStream();
-          showLoading();
-          errorBox.style.display    = "none";
-          videoWrap.style.display   = "flex";
-          controlsRow.style.display = "flex";
-          shutterBtn.style.display  = "inline-flex";
-
-          if (!mediaDevicesSupported) {
-            hideLoading();
-            showError("Camera access isn't supported in this browser. Please try a different browser or use the button below to take a photo instead.", { allowRetry: false });
-            return;
-          }
-
-          const permanentlyDenied = await checkPermanentDenial();
-          if (permanentlyDenied) {
-            hideLoading();
-            showError(
-              "Camera access is blocked for this site. Enable it from your browser or app settings, then try again.",
-              { allowRetry: true, instructions: window.scPermissionInstructions ? window.scPermissionInstructions("camera") : "" }
-            );
-            return;
-          }
-
-          const constraints = {
-            video: {
-              facingMode: { ideal: facingMode },
-              width:  { ideal: 4096 },
-              height: { ideal: 2160 }
-            },
-            audio: false
-          };
-
-          try {
-            activeStream = await navigator.mediaDevices.getUserMedia(constraints);
-            currentTrack = activeStream.getVideoTracks()[0];
-            currentFacing = facingMode;
-            video.srcObject = activeStream;
-            await video.play().catch(() => {});
-            await detectMultipleCameras();
-            await setupTrackFeatures(currentTrack);
-            hideLoading();
-          } catch (err) {
-            hideLoading();
-            let msg = "We couldn't access your camera. Please check your device and try again.";
-            let allowRetry = true;
-            if (err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
-              msg = "Camera access was denied. Grant permission to keep using your camera, or upload a photo instead.";
-              showError(msg, { allowRetry: true, instructions: window.scPermissionInstructions ? window.scPermissionInstructions("camera") : "" });
-              return;
-            } else if (err && err.name === "NotFoundError") {
-              msg = "No camera was found on this device.";
-              allowRetry = true;
-            } else if (err && err.name === "NotReadableError") {
-              msg = "Your camera is already in use by another app. Please close it and try again.";
-            } else if (err && err.name === "OverconstrainedError") {
-              /* Retry once with relaxed constraints if the ideal resolution/facing mode isn't supported */
-              try {
-                activeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: false });
-                currentTrack = activeStream.getVideoTracks()[0];
-                currentFacing = facingMode;
-                video.srcObject = activeStream;
-                await video.play().catch(() => {});
-                await detectMultipleCameras();
-                await setupTrackFeatures(currentTrack);
-                return;
-              } catch (err2) {
-                msg = "We couldn't access your camera. Please check your device and try again.";
-              }
-            }
-            showError(msg, { allowRetry });
-          }
-        }
-
-        /* ── Open / close modal ── */
-        function openCamera() {
-          if (!mediaDevicesSupported) {
-            /* Skip the modal entirely — hand off straight to the device's native camera app */
-            fallbackInput.click();
-            return;
-          }
-          resetModalUI();
-          overlay.classList.add("open");
-          showLoading();
-          startStream(currentFacing);
-        }
-
-        function closeCamera() {
-          stopStream();
-          overlay.classList.remove("open");
-        }
-
-        /* ── Capture at native resolution, preserving full quality ── */
-        async function capturePhoto() {
-          if (!activeStream || !currentTrack) return;
-
-          shutterBtn.disabled = true;
-
-          try {
-            let blob = null;
-
-            /* Prefer ImageCapture.takePhoto() — captures the sensor's native still-photo
-               resolution rather than being limited to the live preview stream size */
-            if (window.ImageCapture) {
-              try {
-                const imageCapture = new ImageCapture(currentTrack);
-                blob = await imageCapture.takePhoto();
-              } catch (icErr) {
-                blob = null;
-              }
-            }
-
-            /* Fallback: grab the current frame from the video element at its native size */
-            if (!blob) {
-              if (!video.videoWidth) { shutterBtn.disabled = false; return; }
-              captureCanvas.width  = video.videoWidth;
-              captureCanvas.height = video.videoHeight;
-              const ctx = captureCanvas.getContext("2d");
-              ctx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
-              blob = await new Promise(resolve => captureCanvas.toBlob(resolve, "image/jpeg", 1.0));
-            }
-
-            shutterBtn.disabled = false;
-            if (!blob) { closeCamera(); return; }
-
-            const ext  = blob.type === "image/png" ? "png" : "jpg";
-            const file = new File([blob], "camera-capture-" + Date.now() + "." + ext, { type: blob.type || "image/jpeg" });
-
-            closeCamera();
-
-            /* Feed straight into the existing compressor pipeline — no extra steps needed */
-            loadFileIntoCompressor(file);
-          } catch (e) {
-            shutterBtn.disabled = false;
-          }
-        }
-
-        /* ── Front / rear switch ── */
-        function switchCamera() {
-          const next = currentFacing === "environment" ? "user" : "environment";
-          startStream(next);
-        }
-
-        /* ── Zoom ── */
-        zoomSlider.addEventListener("input", async () => {
-          if (!currentTrack) return;
-          try {
-            await currentTrack.applyConstraints({ advanced: [{ zoom: parseFloat(zoomSlider.value) }] });
-          } catch (e) {}
-        });
-
-        /* ── Manual refocus trigger (re-applies continuous autofocus) ── */
-        focusBtn.addEventListener("click", async () => {
-          if (!currentTrack) return;
-          try {
-            await currentTrack.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
-            focusBtn.classList.add("active");
-            setTimeout(() => focusBtn.classList.remove("active"), 400);
-          } catch (e) {}
-        });
-
-        /* ── HDR toggle (only visible when the device exposes the capability) ── */
-        hdrBtn.addEventListener("click", async () => {
-          if (!currentTrack) return;
-          hdrOn = !hdrOn;
-          try {
-            await currentTrack.applyConstraints({ advanced: [{ hdr: hdrOn }] });
-            hdrBtn.classList.toggle("active", hdrOn);
-          } catch (e) {
-            hdrOn = !hdrOn;
-          }
-        });
-
-        cameraBtn.addEventListener("click", openCamera);
-        closeBtn.addEventListener("click", closeCamera);
-        cancelBtn.addEventListener("click", closeCamera);
-        shutterBtn.addEventListener("click", capturePhoto);
-        switchBtn.addEventListener("click", switchCamera);
-
-        /* Permission was denied — retry the prompt instead of leaving a dead end */
-        grantBtn.addEventListener("click", () => startStream(currentFacing));
-
-        /* Permission blocked or unsupported — hand off to the native camera app */
-        fallbackBtn.addEventListener("click", () => {
-          closeCamera();
-          fallbackInput.click();
-        });
-
-        /* Cancel from the error/denied state */
-        errorCancelBtn.addEventListener("click", closeCamera);
-
-        overlay.addEventListener("click", (e) => {
-          if (e.target === overlay) closeCamera();
-        });
-
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape" && overlay.classList.contains("open")) closeCamera();
-        });
-
-        document.addEventListener("visibilitychange", () => {
-          if (document.hidden && overlay.classList.contains("open")) closeCamera();
         });
       })();
 
@@ -3639,347 +2887,408 @@
     });
   </script>
 
-  <!-- ══════════════════════════════════════════════════════════
-       SETTINGS · PERMISSIONS · PWA MODULE
-       Self-contained — does not touch any existing tool code.
-       ══════════════════════════════════════════════════════════ -->
   <script>
-    /* ── Browser-specific "enable permission" instructions (best effort, no fake actions) ── */
-    window.scPermissionInstructions = function (type) {
-      const ua = navigator.userAgent || "";
-      const label = type === "camera" ? "Camera" : "Notifications";
-      const isAndroid  = /Android/i.test(ua);
-      const isIOS      = /iPhone|iPad|iPod/i.test(ua);
-      const isSamsung  = /SamsungBrowser/i.test(ua);
-      const isEdge     = /Edg\//i.test(ua);
-      const isFirefox  = /Firefox/i.test(ua);
-      const isChrome   = /Chrome/i.test(ua) && !isEdge && !isSamsung;
-      const standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+  /* ===================== Smart Compress Settings ===================== */
+  (function () {
+    "use strict";
 
-      if (standalone && isAndroid) {
-        return "This app is installed as a PWA. Open your device <b>Settings → Apps → Smart Compress → Permissions → " + label + "</b> and allow it.";
-      }
-      if (isSamsung) {
-        return "Open <b>Samsung Internet → Menu (☰) → Settings → Sites and downloads → " + label + "</b>, find Smart Compress and set it to Allow.";
-      }
-      if (isEdge) {
-        return "Tap the lock/site-info icon in the address bar → <b>Permissions</b> → set " + label + " to Allow. On Android: <b>Edge menu → Settings → Site permissions → " + label + "</b>.";
-      }
-      if (isFirefox) {
-        return "Tap the lock icon in the address bar → <b>Permissions</b> → clear the " + label + " block, then reload and try again.";
-      }
-      if (isChrome && isAndroid) {
-        return "Tap the lock icon in the address bar → <b>Permissions → " + label + "</b> → Allow. Or go to <b>Chrome menu → Settings → Site settings → " + label + "</b>.";
-      }
-      if (isIOS) {
-        return "Open iOS <b>Settings → Safari → " + label + "</b> (or Settings → your browser app) and allow access for this site.";
-      }
-      return "Click the lock/site-info icon next to the address bar and set " + label + " to Allow, then reload the page.";
+    var APP_VERSION = "2.1.0";
+    var WEBSITE_VERSION = "2026.07.03";
+    var PREFIX = "sc_";
+    var KEY_APPEARANCE = PREFIX + "appearance";
+    var KEY_WALLPAPER_IMG = PREFIX + "wallpaper_custom_img";
+
+    var DEFAULTS = {
+      theme: "default",
+      accent: "green",
+      wallpaper: "default",
+      fontsize: "medium",
+      radius: "rounded",
+      animations: true,
+      compact: false,
+      contrast: false
     };
 
-    document.addEventListener("DOMContentLoaded", function () {
+    function loadSettings() {
+      try {
+        var raw = localStorage.getItem(KEY_APPEARANCE);
+        if (!raw) return Object.assign({}, DEFAULTS);
+        var parsed = JSON.parse(raw);
+        return Object.assign({}, DEFAULTS, parsed);
+      } catch (e) {
+        return Object.assign({}, DEFAULTS);
+      }
+    }
 
-      /* ══════════ SETTINGS: STATE ══════════ */
-      const SETTINGS_KEY = "sc_settings_v1";
-      const DEFAULTS = {
-        theme: "default",
-        accent: "green",
-        fontSize: "medium",
-        compactMode: false,
-        highContrast: false,
-        reduceAnimations: false,
-        corners: "rounded"
-      };
+    function saveSettings(s) {
+      try { localStorage.setItem(KEY_APPEARANCE, JSON.stringify(s)); } catch (e) {}
+    }
 
-      function loadSettings() {
+    var state = loadSettings();
+
+    function toast(msg) {
+      var el = document.getElementById("sc-toast");
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(function () { el.classList.remove("show"); }, 2400);
+    }
+
+    function applyAppearance() {
+      var html = document.documentElement;
+      html.setAttribute("data-sc-theme", state.theme);
+      html.setAttribute("data-sc-accent", state.accent);
+      html.setAttribute("data-sc-fontsize", state.fontsize);
+      html.setAttribute("data-sc-radius", state.radius);
+      html.setAttribute("data-sc-anim", state.animations ? "on" : "off");
+      html.setAttribute("data-sc-compact", state.compact ? "on" : "off");
+      html.setAttribute("data-sc-contrast", state.contrast ? "high" : "normal");
+
+      document.body.classList.remove("sc-wallpaper-default", "sc-wallpaper-gradient", "sc-wallpaper-glass", "sc-wallpaper-nature", "sc-wallpaper-space", "sc-wallpaper-custom");
+      document.body.classList.add("sc-wallpaper-" + state.wallpaper);
+
+      var wallpaperEl = document.getElementById("sc-wallpaper");
+      if (state.wallpaper === "custom") {
         try {
-          const raw = localStorage.getItem(SETTINGS_KEY);
-          if (!raw) return Object.assign({}, DEFAULTS);
-          return Object.assign({}, DEFAULTS, JSON.parse(raw));
-        } catch (e) {
-          return Object.assign({}, DEFAULTS);
-        }
+          var img = localStorage.getItem(KEY_WALLPAPER_IMG);
+          if (img && wallpaperEl) wallpaperEl.style.backgroundImage = "url(" + img + ")";
+        } catch (e) {}
+      } else if (wallpaperEl) {
+        wallpaperEl.style.backgroundImage = "";
       }
 
-      function saveSettings(s) {
-        try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch (e) { /* storage unavailable — settings just won't persist */ }
-      }
+      syncControlStates();
+    }
 
-      let settings = loadSettings();
+    function syncControlStates() {
+      setActivePill("set-theme-group", "theme", state.theme);
+      setActivePill("set-accent-group", "accent", state.accent);
+      setActivePill("set-wallpaper-group", "wallpaper", state.wallpaper);
+      setActivePill("set-fontsize-group", "fontsize", state.fontsize);
+      setActivePill("set-radius-group", "radius", state.radius);
 
-      /* ══════════ APPLY TO DOM (instant, no reload) ══════════ */
-      function applySettings(s) {
-        const html = document.documentElement;
+      var animEl = document.getElementById("set-animations");
+      if (animEl) animEl.checked = !!state.animations;
+      var compactEl = document.getElementById("set-compact");
+      if (compactEl) compactEl.checked = !!state.compact;
+      var contrastEl = document.getElementById("set-contrast");
+      if (contrastEl) contrastEl.checked = !!state.contrast;
 
-        s.theme === "default" ? html.removeAttribute("data-sc-theme") : html.setAttribute("data-sc-theme", s.theme);
-        s.accent === "green"  ? html.removeAttribute("data-sc-accent") : html.setAttribute("data-sc-accent", s.accent);
-        s.fontSize === "medium" ? html.removeAttribute("data-sc-fontsize") : html.setAttribute("data-sc-fontsize", s.fontSize);
-        s.compactMode ? html.setAttribute("data-sc-compact", "on") : html.removeAttribute("data-sc-compact");
-        s.highContrast ? html.setAttribute("data-sc-contrast", "on") : html.removeAttribute("data-sc-contrast");
-        s.reduceAnimations ? html.setAttribute("data-sc-motion", "reduced") : html.removeAttribute("data-sc-motion");
-        s.corners === "rounded" ? html.removeAttribute("data-sc-corners") : html.setAttribute("data-sc-corners", s.corners);
+      var clearCustomBtn = document.getElementById("set-wallpaper-clear-custom");
+      if (clearCustomBtn) clearCustomBtn.style.display = (state.wallpaper === "custom") ? "inline-flex" : "none";
+    }
 
-        syncControlsToSettings();
-      }
+    function setActivePill(groupId, datasetKey, value) {
+      var group = document.getElementById(groupId);
+      if (!group) return;
+      var btns = group.querySelectorAll(".pill-btn");
+      btns.forEach(function (btn) {
+        var isActive = btn.dataset[datasetKey] === value;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+      });
+    }
 
-      function updateSetting(key, value) {
-        settings[key] = value;
-        saveSettings(settings);
-        applySettings(settings);
-      }
-
-      /* ══════════ UI WIRING ══════════ */
-      const themeSeg   = document.getElementById("theme-segmented");
-      const accentRow  = document.getElementById("accent-swatch-row");
-      const fontSeg    = document.getElementById("fontsize-segmented");
-      const cornersSeg = document.getElementById("corners-segmented");
-      const compactToggle  = document.getElementById("toggle-compact");
-      const contrastToggle = document.getElementById("toggle-contrast");
-      const motionToggle   = document.getElementById("toggle-motion");
-
-      function wireSegmented(container, settingKey) {
-        if (!container) return;
-        container.querySelectorAll("button").forEach(btn => {
-          btn.addEventListener("click", () => updateSetting(settingKey, btn.getAttribute("data-value")));
+    function wirePillGroup(groupId, datasetKey, onChange) {
+      var group = document.getElementById(groupId);
+      if (!group) return;
+      group.querySelectorAll(".pill-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var value = btn.dataset[datasetKey];
+          state[datasetKey] = value;
+          saveSettings(state);
+          applyAppearance();
+          if (onChange) onChange(value);
+          toast(btn.textContent.trim() + " applied");
         });
-      }
-      wireSegmented(themeSeg, "theme");
-      wireSegmented(fontSeg, "fontSize");
-      wireSegmented(cornersSeg, "corners");
+      });
+    }
 
-      if (accentRow) {
-        accentRow.querySelectorAll(".swatch-btn").forEach(btn => {
-          btn.addEventListener("click", () => updateSetting("accent", btn.getAttribute("data-value")));
-        });
-      }
+    /* ---------- Version info ---------- */
+    function initVersions() {
+      var a = document.getElementById("set-app-version");
+      var w = document.getElementById("set-site-version");
+      if (a) a.textContent = "v" + APP_VERSION;
+      if (w) w.textContent = "v" + WEBSITE_VERSION;
+    }
 
-      if (compactToggle)  compactToggle.addEventListener("change", () => updateSetting("compactMode", compactToggle.checked));
-      if (contrastToggle) contrastToggle.addEventListener("change", () => updateSetting("highContrast", contrastToggle.checked));
-      if (motionToggle)   motionToggle.addEventListener("change", () => updateSetting("reduceAnimations", motionToggle.checked));
+    /* ---------- PWA status ---------- */
+    function isStandalone() {
+      return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+        window.navigator.standalone === true;
+    }
 
-      function syncControlsToSettings() {
-        if (themeSeg)   themeSeg.querySelectorAll("button").forEach(b => b.classList.toggle("active", b.getAttribute("data-value") === settings.theme));
-        if (fontSeg)    fontSeg.querySelectorAll("button").forEach(b => b.classList.toggle("active", b.getAttribute("data-value") === settings.fontSize));
-        if (cornersSeg) cornersSeg.querySelectorAll("button").forEach(b => b.classList.toggle("active", b.getAttribute("data-value") === settings.corners));
-        if (accentRow)  accentRow.querySelectorAll(".swatch-btn").forEach(b => b.classList.toggle("active", b.getAttribute("data-value") === settings.accent));
-        if (compactToggle)  compactToggle.checked = !!settings.compactMode;
-        if (contrastToggle) contrastToggle.checked = !!settings.highContrast;
-        if (motionToggle)   motionToggle.checked = !!settings.reduceAnimations;
-      }
+    var deferredInstallPrompt = null;
+    window.addEventListener("beforeinstallprompt", function (e) {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      var btn = document.getElementById("set-install-btn");
+      if (btn && !isStandalone()) btn.style.display = "inline-flex";
+    });
 
-      /* Apply once on load (covers cases where the very-early <head> script couldn't run,
-         e.g. localStorage briefly unavailable) and sync the visible controls */
-      applySettings(settings);
+    function initPwaStatus() {
+      var statusEl = document.getElementById("set-pwa-status");
+      var descEl = document.getElementById("set-pwa-desc");
+      var installBtn = document.getElementById("set-install-btn");
+      if (!statusEl) return;
 
-      /* ══════════ TOAST ══════════ */
-      const toastEl = document.getElementById("settings-toast");
-      let toastTimer = null;
-      function toast(msg) {
-        if (!toastEl) return;
-        toastEl.textContent = msg;
-        toastEl.classList.add("show");
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2600);
-      }
-
-      /* ══════════ OPEN / CLOSE PANEL ══════════ */
-      const overlay   = document.getElementById("settings-overlay");
-      const openBtn   = document.getElementById("nav-settings-btn");
-      const closeBtn  = document.getElementById("settings-close-btn");
-
-      function openSettings(e) {
-        if (e) e.preventDefault();
-        overlay.classList.add("open");
-        refreshPermissionStatuses();
-        refreshAppInfo();
-        document.getElementById("main-nav") && document.getElementById("main-nav").classList.remove("open");
-      }
-      function closeSettings() { overlay.classList.remove("open"); }
-
-      if (openBtn) openBtn.addEventListener("click", openSettings);
-      if (closeBtn) closeBtn.addEventListener("click", closeSettings);
-      if (overlay) overlay.addEventListener("click", (e) => { if (e.target === overlay) closeSettings(); });
-      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && overlay && overlay.classList.contains("open")) closeSettings(); });
-
-      /* ══════════ PERMISSIONS STATUS ══════════ */
-      function renderPermBadge(type, state) {
-        const badge = document.getElementById("perm-badge-" + type);
-        const openBtn2 = document.getElementById("perm-open-" + type);
-        const instrBox = document.getElementById("perm-instructions-" + type);
-        if (!badge) return;
-
-        badge.classList.remove("allowed", "denied", "unknown");
-        if (state === "granted") {
-          badge.textContent = "Allowed ✅";
-          badge.classList.add("allowed");
-          openBtn2.style.display = "none";
-          instrBox.classList.remove("show");
-        } else if (state === "denied") {
-          badge.textContent = "Denied ❌";
-          badge.classList.add("denied");
-          openBtn2.style.display = "inline-flex";
-        } else {
-          badge.textContent = "Not Requested ⏳";
-          badge.classList.add("unknown");
-          openBtn2.style.display = "none";
-          instrBox.classList.remove("show");
-        }
+      if (isStandalone()) {
+        statusEl.textContent = "Installed (Standalone)";
+        if (descEl) descEl.textContent = "You're running Smart Compress as an installed app.";
+      } else {
+        statusEl.textContent = "Running in Browser";
+        if (descEl) descEl.textContent = "Install Smart Compress for a faster, app-like experience with offline access.";
       }
 
-      async function refreshPermissionStatuses() {
-        /* Camera */
-        if (navigator.permissions && navigator.permissions.query) {
-          try {
-            const camStatus = await navigator.permissions.query({ name: "camera" });
-            renderPermBadge("camera", camStatus.state);
-            camStatus.onchange = () => renderPermBadge("camera", camStatus.state);
-          } catch (e) {
-            renderPermBadge("camera", "unsupported");
+      if (installBtn) {
+        installBtn.addEventListener("click", function () {
+          if (!deferredInstallPrompt) {
+            toast("Use your browser's \"Install App\" or \"Add to Home Screen\" option");
+            return;
           }
-        } else {
-          renderPermBadge("camera", "unsupported");
-        }
-
-        /* Notifications */
-        if ("Notification" in window) {
-          const nPerm = Notification.permission; // "granted" | "denied" | "default"
-          renderPermBadge("notifications", nPerm === "default" ? "prompt" : nPerm);
-        } else {
-          renderPermBadge("notifications", "unsupported");
-        }
-      }
-
-      const permOpenCamera = document.getElementById("perm-open-camera");
-      const permOpenNotifications = document.getElementById("perm-open-notifications");
-      const permInstrCamera = document.getElementById("perm-instructions-camera");
-      const permInstrNotifications = document.getElementById("perm-instructions-notifications");
-
-      if (permOpenCamera) permOpenCamera.addEventListener("click", () => {
-        permInstrCamera.innerHTML = window.scPermissionInstructions("camera");
-        permInstrCamera.classList.toggle("show");
-      });
-      if (permOpenNotifications) permOpenNotifications.addEventListener("click", () => {
-        permInstrNotifications.innerHTML = window.scPermissionInstructions("notifications");
-        permInstrNotifications.classList.toggle("show");
-      });
-
-      /* ══════════ APP SECTION ══════════ */
-      const APP_VERSION = "v1.4.0";
-      document.getElementById("app-version-val").textContent = APP_VERSION;
-
-      function refreshAppInfo() {
-        /* PWA status */
-        const pwaEl = document.getElementById("pwa-status-val");
-        const isStandalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
-        pwaEl.textContent = isStandalone ? "Installed (running standalone)" : "Running in browser";
-
-        /* Storage usage */
-        const storageEl = document.getElementById("storage-usage-val");
-        if (navigator.storage && navigator.storage.estimate) {
-          navigator.storage.estimate().then(est => {
-            const usedMB = ((est.usage || 0) / (1024 * 1024)).toFixed(1);
-            const quotaMB = ((est.quota || 0) / (1024 * 1024)).toFixed(0);
-            storageEl.textContent = usedMB + " MB used" + (quotaMB > 0 ? " of ~" + quotaMB + " MB" : "");
-          }).catch(() => { storageEl.textContent = "Unavailable"; });
-        } else {
-          storageEl.textContent = "Not supported in this browser";
-        }
-      }
-
-      document.getElementById("btn-clear-cache").addEventListener("click", async () => {
-        try {
-          if (window.caches && caches.keys) {
-            const keys = await caches.keys();
-            await Promise.all(keys.map(k => caches.delete(k)));
-          }
-          toast("Cache cleared");
-          refreshAppInfo();
-        } catch (e) {
-          toast("Could not clear cache");
-        }
-      });
-
-      document.getElementById("btn-reset-prefs").addEventListener("click", () => {
-        try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {}
-        settings = Object.assign({}, DEFAULTS);
-        applySettings(settings);
-        toast("Preferences reset");
-      });
-
-      document.getElementById("btn-restore-defaults").addEventListener("click", () => {
-        settings = Object.assign({}, DEFAULTS);
-        saveSettings(settings);
-        applySettings(settings);
-        toast("Default settings restored");
-      });
-
-      /* ══════════ PWA: SERVICE WORKER REGISTRATION ══════════ */
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("/sw.js").catch(() => {
-            /* Registration can fail harmlessly (e.g. file not deployed yet, or running from file://) —
-               the rest of the app must keep working either way */
+          deferredInstallPrompt.prompt();
+          deferredInstallPrompt.userChoice.finally(function () {
+            deferredInstallPrompt = null;
+            installBtn.style.display = "none";
           });
         });
       }
 
-      /* ══════════ PWA: INSTALL PROMPT HANDLING ══════════ */
-      (function () {
-        let deferredInstallPrompt = null;
-        const headerBtn = document.getElementById("pwa-install-btn-header");
-        const settingsRow = document.getElementById("pwa-install-row");
-        const settingsBtn = document.getElementById("pwa-install-btn-settings");
+      window.addEventListener("appinstalled", function () {
+        toast("Smart Compress installed");
+        initPwaStatus();
+      });
+    }
 
-        function isStandaloneMode() {
-          return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
-                 window.navigator.standalone === true;
+    /* ---------- Storage usage ---------- */
+    function humanizeBytes(bytes) {
+      if (!bytes || bytes < 0) return "0 KB";
+      var units = ["B", "KB", "MB", "GB"];
+      var i = 0;
+      while (bytes >= 1024 && i < units.length - 1) { bytes /= 1024; i++; }
+      return bytes.toFixed(bytes < 10 && i > 0 ? 1 : 0) + " " + units[i];
+    }
+
+    function estimateLocalStorageBytes() {
+      var total = 0;
+      try {
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          var v = localStorage.getItem(k) || "";
+          total += k.length + v.length;
         }
+      } catch (e) {}
+      return total * 2; // rough UTF-16 byte estimate
+    }
 
-        function showInstallUI() {
-          if (isStandaloneMode()) return;
-          if (headerBtn) headerBtn.classList.add("show");
-          if (settingsRow) settingsRow.style.display = "";
-        }
-
-        function hideInstallUI() {
-          if (headerBtn) headerBtn.classList.remove("show");
-          if (settingsRow) settingsRow.style.display = "none";
-        }
-
-        /* Chrome/Edge on Android (and desktop) fire this only once the browser has verified
-           the manifest + service worker meet install criteria. Capturing it — instead of letting
-           the browser show its own mini-infobar — lets us drive install from our own UI. */
-        window.addEventListener("beforeinstallprompt", (event) => {
-          event.preventDefault();
-          deferredInstallPrompt = event;
-          showInstallUI();
+    function refreshStorageUsage() {
+      var el = document.getElementById("set-storage-usage");
+      if (!el) return;
+      if (navigator.storage && navigator.storage.estimate) {
+        navigator.storage.estimate().then(function (est) {
+          var used = est.usage || 0;
+          el.textContent = humanizeBytes(used);
+        }).catch(function () {
+          el.textContent = humanizeBytes(estimateLocalStorageBytes());
         });
+      } else {
+        el.textContent = humanizeBytes(estimateLocalStorageBytes());
+      }
+    }
 
-        async function triggerInstall() {
-          if (!deferredInstallPrompt) return;
-          hideInstallUI();
-          deferredInstallPrompt.prompt();
-          try {
-            await deferredInstallPrompt.userChoice;
-          } catch (e) { /* ignore */ }
-          deferredInstallPrompt = null;
+    /* ---------- Clear cache / reset ---------- */
+    function clearCache() {
+      var tasks = [];
+      if (window.caches && caches.keys) {
+        tasks.push(caches.keys().then(function (names) {
+          return Promise.all(names.map(function (n) { return caches.delete(n); }));
+        }).catch(function () {}));
+      }
+      Promise.all(tasks).finally(function () {
+        toast("Cache cleared");
+        refreshStorageUsage();
+      });
+    }
+
+    function restoreDefaults() {
+      if (!confirm("Reset appearance settings (theme, accent, wallpaper, fonts, layout) to their defaults?")) return;
+      state = Object.assign({}, DEFAULTS);
+      saveSettings(state);
+      try { localStorage.removeItem(KEY_WALLPAPER_IMG); } catch (e) {}
+      applyAppearance();
+      toast("Default settings restored");
+    }
+
+    function resetUserPreferences() {
+      if (!confirm("Reset all Smart Compress preferences stored on this device? This cannot be undone.")) return;
+      try {
+        var keysToRemove = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (k && k.indexOf(PREFIX) === 0) keysToRemove.push(k);
         }
+        keysToRemove.forEach(function (k) { localStorage.removeItem(k); });
+      } catch (e) {}
+      state = Object.assign({}, DEFAULTS);
+      applyAppearance();
+      refreshStorageUsage();
+      toast("User preferences reset");
+    }
 
-        if (headerBtn) headerBtn.addEventListener("click", triggerInstall);
-        if (settingsBtn) settingsBtn.addEventListener("click", triggerInstall);
-
-        window.addEventListener("appinstalled", () => {
-          deferredInstallPrompt = null;
-          hideInstallUI();
-          try { toast("Smart Compress installed"); } catch (e) {}
-          refreshAppInfo();
+    /* ---------- Custom wallpaper upload ---------- */
+    function initWallpaperUpload() {
+      var input = document.getElementById("set-wallpaper-upload");
+      var clearBtn = document.getElementById("set-wallpaper-clear-custom");
+      if (input) {
+        input.addEventListener("change", function () {
+          var file = input.files && input.files[0];
+          if (!file) return;
+          if (file.size > 4 * 1024 * 1024) {
+            toast("Please choose an image under 4MB");
+            input.value = "";
+            return;
+          }
+          var reader = new FileReader();
+          reader.onload = function () {
+            try {
+              localStorage.setItem(KEY_WALLPAPER_IMG, reader.result);
+              state.wallpaper = "custom";
+              saveSettings(state);
+              applyAppearance();
+              toast("Custom wallpaper applied");
+            } catch (e) {
+              toast("Image too large to store on this device");
+            }
+          };
+          reader.readAsDataURL(file);
         });
+      }
+      if (clearBtn) {
+        clearBtn.addEventListener("click", function () {
+          try { localStorage.removeItem(KEY_WALLPAPER_IMG); } catch (e) {}
+          state.wallpaper = "default";
+          saveSettings(state);
+          applyAppearance();
+          toast("Custom wallpaper removed");
+        });
+      }
+    }
 
-        /* Already running standalone (installed) on load — keep install UI hidden. */
-        if (isStandaloneMode()) hideInstallUI();
-      })();
+    /* ---------- Toggles ---------- */
+    function initToggles() {
+      var animEl = document.getElementById("set-animations");
+      var compactEl = document.getElementById("set-compact");
+      var contrastEl = document.getElementById("set-contrast");
 
+      if (animEl) animEl.addEventListener("change", function () {
+        state.animations = animEl.checked;
+        saveSettings(state);
+        applyAppearance();
+        toast("Animations " + (state.animations ? "enabled" : "disabled"));
+      });
+      if (compactEl) compactEl.addEventListener("change", function () {
+        state.compact = compactEl.checked;
+        saveSettings(state);
+        applyAppearance();
+        toast("Compact mode " + (state.compact ? "enabled" : "disabled"));
+      });
+      if (contrastEl) contrastEl.addEventListener("change", function () {
+        state.contrast = contrastEl.checked;
+        saveSettings(state);
+        applyAppearance();
+        toast("High contrast " + (state.contrast ? "enabled" : "disabled"));
+      });
+    }
+
+    /* ---------- Permissions ---------- */
+    function setBadge(el, text, cls) {
+      if (!el) return;
+      el.textContent = text;
+      el.className = "perm-badge " + cls;
+    }
+
+    function initPermissions() {
+      var notifBadge = document.getElementById("set-perm-notif-badge");
+      var notifGuidance = document.getElementById("set-perm-notif-guidance");
+      var notifRequestBtn = document.getElementById("set-perm-notif-request");
+      var clipBadge = document.getElementById("set-perm-clip-badge");
+      var clipGuidance = document.getElementById("set-perm-clip-guidance");
+
+      function renderNotif() {
+        if (!("Notification" in window)) {
+          setBadge(notifBadge, "Not Supported", "unknown");
+          return;
+        }
+        var perm = Notification.permission;
+        if (perm === "granted") {
+          setBadge(notifBadge, "Allowed", "allowed");
+          if (notifGuidance) notifGuidance.classList.remove("show");
+          if (notifRequestBtn) notifRequestBtn.style.display = "none";
+        } else if (perm === "denied") {
+          setBadge(notifBadge, "Denied", "denied");
+          if (notifGuidance) notifGuidance.classList.add("show");
+          if (notifRequestBtn) notifRequestBtn.style.display = "none";
+        } else {
+          setBadge(notifBadge, "Not Requested", "unknown");
+          if (notifGuidance) notifGuidance.classList.remove("show");
+          if (notifRequestBtn) notifRequestBtn.style.display = "inline-flex";
+        }
+      }
+
+      renderNotif();
+      if (notifRequestBtn) {
+        notifRequestBtn.addEventListener("click", function () {
+          if (!("Notification" in window)) return;
+          Notification.requestPermission().then(function () { renderNotif(); });
+        });
+      }
+
+      if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: "clipboard-read" }).then(function (status) {
+          function render() {
+            if (status.state === "granted") { setBadge(clipBadge, "Allowed", "allowed"); if (clipGuidance) clipGuidance.classList.remove("show"); }
+            else if (status.state === "denied") { setBadge(clipBadge, "Denied", "denied"); if (clipGuidance) clipGuidance.classList.add("show"); }
+            else { setBadge(clipBadge, "Not Requested", "unknown"); if (clipGuidance) clipGuidance.classList.remove("show"); }
+          }
+          render();
+          status.onchange = render;
+        }).catch(function () {
+          setBadge(clipBadge, "Not Supported", "unknown");
+        });
+      } else {
+        setBadge(clipBadge, "Not Supported", "unknown");
+      }
+    }
+
+    /* ---------- Init ---------- */
+    document.addEventListener("DOMContentLoaded", function () {
+      initVersions();
+      initPwaStatus();
+      refreshStorageUsage();
+      initPermissions();
+      initToggles();
+      initWallpaperUpload();
+
+      wirePillGroup("set-theme-group", "theme");
+      wirePillGroup("set-accent-group", "accent");
+      wirePillGroup("set-wallpaper-group", "wallpaper");
+      wirePillGroup("set-fontsize-group", "fontsize");
+      wirePillGroup("set-radius-group", "radius");
+
+      var clearCacheBtn = document.getElementById("set-clear-cache");
+      if (clearCacheBtn) clearCacheBtn.addEventListener("click", clearCache);
+      var restoreBtn = document.getElementById("set-restore-defaults");
+      if (restoreBtn) restoreBtn.addEventListener("click", restoreDefaults);
+      var resetPrefsBtn = document.getElementById("set-reset-prefs");
+      if (resetPrefsBtn) resetPrefsBtn.addEventListener("click", resetUserPreferences);
+
+      applyAppearance();
     });
+
+    /* Apply appearance ASAP (before full DOMContentLoaded) to avoid theme flash */
+    applyAppearance();
+  })();
   </script>
 </body>
 </html>
