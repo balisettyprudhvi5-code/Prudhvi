@@ -16,7 +16,14 @@
   <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
   <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
-  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+
+  <!-- PWA / installability -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Smart Compress" />
+  <meta name="background_color" content="#0d0d0f" />
 
   <meta property="og:title" content="Smart Compress — Free Instant Image Compression & Editing Tools" />
   <meta property="og:description" content="Compress JPG, PNG, and WebP images instantly in your browser. Nothing leaves your device. Free forever." />
@@ -612,233 +619,88 @@
     .blog-faq-item:first-of-type { border-top: none; }
     .blog-faq-item strong { display: block; color: var(--text); font-size: .92rem; margin-bottom: .35rem; }
 
-    /* ===================== Settings — Theme Presets ===================== */
-    html[data-sc-theme="dark"] {
-      --bg: #0b0b0d; --surface: #151519; --surface2: #1c1c22; --border: #27272f; --text: #e6e6ee; --muted: #75758a;
-    }
-    html[data-sc-theme="light"] {
-      --bg: #f4f5f8; --surface: #ffffff; --surface2: #eceef2; --border: #dcdfe5; --text: #14141c; --muted: #5c5c6b;
-    }
-    html[data-sc-theme="amoled"] {
-      --bg: #000000; --surface: #070707; --surface2: #101012; --border: #1c1c1f; --text: #f2f2f5; --muted: #86869a;
-    }
-    /* Accent overrides (layer on top of any theme) */
-    html[data-sc-accent="blue"]   { --accent: #4d9fff; --accent2: #3dd0ff; }
-    html[data-sc-accent="purple"] { --accent: #b98bff; --accent2: #e23dff; }
-    html[data-sc-accent="orange"] { --accent: #ff9f4d; --accent2: #ffd23d; }
-    html[data-sc-accent="red"]    { --accent: #ff5c5c; --accent2: #ff3d84; }
-
-    /* Rounded corners */
-    html[data-sc-radius="sharp"]     { --radius: 3px;  --radius-sm: 3px; }
-    html[data-sc-radius="rounded"]   { --radius: 14px; --radius-sm: 8px; }
-    html[data-sc-radius="xrounded"]  { --radius: 28px; --radius-sm: 18px; }
-
-    /* Font size (scales rem-based layout) */
-    html[data-sc-fontsize="small"]  { font-size: 14px; }
-    html[data-sc-fontsize="medium"] { font-size: 16px; }
-    html[data-sc-fontsize="large"]  { font-size: 18px; }
-
-    /* Animations off */
-    html[data-sc-anim="off"] *, html[data-sc-anim="off"] *::before, html[data-sc-anim="off"] *::after {
-      animation-duration: 0.001ms !important; animation-iteration-count: 1 !important;
-      transition-duration: 0.001ms !important; scroll-behavior: auto !important;
-    }
-
-    /* Compact mode */
-    html[data-sc-compact="on"] .page-section { padding: 3.2rem 1.5rem; }
-    html[data-sc-compact="on"] .hero { padding: 3rem 1.5rem 2rem; }
-    html[data-sc-compact="on"] .about-card,
-    html[data-sc-compact="on"] .privacy-block,
-    html[data-sc-compact="on"] .settings-card { padding: 1.1rem; }
-    html[data-sc-compact="on"] .section-lead { margin-bottom: 1.6rem; }
-
-    /* High contrast */
-    html[data-sc-contrast="high"] { --muted: #c9c9d6; --border: #6a6a7d; }
-    html[data-sc-contrast="high"] a { text-decoration: underline; }
-    html[data-sc-contrast="high"] .btn-secondary { border-width: 2px; }
-
-    /* Wallpaper layer — sits behind all content */
-    #sc-wallpaper {
-      position: fixed; inset: 0; z-index: -1; pointer-events: none;
-      background: var(--bg); transition: background .3s ease;
-    }
-    body.sc-wallpaper-gradient #sc-wallpaper {
-      background: radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--accent) 16%, var(--bg)) 0%, var(--bg) 45%),
-                  radial-gradient(circle at 85% 90%, color-mix(in srgb, var(--accent2) 14%, var(--bg)) 0%, var(--bg) 50%),
-                  var(--bg);
-    }
-    body.sc-wallpaper-glass #sc-wallpaper {
-      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, var(--bg)) 0%, var(--bg) 40%, color-mix(in srgb, var(--accent2) 8%, var(--bg)) 100%);
-    }
-    body.sc-wallpaper-glass .about-card,
-    body.sc-wallpaper-glass .settings-card,
-    body.sc-wallpaper-glass .privacy-block,
-    body.sc-wallpaper-glass header {
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      background: color-mix(in srgb, var(--surface) 78%, transparent);
-    }
-    body.sc-wallpaper-nature #sc-wallpaper {
-      background: linear-gradient(160deg, #0e2a1c 0%, #163d24 35%, var(--bg) 100%);
-    }
-    body.sc-wallpaper-space #sc-wallpaper {
-      background:
-        radial-gradient(1.5px 1.5px at 20% 30%, #fff 100%, transparent 0),
-        radial-gradient(1.5px 1.5px at 65% 15%, #fff 100%, transparent 0),
-        radial-gradient(1px 1px at 80% 60%, #fff 100%, transparent 0),
-        radial-gradient(1.5px 1.5px at 40% 80%, #fff 100%, transparent 0),
-        radial-gradient(1px 1px at 90% 85%, #fff 100%, transparent 0),
-        radial-gradient(1px 1px at 10% 65%, #fff 100%, transparent 0),
-        linear-gradient(180deg, #05050c 0%, #0b0b18 100%);
-      background-size: 220px 220px, 260px 260px, 240px 240px, 200px 200px, 280px 280px, 190px 190px, cover;
-    }
-    body.sc-wallpaper-custom #sc-wallpaper {
-      background-size: cover; background-position: center; background-repeat: no-repeat;
-    }
-
-    /* Settings page */
-    .settings-group { margin-bottom: 2.6rem; }
-    .settings-group h3.settings-group-title {
-      font-family: var(--mono); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--accent2); margin-bottom: 1rem;
-    }
-    .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
-    .settings-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 1.4rem; display: flex; flex-direction: column; gap: .7rem;
-    }
-    .settings-card-row {
-      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-    }
-    .settings-card h4 { font-size: .95rem; font-weight: 600; color: var(--text); }
-    .settings-card p.settings-desc { font-size: .82rem; color: var(--muted); line-height: 1.55; }
-    .settings-value { font-family: var(--mono); font-size: .82rem; color: var(--accent); text-align: right; }
-
-    .pill-group { display: flex; flex-wrap: wrap; gap: .5rem; }
-    .pill-btn {
-      background: var(--bg); border: 1px solid var(--border); color: var(--muted);
-      font-family: var(--sans); font-size: .82rem; font-weight: 500; padding: .5rem .95rem;
-      border-radius: var(--radius-sm); cursor: pointer; transition: all .15s ease; display: inline-flex; align-items: center; gap: .5rem;
-    }
-    .pill-btn:hover { border-color: var(--muted); color: var(--text); }
-    .pill-btn.active { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--bg)); }
-    .pill-swatch { width: 14px; height: 14px; border-radius: 50%; display: inline-block; border: 1px solid rgba(255,255,255,.25); flex-shrink: 0; }
-
-    .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .switch-track {
-      position: absolute; cursor: pointer; inset: 0; background: var(--border);
-      border-radius: 999px; transition: background .2s ease;
-    }
-    .switch-track::before {
-      content: ""; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px;
-      background: var(--text); border-radius: 50%; transition: transform .2s ease;
-    }
-    .switch input:checked + .switch-track { background: var(--accent); }
-    .switch input:checked + .switch-track::before { transform: translateX(20px); background: #0d0d0f; }
-    .switch input:focus-visible + .switch-track { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    .settings-btnbar { display: flex; flex-wrap: wrap; gap: .8rem; }
-    .btn-danger {
-      background: transparent; border: 1px solid var(--danger); color: var(--danger);
-      padding: .65rem 1.3rem; border-radius: var(--radius-sm); font-weight: 600; font-size: .85rem;
-      cursor: pointer; transition: all .2s ease; font-family: var(--sans);
-    }
-    .btn-danger:hover { background: rgba(255,92,92,0.1); }
-
-    .perm-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 0; border-top: 1px solid var(--border); }
-    .perm-row:first-of-type { border-top: none; }
-    .perm-badge { font-family: var(--mono); font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: .3rem .65rem; border-radius: 99px; }
-    .perm-badge.allowed { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
-    .perm-badge.denied { color: var(--danger); background: rgba(255,92,92,0.12); }
-    .perm-badge.unknown { color: var(--muted); background: var(--surface2); }
-    .perm-guidance { font-size: .8rem; color: var(--muted); line-height: 1.6; margin-top: .5rem; display: none; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .8rem 1rem; }
-    .perm-guidance.show { display: block; }
-
-    .settings-toast {
-      position: fixed; bottom: 1.4rem; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: var(--surface2); border: 1px solid var(--accent); color: var(--text);
-      padding: .75rem 1.3rem; border-radius: var(--radius-sm); font-size: .85rem; z-index: 999;
-      opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
-      box-shadow: 0 8px 30px rgba(0,0,0,.4);
-    }
-    .settings-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    .wallpaper-upload-row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
-    .file-btn {
-      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
-      padding: .55rem 1rem; border-radius: var(--radius-sm); font-size: .82rem; cursor: pointer;
-      font-family: var(--sans); transition: all .15s ease;
-    }
-    .file-btn:hover { border-color: var(--accent); }
-
-    @media (max-width: 640px) {
-      .settings-card-row { flex-direction: column; align-items: flex-start; }
-      .settings-value { text-align: left; }
-    }
-    /* ===================== Settings Modal (appended — reuses #settings section) ===================== */
-    #sc-settings-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.62);
-      backdrop-filter: blur(2px);
-      z-index: 1000;
-    }
-    body.sc-settings-modal-open #sc-settings-backdrop { display: block; }
-
-    body.sc-settings-modal-open { overflow: hidden; }
-
-    body.sc-settings-modal-open #settings.page-section {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: min(760px, 92vw);
-      max-height: 88vh;
-      overflow-y: auto;
-      z-index: 1001;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.55);
-      padding-top: 2.5rem;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    #sc-settings-close-btn {
-      position: sticky;
-      top: .5rem;
-      float: right;
-      margin: 0 1rem 0 0;
-      background: var(--surface, transparent);
-      border: 1px solid var(--border);
-      color: var(--text);
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      font-size: 1.1rem;
-      cursor: pointer;
-      line-height: 1;
-      z-index: 2;
-      display: none;
+    /* PWA: Install button (nav) */
+    .nav-install-btn {
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
+      gap: .4rem;
+      background: var(--accent);
+      color: #0d0d0f;
+      border: none;
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: .82rem;
+      padding: .5rem .9rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s, transform .1s;
     }
-    body.sc-settings-modal-open #sc-settings-close-btn { display: flex; }
+    .nav-install-btn:hover { background: var(--accent2); }
+    .nav-install-btn:active { transform: scale(.97); }
+    #pwa-install-item { display: none; }
+    #pwa-install-item.show { display: flex; align-items: center; }
 
-    @media (max-width: 640px) {
-      body.sc-settings-modal-open #settings.page-section {
-        width: 94vw;
-        max-height: 92vh;
-      }
+    /* PWA: Update available banner */
+    #pwa-update-banner {
+      position: fixed;
+      left: 50%;
+      bottom: 1.2rem;
+      transform: translateX(-50%) translateY(150%);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .9rem 1rem .9rem 1.2rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,.45);
+      max-width: calc(100vw - 2rem);
+      opacity: 0;
+      transition: transform .3s ease, opacity .3s ease;
+    }
+    #pwa-update-banner.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    #pwa-update-banner p {
+      font-size: .85rem;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    #pwa-update-banner .pwa-update-actions { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+    #pwa-update-btn {
+      background: var(--accent);
+      color: #0d0d0f;
+      border: none;
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: .82rem;
+      padding: .5rem .9rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #pwa-update-btn:hover { background: var(--accent2); }
+    #pwa-update-dismiss {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: .3rem;
+    }
+    #pwa-update-dismiss:hover { color: var(--text); }
+    @media (max-width: 560px) {
+      #pwa-update-banner { flex-wrap: wrap; left: 1rem; right: 1rem; transform: translateY(150%); width: auto; max-width: none; }
+      #pwa-update-banner.show { transform: translateY(0); }
+      #pwa-update-banner p { white-space: normal; }
     }
   </style>
-
 </head>
 <body>
-
-  <div id="sc-wallpaper" aria-hidden="true"></div>
-  <div class="settings-toast" id="sc-toast" role="status" aria-live="polite"></div>
 
   <a href="#suite-workspace-block" class="skip-link">Skip to operational image tools</a>
 
@@ -859,10 +721,23 @@
         <li><a href="#privacy">Privacy Policy</a></li>
         <li><a href="#contact">Contact Us</a></li>
         <li><a href="#terms">Terms & Conditions</a></li>
-        <li><a href="#settings" id="nav-settings-link" data-settings-trigger="true">⚙️ Settings</a></li>
+        <li id="pwa-install-item">
+          <button type="button" id="pwa-install-btn" class="nav-install-btn" aria-label="Install Smart Compress app">
+            Install App
+          </button>
+        </li>
       </ul>
     </nav>
   </header>
+
+  <!-- PWA: Update available banner -->
+  <div id="pwa-update-banner" role="status" aria-live="polite">
+    <p>A new version of Smart Compress is available.</p>
+    <div class="pwa-update-actions">
+      <button type="button" id="pwa-update-btn">Update Now</button>
+      <button type="button" id="pwa-update-dismiss" aria-label="Dismiss update notice">✕</button>
+    </div>
+  </div>
 
   <section class="hero" id="home" aria-labelledby="hero-title">
     <p class="hero-eyebrow">100% Client-Side · Private · Blazing Fast</p>
@@ -1504,161 +1379,6 @@
       </div>
     </div>
   </section>
-  <section class="page-section" id="settings" aria-labelledby="settings-heading">
-    <div class="section-inner">
-      <p class="section-eyebrow">Local Device Preferences · Nothing Leaves Your Browser</p>
-      <h2 id="settings-heading" class="section-title">Settings</h2>
-      <p class="section-lead">Customize the look, behavior, and permissions of Smart Compress. All preferences are stored only on this device and apply the same way whether you're using the website or the installed app.</p>
-
-      <!-- GENERAL -->
-      <div class="settings-group">
-        <h3 class="settings-group-title">General</h3>
-        <div class="settings-grid">
-          <div class="settings-card">
-            <div class="settings-card-row"><h4>App Version</h4><span class="settings-value" id="set-app-version">—</span></div>
-            <p class="settings-desc">Version of the installed Smart Compress app shell.</p>
-          </div>
-          <div class="settings-card">
-            <div class="settings-card-row"><h4>Website Version</h4><span class="settings-value" id="set-site-version">—</span></div>
-            <p class="settings-desc">Current build served at smartcompress.app.</p>
-          </div>
-          <div class="settings-card">
-            <div class="settings-card-row"><h4>PWA Status</h4><span class="settings-value" id="set-pwa-status">—</span></div>
-            <p class="settings-desc" id="set-pwa-desc">Whether the app is running installed (standalone) or in a browser tab.</p>
-            <div class="settings-btnbar"><button class="btn-secondary" id="set-install-btn" type="button" style="display:none;">Install App</button></div>
-          </div>
-          <div class="settings-card">
-            <div class="settings-card-row"><h4>Storage Usage</h4><span class="settings-value" id="set-storage-usage">—</span></div>
-            <p class="settings-desc">Estimated cache and local data used by Smart Compress on this device.</p>
-          </div>
-        </div>
-        <div class="settings-btnbar" style="margin-top:1rem;">
-          <button class="btn-danger" id="set-clear-cache" type="button">Clear Cache</button>
-          <button class="btn-danger" id="set-restore-defaults" type="button">Restore Default Settings</button>
-          <button class="btn-danger" id="set-reset-prefs" type="button">Reset User Preferences</button>
-        </div>
-      </div>
-
-      <!-- APPEARANCE -->
-      <div class="settings-group">
-        <h3 class="settings-group-title">Appearance</h3>
-        <div class="settings-grid">
-
-          <div class="settings-card">
-            <h4>Theme</h4>
-            <p class="settings-desc">Choose the overall color scheme.</p>
-            <div class="pill-group" id="set-theme-group" role="group" aria-label="Theme options">
-              <button class="pill-btn" data-theme="default" type="button">Smart Compress Default</button>
-              <button class="pill-btn" data-theme="dark" type="button">Dark</button>
-              <button class="pill-btn" data-theme="light" type="button">Light</button>
-              <button class="pill-btn" data-theme="amoled" type="button">AMOLED Black</button>
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <h4>Accent Color</h4>
-            <p class="settings-desc">Highlight color used across buttons and links.</p>
-            <div class="pill-group" id="set-accent-group" role="group" aria-label="Accent color options">
-              <button class="pill-btn" data-accent="green" type="button"><span class="pill-swatch" style="background:#7fff6e;"></span>Green</button>
-              <button class="pill-btn" data-accent="blue" type="button"><span class="pill-swatch" style="background:#4d9fff;"></span>Blue</button>
-              <button class="pill-btn" data-accent="purple" type="button"><span class="pill-swatch" style="background:#b98bff;"></span>Purple</button>
-              <button class="pill-btn" data-accent="orange" type="button"><span class="pill-swatch" style="background:#ff9f4d;"></span>Orange</button>
-              <button class="pill-btn" data-accent="red" type="button"><span class="pill-swatch" style="background:#ff5c5c;"></span>Red</button>
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <h4>Background Wallpaper</h4>
-            <p class="settings-desc">Subtle backdrop shown behind the interface.</p>
-            <div class="pill-group" id="set-wallpaper-group" role="group" aria-label="Wallpaper options">
-              <button class="pill-btn" data-wallpaper="default" type="button">Default</button>
-              <button class="pill-btn" data-wallpaper="gradient" type="button">Gradient</button>
-              <button class="pill-btn" data-wallpaper="glass" type="button">Glass</button>
-              <button class="pill-btn" data-wallpaper="nature" type="button">Nature</button>
-              <button class="pill-btn" data-wallpaper="space" type="button">Space</button>
-            </div>
-            <div class="wallpaper-upload-row">
-              <label class="file-btn" for="set-wallpaper-upload">Upload Custom Wallpaper</label>
-              <input type="file" id="set-wallpaper-upload" accept="image/*" style="display:none;">
-              <button class="pill-btn" id="set-wallpaper-clear-custom" type="button" style="display:none;">Remove Custom</button>
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <h4>Font Size</h4>
-            <p class="settings-desc">Adjusts overall text scale across the site.</p>
-            <div class="pill-group" id="set-fontsize-group" role="group" aria-label="Font size options">
-              <button class="pill-btn" data-fontsize="small" type="button">Small</button>
-              <button class="pill-btn" data-fontsize="medium" type="button">Medium</button>
-              <button class="pill-btn" data-fontsize="large" type="button">Large</button>
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <h4>Rounded Corners</h4>
-            <p class="settings-desc">Corner radius used for cards and buttons.</p>
-            <div class="pill-group" id="set-radius-group" role="group" aria-label="Rounded corner options">
-              <button class="pill-btn" data-radius="sharp" type="button">Sharp</button>
-              <button class="pill-btn" data-radius="rounded" type="button">Rounded</button>
-              <button class="pill-btn" data-radius="xrounded" type="button">Extra Rounded</button>
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <div class="settings-card-row">
-              <div><h4>Animations</h4><p class="settings-desc">Enable interface motion and transitions.</p></div>
-              <label class="switch"><input type="checkbox" id="set-animations" checked><span class="switch-track"></span></label>
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <div class="settings-card-row">
-              <div><h4>Compact Mode</h4><p class="settings-desc">Reduces spacing for a denser layout.</p></div>
-              <label class="switch"><input type="checkbox" id="set-compact"><span class="switch-track"></span></label>
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <div class="settings-card-row">
-              <div><h4>High Contrast Mode</h4><p class="settings-desc">Increases text and border contrast for readability.</p></div>
-              <label class="switch"><input type="checkbox" id="set-contrast"><span class="switch-track"></span></label>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- PERMISSIONS -->
-      <div class="settings-group">
-        <h3 class="settings-group-title">Permissions</h3>
-        <div class="settings-card">
-          <div class="perm-row">
-            <div>
-              <h4>Notifications</h4>
-              <p class="settings-desc">Used for optional export/compression completion alerts.</p>
-              <div class="perm-guidance" id="set-perm-notif-guidance">To enable notifications, open your browser's site settings for smartcompress.app (usually via the padlock icon in the address bar) and set Notifications to "Allow", then reload this page.</div>
-            </div>
-            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:.5rem;">
-              <span class="perm-badge unknown" id="set-perm-notif-badge">Checking…</span>
-              <button class="pill-btn" id="set-perm-notif-request" type="button" style="display:none;">Request Access</button>
-            </div>
-          </div>
-          <div class="perm-row">
-            <div>
-              <h4>Clipboard</h4>
-              <p class="settings-desc">Used by "Copy" buttons across tools (e.g. Prompt Studio).</p>
-              <div class="perm-guidance" id="set-perm-clip-guidance">To enable clipboard access, open your browser's site settings for smartcompress.app and set Clipboard to "Allow", then reload this page.</div>
-            </div>
-            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:.5rem;">
-              <span class="perm-badge unknown" id="set-perm-clip-badge">Checking…</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
 
   <section class="page-section blog-section" id="blog" aria-labelledby="blog-heading">
     <div class="section-inner">
@@ -2946,550 +2666,130 @@
     });
   </script>
 
+  <!-- PWA: service worker registration, update banner, install prompt -->
   <script>
-  /* ===================== Smart Compress Settings ===================== */
-  (function () {
-    "use strict";
+    (function () {
+      "use strict";
 
-    var APP_VERSION = "2.1.0";
-    var WEBSITE_VERSION = "2026.07.03";
-    var PREFIX = "sc_";
-    var KEY_APPEARANCE = PREFIX + "appearance";
-    var KEY_WALLPAPER_IMG = PREFIX + "wallpaper_custom_img";
+      /* ---------------- Service Worker registration + updates ---------------- */
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then((registration) => {
+              // If a worker is already waiting on load, surface the banner immediately.
+              if (registration.waiting && navigator.serviceWorker.controller) {
+                showUpdateBanner(registration);
+              }
 
-    var DEFAULTS = {
-      theme: "default",
-      accent: "green",
-      wallpaper: "default",
-      fontsize: "medium",
-      radius: "rounded",
-      animations: true,
-      compact: false,
-      contrast: false
-    };
+              // A new worker was found — watch it install, then show the banner
+              // once it's waiting (i.e. an older version is already controlling
+              // the page, so this is a genuine update, not the first install).
+              registration.addEventListener("updatefound", () => {
+                const newWorker = registration.installing;
+                if (!newWorker) return;
+                newWorker.addEventListener("statechange", () => {
+                  if (
+                    newWorker.state === "installed" &&
+                    navigator.serviceWorker.controller
+                  ) {
+                    showUpdateBanner(registration);
+                  }
+                });
+              });
 
-    function loadSettings() {
-      try {
-        var raw = localStorage.getItem(KEY_APPEARANCE);
-        if (!raw) return Object.assign({}, DEFAULTS);
-        var parsed = JSON.parse(raw);
-        return Object.assign({}, DEFAULTS, parsed);
-      } catch (e) {
-        return Object.assign({}, DEFAULTS);
-      }
-    }
+              // Re-check for a new deployment periodically and whenever the
+              // tab regains focus, so long-lived tabs still get offered updates.
+              const checkForUpdates = () => registration.update().catch(() => {});
+              setInterval(checkForUpdates, 60 * 60 * 1000); // hourly
+              document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === "visible") checkForUpdates();
+              });
+            })
+            .catch((err) => {
+              console.warn("Service worker registration failed:", err);
+            });
 
-    function saveSettings(s) {
-      try { localStorage.setItem(KEY_APPEARANCE, JSON.stringify(s)); } catch (e) {}
-    }
-
-    var state = loadSettings();
-
-    function toast(msg) {
-      var el = document.getElementById("sc-toast");
-      if (!el) return;
-      el.textContent = msg;
-      el.classList.add("show");
-      clearTimeout(toast._t);
-      toast._t = setTimeout(function () { el.classList.remove("show"); }, 2400);
-    }
-
-    function applyAppearance() {
-      var html = document.documentElement;
-      html.setAttribute("data-sc-theme", state.theme);
-      html.setAttribute("data-sc-accent", state.accent);
-      html.setAttribute("data-sc-fontsize", state.fontsize);
-      html.setAttribute("data-sc-radius", state.radius);
-      html.setAttribute("data-sc-anim", state.animations ? "on" : "off");
-      html.setAttribute("data-sc-compact", state.compact ? "on" : "off");
-      html.setAttribute("data-sc-contrast", state.contrast ? "high" : "normal");
-
-      document.body.classList.remove("sc-wallpaper-default", "sc-wallpaper-gradient", "sc-wallpaper-glass", "sc-wallpaper-nature", "sc-wallpaper-space", "sc-wallpaper-custom");
-      document.body.classList.add("sc-wallpaper-" + state.wallpaper);
-
-      var wallpaperEl = document.getElementById("sc-wallpaper");
-      if (state.wallpaper === "custom") {
-        try {
-          var img = localStorage.getItem(KEY_WALLPAPER_IMG);
-          if (img && wallpaperEl) wallpaperEl.style.backgroundImage = "url(" + img + ")";
-        } catch (e) {}
-      } else if (wallpaperEl) {
-        wallpaperEl.style.backgroundImage = "";
-      }
-
-      syncControlStates();
-    }
-
-    function syncControlStates() {
-      setActivePill("set-theme-group", "theme", state.theme);
-      setActivePill("set-accent-group", "accent", state.accent);
-      setActivePill("set-wallpaper-group", "wallpaper", state.wallpaper);
-      setActivePill("set-fontsize-group", "fontsize", state.fontsize);
-      setActivePill("set-radius-group", "radius", state.radius);
-
-      var animEl = document.getElementById("set-animations");
-      if (animEl) animEl.checked = !!state.animations;
-      var compactEl = document.getElementById("set-compact");
-      if (compactEl) compactEl.checked = !!state.compact;
-      var contrastEl = document.getElementById("set-contrast");
-      if (contrastEl) contrastEl.checked = !!state.contrast;
-
-      var clearCustomBtn = document.getElementById("set-wallpaper-clear-custom");
-      if (clearCustomBtn) clearCustomBtn.style.display = (state.wallpaper === "custom") ? "inline-flex" : "none";
-    }
-
-    function setActivePill(groupId, datasetKey, value) {
-      var group = document.getElementById(groupId);
-      if (!group) return;
-      var btns = group.querySelectorAll(".pill-btn");
-      btns.forEach(function (btn) {
-        var isActive = btn.dataset[datasetKey] === value;
-        btn.classList.toggle("active", isActive);
-        btn.setAttribute("aria-pressed", isActive ? "true" : "false");
-      });
-    }
-
-    function wirePillGroup(groupId, datasetKey, onChange) {
-      var group = document.getElementById(groupId);
-      if (!group) return;
-      group.querySelectorAll(".pill-btn").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          var value = btn.dataset[datasetKey];
-          state[datasetKey] = value;
-          saveSettings(state);
-          applyAppearance();
-          if (onChange) onChange(value);
-          toast(btn.textContent.trim() + " applied");
-        });
-      });
-    }
-
-    /* ---------- Version info ---------- */
-    function initVersions() {
-      var a = document.getElementById("set-app-version");
-      var w = document.getElementById("set-site-version");
-      if (a) a.textContent = "v" + APP_VERSION;
-      if (w) w.textContent = "v" + WEBSITE_VERSION;
-    }
-
-    /* ---------- PWA status ---------- */
-    function isStandalone() {
-      return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
-        window.navigator.standalone === true;
-    }
-
-    var deferredInstallPrompt = null;
-    window.addEventListener("beforeinstallprompt", function (e) {
-      e.preventDefault();
-      deferredInstallPrompt = e;
-      var btn = document.getElementById("set-install-btn");
-      if (btn && !isStandalone()) btn.style.display = "inline-flex";
-    });
-
-    function initPwaStatus() {
-      var statusEl = document.getElementById("set-pwa-status");
-      var descEl = document.getElementById("set-pwa-desc");
-      var installBtn = document.getElementById("set-install-btn");
-      if (!statusEl) return;
-
-      if (isStandalone()) {
-        statusEl.textContent = "Installed (Standalone)";
-        if (descEl) descEl.textContent = "You're running Smart Compress as an installed app.";
-      } else {
-        statusEl.textContent = "Running in Browser";
-        if (descEl) descEl.textContent = "Install Smart Compress for a faster, app-like experience with offline access.";
-      }
-
-      if (installBtn) {
-        installBtn.addEventListener("click", function () {
-          if (!deferredInstallPrompt) {
-            toast("Use your browser's \"Install App\" or \"Add to Home Screen\" option");
-            return;
-          }
-          deferredInstallPrompt.prompt();
-          deferredInstallPrompt.userChoice.finally(function () {
-            deferredInstallPrompt = null;
-            installBtn.style.display = "none";
+          // Once the new worker takes control, reload exactly once so every
+          // open tab is running the latest deployed version.
+          let hasReloaded = false;
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (hasReloaded) return;
+            hasReloaded = true;
+            window.location.reload();
           });
         });
       }
 
-      window.addEventListener("appinstalled", function () {
-        toast("Smart Compress installed");
-        initPwaStatus();
-      });
-    }
+      const updateBanner = document.getElementById("pwa-update-banner");
+      const updateBtn = document.getElementById("pwa-update-btn");
+      const dismissBtn = document.getElementById("pwa-update-dismiss");
+      let waitingWorker = null;
 
-    /* ---------- Storage usage ---------- */
-    function humanizeBytes(bytes) {
-      if (!bytes || bytes < 0) return "0 KB";
-      var units = ["B", "KB", "MB", "GB"];
-      var i = 0;
-      while (bytes >= 1024 && i < units.length - 1) { bytes /= 1024; i++; }
-      return bytes.toFixed(bytes < 10 && i > 0 ? 1 : 0) + " " + units[i];
-    }
-
-    function estimateLocalStorageBytes() {
-      var total = 0;
-      try {
-        for (var i = 0; i < localStorage.length; i++) {
-          var k = localStorage.key(i);
-          var v = localStorage.getItem(k) || "";
-          total += k.length + v.length;
-        }
-      } catch (e) {}
-      return total * 2; // rough UTF-16 byte estimate
-    }
-
-    function refreshStorageUsage() {
-      var el = document.getElementById("set-storage-usage");
-      if (!el) return;
-      if (navigator.storage && navigator.storage.estimate) {
-        navigator.storage.estimate().then(function (est) {
-          var used = est.usage || 0;
-          el.textContent = humanizeBytes(used);
-        }).catch(function () {
-          el.textContent = humanizeBytes(estimateLocalStorageBytes());
-        });
-      } else {
-        el.textContent = humanizeBytes(estimateLocalStorageBytes());
+      function showUpdateBanner(registration) {
+        waitingWorker = registration.waiting;
+        if (!waitingWorker || !updateBanner) return;
+        updateBanner.classList.add("show");
       }
-    }
 
-    /* ---------- Clear cache / reset ---------- */
-    function clearCache() {
-      var tasks = [];
-      if (window.caches && caches.keys) {
-        tasks.push(caches.keys().then(function (names) {
-          return Promise.all(names.map(function (n) { return caches.delete(n); }));
-        }).catch(function () {}));
-      }
-      Promise.all(tasks).finally(function () {
-        toast("Cache cleared");
-        refreshStorageUsage();
-      });
-    }
-
-    function restoreDefaults() {
-      if (!confirm("Reset appearance settings (theme, accent, wallpaper, fonts, layout) to their defaults?")) return;
-      state = Object.assign({}, DEFAULTS);
-      saveSettings(state);
-      try { localStorage.removeItem(KEY_WALLPAPER_IMG); } catch (e) {}
-      applyAppearance();
-      toast("Default settings restored");
-    }
-
-    function resetUserPreferences() {
-      if (!confirm("Reset all Smart Compress preferences stored on this device? This cannot be undone.")) return;
-      try {
-        var keysToRemove = [];
-        for (var i = 0; i < localStorage.length; i++) {
-          var k = localStorage.key(i);
-          if (k && k.indexOf(PREFIX) === 0) keysToRemove.push(k);
-        }
-        keysToRemove.forEach(function (k) { localStorage.removeItem(k); });
-      } catch (e) {}
-      state = Object.assign({}, DEFAULTS);
-      applyAppearance();
-      refreshStorageUsage();
-      toast("User preferences reset");
-    }
-
-    /* ---------- Custom wallpaper upload ---------- */
-    function initWallpaperUpload() {
-      var input = document.getElementById("set-wallpaper-upload");
-      var clearBtn = document.getElementById("set-wallpaper-clear-custom");
-      if (input) {
-        input.addEventListener("change", function () {
-          var file = input.files && input.files[0];
-          if (!file) return;
-          if (file.size > 4 * 1024 * 1024) {
-            toast("Please choose an image under 4MB");
-            input.value = "";
-            return;
+      if (updateBtn) {
+        updateBtn.addEventListener("click", () => {
+          if (waitingWorker) {
+            waitingWorker.postMessage("SKIP_WAITING");
           }
-          var reader = new FileReader();
-          reader.onload = function () {
-            try {
-              localStorage.setItem(KEY_WALLPAPER_IMG, reader.result);
-              state.wallpaper = "custom";
-              saveSettings(state);
-              applyAppearance();
-              toast("Custom wallpaper applied");
-            } catch (e) {
-              toast("Image too large to store on this device");
-            }
-          };
-          reader.readAsDataURL(file);
+          updateBanner.classList.remove("show");
         });
       }
-      if (clearBtn) {
-        clearBtn.addEventListener("click", function () {
-          try { localStorage.removeItem(KEY_WALLPAPER_IMG); } catch (e) {}
-          state.wallpaper = "default";
-          saveSettings(state);
-          applyAppearance();
-          toast("Custom wallpaper removed");
+
+      if (dismissBtn) {
+        dismissBtn.addEventListener("click", () => {
+          updateBanner.classList.remove("show");
         });
       }
-    }
 
-    /* ---------- Toggles ---------- */
-    function initToggles() {
-      var animEl = document.getElementById("set-animations");
-      var compactEl = document.getElementById("set-compact");
-      var contrastEl = document.getElementById("set-contrast");
+      /* ---------------- Install prompt (Add to Home Screen) ---------------- */
+      const installItem = document.getElementById("pwa-install-item");
+      const installBtn = document.getElementById("pwa-install-btn");
+      let deferredInstallPrompt = null;
 
-      if (animEl) animEl.addEventListener("change", function () {
-        state.animations = animEl.checked;
-        saveSettings(state);
-        applyAppearance();
-        toast("Animations " + (state.animations ? "enabled" : "disabled"));
-      });
-      if (compactEl) compactEl.addEventListener("change", function () {
-        state.compact = compactEl.checked;
-        saveSettings(state);
-        applyAppearance();
-        toast("Compact mode " + (state.compact ? "enabled" : "disabled"));
-      });
-      if (contrastEl) contrastEl.addEventListener("change", function () {
-        state.contrast = contrastEl.checked;
-        saveSettings(state);
-        applyAppearance();
-        toast("High contrast " + (state.contrast ? "enabled" : "disabled"));
-      });
-    }
+      function isRunningStandalone() {
+        return (
+          window.matchMedia("(display-mode: standalone)").matches ||
+          window.matchMedia("(display-mode: window-controls-overlay)").matches ||
+          window.navigator.standalone === true // iOS Safari
+        );
+      }
 
-    /* ---------- Permissions ---------- */
-    function setBadge(el, text, cls) {
-      if (!el) return;
-      el.textContent = text;
-      el.className = "perm-badge " + cls;
-    }
+      if (isRunningStandalone() && installItem) {
+        installItem.classList.remove("show");
+      }
 
-    function initPermissions() {
-      var notifBadge = document.getElementById("set-perm-notif-badge");
-      var notifGuidance = document.getElementById("set-perm-notif-guidance");
-      var notifRequestBtn = document.getElementById("set-perm-notif-request");
-      var clipBadge = document.getElementById("set-perm-clip-badge");
-      var clipGuidance = document.getElementById("set-perm-clip-guidance");
-
-      function renderNotif() {
-        if (!("Notification" in window)) {
-          setBadge(notifBadge, "Not Supported", "unknown");
-          return;
+      window.addEventListener("beforeinstallprompt", (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        if (installItem && !isRunningStandalone()) {
+          installItem.classList.add("show");
         }
-        var perm = Notification.permission;
-        if (perm === "granted") {
-          setBadge(notifBadge, "Allowed", "allowed");
-          if (notifGuidance) notifGuidance.classList.remove("show");
-          if (notifRequestBtn) notifRequestBtn.style.display = "none";
-        } else if (perm === "denied") {
-          setBadge(notifBadge, "Denied", "denied");
-          if (notifGuidance) notifGuidance.classList.add("show");
-          if (notifRequestBtn) notifRequestBtn.style.display = "none";
-        } else {
-          setBadge(notifBadge, "Not Requested", "unknown");
-          if (notifGuidance) notifGuidance.classList.remove("show");
-          if (notifRequestBtn) notifRequestBtn.style.display = "inline-flex";
-        }
-      }
+      });
 
-      renderNotif();
-      if (notifRequestBtn) {
-        notifRequestBtn.addEventListener("click", function () {
-          if (!("Notification" in window)) return;
-          Notification.requestPermission().then(function () { renderNotif(); });
-        });
-      }
-
-      if (navigator.permissions && navigator.permissions.query) {
-        navigator.permissions.query({ name: "clipboard-read" }).then(function (status) {
-          function render() {
-            if (status.state === "granted") { setBadge(clipBadge, "Allowed", "allowed"); if (clipGuidance) clipGuidance.classList.remove("show"); }
-            else if (status.state === "denied") { setBadge(clipBadge, "Denied", "denied"); if (clipGuidance) clipGuidance.classList.add("show"); }
-            else { setBadge(clipBadge, "Not Requested", "unknown"); if (clipGuidance) clipGuidance.classList.remove("show"); }
+      if (installBtn) {
+        installBtn.addEventListener("click", async () => {
+          if (!deferredInstallPrompt) return;
+          deferredInstallPrompt.prompt();
+          try {
+            await deferredInstallPrompt.userChoice;
+          } finally {
+            deferredInstallPrompt = null;
+            if (installItem) installItem.classList.remove("show");
           }
-          render();
-          status.onchange = render;
-        }).catch(function () {
-          setBadge(clipBadge, "Not Supported", "unknown");
         });
-      } else {
-        setBadge(clipBadge, "Not Supported", "unknown");
-      }
-    }
-
-    /* ---------- Init ---------- */
-    document.addEventListener("DOMContentLoaded", function () {
-      initVersions();
-      initPwaStatus();
-      refreshStorageUsage();
-      initPermissions();
-      initToggles();
-      initWallpaperUpload();
-
-      wirePillGroup("set-theme-group", "theme");
-      wirePillGroup("set-accent-group", "accent");
-      wirePillGroup("set-wallpaper-group", "wallpaper");
-      wirePillGroup("set-fontsize-group", "fontsize");
-      wirePillGroup("set-radius-group", "radius");
-
-      var clearCacheBtn = document.getElementById("set-clear-cache");
-      if (clearCacheBtn) clearCacheBtn.addEventListener("click", clearCache);
-      var restoreBtn = document.getElementById("set-restore-defaults");
-      if (restoreBtn) restoreBtn.addEventListener("click", restoreDefaults);
-      var resetPrefsBtn = document.getElementById("set-reset-prefs");
-      if (resetPrefsBtn) resetPrefsBtn.addEventListener("click", resetUserPreferences);
-
-      applyAppearance();
-    });
-
-    /* Apply appearance ASAP (before full DOMContentLoaded) to avoid theme flash */
-    applyAppearance();
-  })();
-  </script>
-
-  <!-- ===================== Settings Modal Wiring (appended) =====================
-       Reuses the existing #settings section (already implements Theme, Accent,
-       Wallpaper upload, Font Size, App Version, PWA Status, Storage Usage,
-       Restore Defaults, and Reset User Preferences) and presents it as a modal
-       instead of a page-jump. No settings logic is duplicated or altered. -->
-  <div id="sc-settings-backdrop"></div>
-  <script>
-  (function () {
-    "use strict";
-
-    var settingsSection = document.getElementById("settings");
-    if (!settingsSection) return;
-
-    var backdrop = document.getElementById("sc-settings-backdrop");
-    var lastFocusedEl = null;
-    var closeBtn = null;
-
-    function ensureCloseButton() {
-      if (closeBtn) return closeBtn;
-      closeBtn = document.createElement("button");
-      closeBtn.type = "button";
-      closeBtn.id = "sc-settings-close-btn";
-      closeBtn.setAttribute("aria-label", "Close settings");
-      closeBtn.innerHTML = "&times;";
-      closeBtn.addEventListener("click", closeSettingsModal);
-      settingsSection.insertBefore(closeBtn, settingsSection.firstChild);
-      return closeBtn;
-    }
-
-    function openSettingsModal(e) {
-      if (e) e.preventDefault();
-      lastFocusedEl = document.activeElement;
-      ensureCloseButton();
-      document.body.classList.add("sc-settings-modal-open");
-      settingsSection.setAttribute("role", "dialog");
-      settingsSection.setAttribute("aria-modal", "true");
-      settingsSection.setAttribute("aria-labelledby", "settings-heading");
-
-      // Close the mobile hamburger menu if it was open
-      var mainNavList = document.getElementById("main-nav");
-      var toggleBtn = document.getElementById("nav-toggle");
-      if (mainNavList && mainNavList.classList.contains("open")) {
-        mainNavList.classList.remove("open");
-        if (toggleBtn) toggleBtn.setAttribute("aria-expanded", "false");
       }
 
-      window.requestAnimationFrame(function () {
-        if (closeBtn) closeBtn.focus();
+      window.addEventListener("appinstalled", () => {
+        deferredInstallPrompt = null;
+        if (installItem) installItem.classList.remove("show");
       });
-    }
-
-    function closeSettingsModal() {
-      document.body.classList.remove("sc-settings-modal-open");
-      settingsSection.removeAttribute("role");
-      settingsSection.removeAttribute("aria-modal");
-      if (lastFocusedEl && typeof lastFocusedEl.focus === "function") {
-        lastFocusedEl.focus();
-      }
-    }
-
-    function isModalOpen() {
-      return document.body.classList.contains("sc-settings-modal-open");
-    }
-
-    // Wire every link that points at #settings (top nav + mobile hamburger share
-    // the same list, so this also covers task 2 automatically; querySelectorAll
-    // keeps this safe even if more Settings entry points are added later).
-    document.querySelectorAll('a[href="#settings"]').forEach(function (link) {
-      link.addEventListener("click", openSettingsModal);
-    });
-
-    if (backdrop) {
-      backdrop.addEventListener("click", closeSettingsModal);
-    }
-
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && isModalOpen()) closeSettingsModal();
-    });
-
-    // Simple focus trap while the modal is open
-    document.addEventListener("keydown", function (e) {
-      if (e.key !== "Tab" || !isModalOpen()) return;
-      var focusable = settingsSection.querySelectorAll(
-        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      if (!focusable.length) return;
-      var first = focusable[0];
-      var last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    });
-
-    // Deep-link support: if the page is loaded/navigated directly to #settings,
-    // open it as a modal too, so behavior stays consistent everywhere.
-    function checkHashOnLoad() {
-      if (window.location.hash === "#settings") openSettingsModal();
-    }
-    document.addEventListener("DOMContentLoaded", checkHashOnLoad);
-    window.addEventListener("hashchange", function () {
-      if (window.location.hash === "#settings") openSettingsModal();
-    });
-  })();
-  </script>
-
-  <script>
-  // Service worker registration + auto-update handling.
-  // Ensures every open tab (and the installed PWA) picks up a new deployed
-  // version automatically instead of getting stuck on an old cached build.
-  (function () {
-    if (!("serviceWorker" in navigator)) return;
-
-    window.addEventListener("load", function () {
-      navigator.serviceWorker.register("/sw.js").catch(function () {
-        /* Registration failures shouldn't break the app itself. */
-      });
-    });
-
-    // When the new service worker takes control, reload once so the page
-    // (and any inline assets it references) reflect the latest version.
-    // The `refreshed` guard prevents an infinite reload loop.
-    var refreshed = false;
-    navigator.serviceWorker.addEventListener("controllerchange", function () {
-      if (refreshed) return;
-      refreshed = true;
-      window.location.reload();
-    });
-
-    // Notification hook: fires in every open tab as soon as the new
-    // service worker has activated there.
-    navigator.serviceWorker.addEventListener("message", function (event) {
-      if (event.data && event.data.type === "SW_UPDATED") {
-        console.info("Smart Compress updated to a new version:", event.data.version);
-      }
-    });
-  })();
+    })();
   </script>
 </body>
 </html>
