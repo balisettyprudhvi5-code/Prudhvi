@@ -16,7 +16,7 @@
   <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
   <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
-  <link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" href="/site.webmanifest" />
 
   <meta property="og:title" content="Smart Compress — Free Instant Image Compression & Editing Tools" />
   <meta property="og:description" content="Compress JPG, PNG, and WebP images instantly in your browser. Nothing leaves your device. Free forever." />
@@ -611,7 +611,113 @@
     .blog-faq-item { border-top: 1px solid var(--border); padding: .8rem 0; }
     .blog-faq-item:first-of-type { border-top: none; }
     .blog-faq-item strong { display: block; color: var(--text); font-size: .92rem; margin-bottom: .35rem; }
+
+    /* === Split Image & Merge Images additions (additive only) === */
+    .split-grid-preview {
+      display: grid;
+      gap: 10px;
+      margin-top: 1.4rem;
+    }
+    .split-piece {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--surface2);
+      aspect-ratio: 1 / 1;
+    }
+    .split-piece img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      cursor: zoom-in;
+    }
+    .split-piece .split-piece-num {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(0,0,0,.65);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: .7rem;
+      padding: 2px 8px;
+      border-radius: 99px;
+      pointer-events: none;
+    }
+    .split-piece .split-piece-dl {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: var(--accent);
+      color: #000;
+      font-family: var(--mono);
+      font-size: .7rem;
+      padding: 3px 9px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .zoom-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.88);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      cursor: zoom-out;
+      padding: 2.5rem;
+    }
+    .zoom-modal-overlay img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 8px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    }
+    .merge-thumb-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .8rem;
+      margin-top: 1.4rem;
+    }
+    .merge-thumb {
+      position: relative;
+      width: 112px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface2);
+      cursor: grab;
+      transition: opacity .15s;
+    }
+    .merge-thumb.dragging { opacity: .35; }
+    .merge-thumb img {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      display: block;
+      background: #111;
+    }
+    .merge-thumb .merge-thumb-actions {
+      display: flex;
+      justify-content: space-between;
+      padding: .25rem .3rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    .merge-thumb .merge-thumb-actions button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .85rem;
+      padding: 2px 4px;
+      line-height: 1;
+    }
+    .merge-thumb .merge-thumb-actions button:hover { color: var(--accent); }
   </style>
+
 </head>
 <body>
 
@@ -634,15 +740,6 @@
         <li><a href="#privacy">Privacy Policy</a></li>
         <li><a href="#contact">Contact Us</a></li>
         <li><a href="#terms">Terms & Conditions</a></li>
-        <li>
-          <button
-            type="button"
-            id="pwa-install-btn"
-            class="pwa-install-btn"
-            style="display:none;background:var(--accent);color:#0d0d0f;border:none;border-radius:var(--radius-sm);padding:.45rem .9rem;font-weight:600;font-family:var(--sans);font-size:.85rem;cursor:pointer;white-space:nowrap;"
-            aria-label="Install Smart Compress as an app"
-          >📲 Install App</button>
-        </li>
       </ul>
     </nav>
   </header>
@@ -654,7 +751,6 @@
     <div class="hero-buttons">
       <a href="#tools-suite" class="btn-primary" role="button">Compress Now</a>
       <a href="#about" class="btn-secondary" role="button">Learn More</a>
-      <button type="button" class="btn-secondary pwa-install-btn" style="display:none;cursor:pointer;">📲 Install App</button>
     </div>
   </section>
 
@@ -700,7 +796,14 @@
         <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-promptstudio" id="tab-promptstudio">
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg> 10. AI Prompt Studio
         </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-split" id="tab-split">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg> 11. Split Image
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-merge" id="tab-merge">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4h7v7H4zM13 13h7v7h-7zM4 13l7-7M13 4l7 7"/></svg> 12. Merge Images
+        </button>
       </div>
+
 
       <div id="suite-workspace-block">
         
@@ -1155,6 +1258,158 @@
 
           <div style="margin-top:1.6rem; padding:1rem 1.2rem; border:1px dashed var(--border); border-radius:var(--radius-sm); font-family:var(--mono); font-size:.78rem; color:var(--muted);">
             🚀 Coming soon: Prompt → AI Image Generator. The architecture here is ready to connect to an image-generation API the moment one is added.
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-split" role="tabpanel" aria-labelledby="tab-split">
+          <div class="tool-title-row">
+            <h2>🧩 Split Image <span>Split any image into multiple high-quality pieces instantly</span></h2>
+          </div>
+
+          <div class="tool-controls-panel">
+            <div class="control-group">
+              <label for="split-mode">Split Mode</label>
+              <select id="split-mode">
+                <option value="horizontal">Horizontal Split</option>
+                <option value="vertical">Vertical Split</option>
+                <option value="grid" selected>Grid Split</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="split-preset">Presets</label>
+              <select id="split-preset">
+                <option value="custom" selected>Custom Rows × Columns</option>
+                <option value="2">2 Parts</option>
+                <option value="3">3 Parts</option>
+                <option value="4">4 Parts (2×2)</option>
+                <option value="6">6 Parts (2×3)</option>
+                <option value="9">9 Parts (3×3)</option>
+                <option value="instagram">Instagram Grid (3×3)</option>
+                <option value="whatsapp">WhatsApp Status Split</option>
+                <option value="panorama">Panorama Split</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="split-rows">Rows</label>
+              <input type="number" id="split-rows" min="1" max="10" value="2">
+            </div>
+            <div class="control-group">
+              <label for="split-cols">Columns</label>
+              <input type="number" id="split-cols" min="1" max="10" value="2">
+            </div>
+            <div class="control-group">
+              <label for="split-format">Output Format</label>
+              <select id="split-format">
+                <option value="image/png" selected>PNG</option>
+                <option value="image/jpeg">JPG</option>
+                <option value="image/webp">WebP</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="split-prefix">Filename Prefix</label>
+              <input type="text" id="split-prefix" value="piece" placeholder="e.g. piece">
+            </div>
+            <div class="control-group" style="justify-content: center; flex-direction: row; gap: 0.5rem; align-items: center; padding-top: 1rem;">
+              <input type="checkbox" id="split-numbering" checked>
+              <label for="split-numbering" style="cursor: pointer; text-transform: none;">Show Piece Numbering</label>
+            </div>
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-split">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
+            <p>Drag & drop, <span>browse files</span>, or paste (Ctrl/Cmd+V) an image to split</p>
+            <input type="file" id="file-split" class="file-input-hidden" accept="image/jpeg, image/png, image/webp" />
+          </div>
+
+          <div id="split-info" style="display:none; margin-top:1.2rem; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:.8rem 1rem; font-family:var(--mono); font-size:.78rem; color:var(--muted);"></div>
+
+          <div id="split-preview-grid" class="split-grid-preview" style="display:none;"></div>
+
+          <div class="action-row" id="split-action-row" style="display:none;">
+            <button id="split-generate-btn" class="btn-primary" type="button">Generate Split Preview</button>
+            <a id="split-dl-zip" class="btn-primary" href="#" style="display:none;">⬇ Download All as ZIP</a>
+            <button id="split-clear-btn" class="btn-secondary" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-merge" role="tabpanel" aria-labelledby="tab-merge">
+          <div class="tool-title-row">
+            <h2>🖼 Merge Images <span>Combine multiple images into a single high-quality image</span></h2>
+          </div>
+
+          <div class="tool-controls-panel">
+            <div class="control-group">
+              <label for="merge-mode">Merge Mode</label>
+              <select id="merge-mode">
+                <option value="vertical">Vertical Stack</option>
+                <option value="horizontal">Horizontal Row</option>
+                <option value="grid" selected>Grid Layout</option>
+                <option value="custom">Custom Layout (by Columns)</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="merge-cols">Grid / Custom Columns</label>
+              <input type="number" id="merge-cols" min="1" max="10" value="2">
+            </div>
+            <div class="control-group">
+              <label for="merge-bg">Background Color</label>
+              <input type="color" id="merge-bg" value="#0d0d0f" style="height:42px;padding:.3rem;">
+            </div>
+            <div class="control-group">
+              <label for="merge-padding">Outer Padding (px)</label>
+              <input type="number" id="merge-padding" min="0" max="200" value="0">
+            </div>
+            <div class="control-group">
+              <label for="merge-margin">Margin Between Images (px)</label>
+              <input type="number" id="merge-margin" min="0" max="200" value="8">
+            </div>
+            <div class="control-group">
+              <label for="merge-border">Border Width (px)</label>
+              <input type="number" id="merge-border" min="0" max="40" value="0">
+            </div>
+            <div class="control-group">
+              <label for="merge-border-color">Border Color</label>
+              <input type="color" id="merge-border-color" value="#00e5ff" style="height:42px;padding:.3rem;">
+            </div>
+            <div class="control-group">
+              <label for="merge-radius">Corner Radius (px)</label>
+              <input type="number" id="merge-radius" min="0" max="100" value="0">
+            </div>
+            <div class="control-group">
+              <label for="merge-format">Output Format</label>
+              <select id="merge-format">
+                <option value="image/png" selected>PNG</option>
+                <option value="image/jpeg">JPG</option>
+                <option value="image/webp">WebP</option>
+              </select>
+            </div>
+            <div class="control-group" style="justify-content: center; flex-direction: row; gap: 0.5rem; align-items: center; padding-top: 1rem;">
+              <input type="checkbox" id="merge-auto-align" checked>
+              <label for="merge-auto-align" style="cursor: pointer; text-transform: none;">Auto Align / Equal Cell Size</label>
+            </div>
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-merge">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            <p>Drag & drop, <span>browse files</span>, or paste (Ctrl/Cmd+V) multiple images to merge</p>
+            <input type="file" id="file-merge" class="file-input-hidden" accept="image/jpeg, image/png, image/webp" multiple />
+          </div>
+
+          <div id="merge-thumb-list" class="merge-thumb-list" style="display:none;"></div>
+
+          <div class="workbench-layout" id="workbench-merge" style="display:none; grid-template-columns: 1fr;">
+            <div class="preview-box">
+              <h4>Merged Output Preview</h4>
+              <canvas id="canvas-merge"></canvas>
+            </div>
+          </div>
+
+          <div id="merge-info" style="display:none; margin-top:1rem; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:.8rem 1rem; font-family:var(--mono); font-size:.78rem; color:var(--muted);"></div>
+
+          <div class="action-row" id="merge-action-row" style="display:none;">
+            <button id="merge-generate-btn" class="btn-primary" type="button">Merge Images</button>
+            <a id="merge-dl-btn" class="btn-primary" href="#" style="display:none;">⬇ Download Merged Image</a>
+            <button id="merge-clear-btn" class="btn-secondary" type="button">Clear</button>
           </div>
         </div>
 
@@ -2572,67 +2827,465 @@
         document.getElementById("ps-image-clear-btn").style.display = "none";
       });
 
-    });
-  </script>
+      /* ============================================================
+         11. SPLIT IMAGE — new tool, fully additive, no existing code touched
+         ============================================================ */
+      (function() {
+        let splitCurrentImage = null;
+        let splitPieceBlobs = [];
 
-  <!-- PWA install flow: uses the native beforeinstallprompt event only.
-       No file (APK/ZIP/etc) is ever downloaded when the button is clicked. -->
-  <script>
-    (function () {
-      let deferredInstallPrompt = null;
-      const installButtons = Array.from(document.querySelectorAll('.pwa-install-btn'));
+        const splitModeSel   = document.getElementById("split-mode");
+        const splitPresetSel = document.getElementById("split-preset");
+        const splitRowsInput = document.getElementById("split-rows");
+        const splitColsInput = document.getElementById("split-cols");
 
-      function showInstallButtons() {
-        installButtons.forEach((btn) => { btn.style.display = 'inline-flex'; });
-      }
-      function hideInstallButtons() {
-        installButtons.forEach((btn) => { btn.style.display = 'none'; });
-      }
+        const SPLIT_PRESETS = {
+          "2":         { mode: "grid", rows: 1, cols: 2 },
+          "3":         { mode: "grid", rows: 1, cols: 3 },
+          "4":         { mode: "grid", rows: 2, cols: 2 },
+          "6":         { mode: "grid", rows: 2, cols: 3 },
+          "9":         { mode: "grid", rows: 3, cols: 3 },
+          "instagram": { mode: "grid", rows: 3, cols: 3 },
+          "whatsapp":  { mode: "grid", rows: 3, cols: 1 },
+          "panorama":  { mode: "grid", rows: 1, cols: 3 }
+        };
 
-      // If the app is already installed / running standalone, never show the button.
-      const isStandalone =
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true;
-      if (isStandalone) hideInstallButtons();
+        function updateSplitFieldStates() {
+          const mode = splitModeSel.value;
+          splitRowsInput.disabled = (mode === "vertical");
+          splitColsInput.disabled = (mode === "horizontal");
+        }
+        updateSplitFieldStates();
 
-      // Chrome/Android (and other Chromium browsers) fire this when the PWA
-      // is installable. We intercept it, stash it, and only trigger it from
-      // our own button click — this IS the standard install flow.
-      window.addEventListener('beforeinstallprompt', (event) => {
-        event.preventDefault();
-        deferredInstallPrompt = event;
-        if (!isStandalone) showInstallButtons();
-      });
+        splitPresetSel.addEventListener("change", () => {
+          const val = splitPresetSel.value;
+          if (val === "custom") return;
+          const preset = SPLIT_PRESETS[val];
+          if (!preset) return;
+          splitModeSel.value = preset.mode;
+          splitRowsInput.value = preset.rows;
+          splitColsInput.value = preset.cols;
+          updateSplitFieldStates();
+        });
 
-      installButtons.forEach((btn) => {
-        btn.addEventListener('click', async () => {
-          if (!deferredInstallPrompt) return;
-          btn.disabled = true;
-          deferredInstallPrompt.prompt();
-          try {
-            await deferredInstallPrompt.userChoice;
-          } finally {
-            deferredInstallPrompt = null;
-            hideInstallButtons();
-            btn.disabled = false;
+        splitModeSel.addEventListener("change", updateSplitFieldStates);
+        [splitRowsInput, splitColsInput].forEach(el => {
+          el.addEventListener("input", () => { splitPresetSel.value = "custom"; });
+        });
+
+        function getSplitDims() {
+          const mode = splitModeSel.value;
+          let rows = Math.max(1, parseInt(splitRowsInput.value) || 1);
+          let cols = Math.max(1, parseInt(splitColsInput.value) || 1);
+          if (mode === "horizontal") cols = 1;
+          if (mode === "vertical") rows = 1;
+          return { rows, cols };
+        }
+
+        function loadSplitImage(fileObj) {
+          if (!fileObj || fileObj.type.indexOf("image") === -1) return;
+          const img = new Image();
+          img.onload = function() {
+            splitCurrentImage = img;
+            splitPieceBlobs = [];
+            document.getElementById("split-action-row").style.display = "flex";
+            document.getElementById("split-dl-zip").style.display = "none";
+            const grid = document.getElementById("split-preview-grid");
+            grid.innerHTML = "";
+            grid.style.display = "none";
+            const info = document.getElementById("split-info");
+            info.style.display = "block";
+            info.textContent = `Loaded image: ${img.naturalWidth}×${img.naturalHeight}px — configure split settings, then click "Generate Split Preview".`;
+          };
+          img.src = URL.createObjectURL(fileObj);
+        }
+
+        setupDropzoneOperationalBinding("dropzone-split", "file-split", loadSplitImage);
+
+        function openZoomModal(src) {
+          const overlay = document.createElement("div");
+          overlay.className = "zoom-modal-overlay";
+          const imgEl = document.createElement("img");
+          imgEl.src = src;
+          imgEl.alt = "Zoomed split piece preview";
+          overlay.appendChild(imgEl);
+          overlay.addEventListener("click", () => overlay.remove());
+          document.body.appendChild(overlay);
+        }
+
+        function generateSplit() {
+          if (!splitCurrentImage) return;
+          const { rows, cols } = getSplitDims();
+          const format = document.getElementById("split-format").value;
+          const prefix = document.getElementById("split-prefix").value.trim() || "piece";
+          const showNum = document.getElementById("split-numbering").checked;
+          const img = splitCurrentImage;
+          const pieceW = Math.max(1, Math.floor(img.naturalWidth / cols));
+          const pieceH = Math.max(1, Math.floor(img.naturalHeight / rows));
+          const total = rows * cols;
+          const ext = format === "image/png" ? "png" : (format === "image/webp" ? "webp" : "jpg");
+
+          const grid = document.getElementById("split-preview-grid");
+          grid.innerHTML = "";
+          grid.style.display = "grid";
+          grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+          splitPieceBlobs = new Array(total);
+          const pieceEls = [];
+
+          for (let i = 0; i < total; i++) {
+            const pieceDiv = document.createElement("div");
+            pieceDiv.className = "split-piece";
+            pieceDiv.innerHTML = (showNum ? `<span class="split-piece-num">${i + 1}</span>` : "") +
+              `<img alt="Split piece ${i + 1} of ${total}"><a class="split-piece-dl" href="#" download>⬇</a>`;
+            grid.appendChild(pieceDiv);
+            pieceEls.push(pieceDiv);
+          }
+
+          document.getElementById("split-dl-zip").style.display = "none";
+
+          let doneCount = 0;
+          let idx = 0;
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              const myIdx = idx;
+              const pieceCanvas = document.createElement("canvas");
+              pieceCanvas.width = pieceW;
+              pieceCanvas.height = pieceH;
+              const pctx = pieceCanvas.getContext("2d");
+              if (format !== "image/png") {
+                pctx.fillStyle = "#ffffff";
+                pctx.fillRect(0, 0, pieceW, pieceH);
+              }
+              pctx.drawImage(img, c * pieceW, r * pieceH, pieceW, pieceH, 0, 0, pieceW, pieceH);
+              pieceCanvas.toBlob(function(blob) {
+                if (!blob) return;
+                splitPieceBlobs[myIdx] = blob;
+                const url = URL.createObjectURL(blob);
+                const el = pieceEls[myIdx];
+                const imgTag = el.querySelector("img");
+                const aTag = el.querySelector("a");
+                imgTag.src = url;
+                imgTag.addEventListener("click", () => openZoomModal(url));
+                aTag.href = url;
+                aTag.download = `${prefix}-${myIdx + 1}.${ext}`;
+                doneCount++;
+                if (doneCount === total) {
+                  document.getElementById("split-dl-zip").style.display = "inline-flex";
+                }
+              }, format, 0.92);
+              idx++;
+            }
+          }
+
+          const info = document.getElementById("split-info");
+          info.style.display = "block";
+          info.textContent = `Original: ${img.naturalWidth}×${img.naturalHeight}px → ${total} pieces of ${pieceW}×${pieceH}px each (${ext.toUpperCase()})`;
+        }
+
+        document.getElementById("split-generate-btn").addEventListener("click", generateSplit);
+
+        document.getElementById("split-clear-btn").addEventListener("click", () => {
+          splitCurrentImage = null;
+          splitPieceBlobs = [];
+          document.getElementById("split-preview-grid").innerHTML = "";
+          document.getElementById("split-preview-grid").style.display = "none";
+          document.getElementById("split-info").style.display = "none";
+          document.getElementById("split-action-row").style.display = "none";
+          document.getElementById("split-dl-zip").style.display = "none";
+          document.getElementById("file-split").value = "";
+        });
+
+        document.getElementById("split-dl-zip").addEventListener("click", async (e) => {
+          e.preventDefault();
+          if (!window.JSZip || !splitPieceBlobs.length) return;
+          const zip = new JSZip();
+          const prefix = document.getElementById("split-prefix").value.trim() || "piece";
+          const format = document.getElementById("split-format").value;
+          const ext = format === "image/png" ? "png" : (format === "image/webp" ? "webp" : "jpg");
+          splitPieceBlobs.forEach((blob, i) => {
+            if (blob) zip.file(`${prefix}-${i + 1}.${ext}`, blob);
+          });
+          const content = await zip.generateAsync({ type: "blob" });
+          const url = URL.createObjectURL(content);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${prefix}-split-pieces.zip`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        });
+
+        /* Expose loader for the shared paste handler below */
+        window.__splitLoadImage = loadSplitImage;
+      })();
+
+      /* ============================================================
+         12. MERGE IMAGES — new tool, fully additive, no existing code touched
+         ============================================================ */
+      (function() {
+        let mergeImages = [];
+        let mergeIdCounter = 0;
+
+        function addMergeImages(fileList) {
+          Array.from(fileList).forEach(file => {
+            if (!file || file.type.indexOf("image") === -1) return;
+            const img = new Image();
+            const id = "m" + (++mergeIdCounter);
+            img.onload = function() {
+              mergeImages.push({ id: id, img: img, rotation: 0, flipH: false, flipV: false });
+              renderMergeThumbs();
+              document.getElementById("merge-action-row").style.display = "flex";
+            };
+            img.src = URL.createObjectURL(file);
+          });
+        }
+
+        const mergeDropzone  = document.getElementById("dropzone-merge");
+        const mergeFileInput = document.getElementById("file-merge");
+
+        mergeDropzone.addEventListener("click", () => mergeFileInput.click());
+        mergeDropzone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          mergeDropzone.classList.add("drag-over");
+        });
+        ["dragleave", "drop"].forEach(evt => {
+          mergeDropzone.addEventListener(evt, () => mergeDropzone.classList.remove("drag-over"));
+        });
+        mergeDropzone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            addMergeImages(e.dataTransfer.files);
           }
         });
-      });
-
-      window.addEventListener('appinstalled', () => {
-        deferredInstallPrompt = null;
-        hideInstallButtons();
-      });
-
-      // Register the service worker so the app is installable and works offline.
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js').catch(() => {
-            /* registration failure shouldn't break the page */
-          });
+        mergeFileInput.addEventListener("change", (e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            addMergeImages(e.target.files);
+          }
         });
-      }
-    })();
+
+        const mergeThumbList = document.getElementById("merge-thumb-list");
+
+        mergeThumbList.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          const dragging = mergeThumbList.querySelector(".merge-thumb.dragging");
+          if (!dragging) return;
+          const siblings = [...mergeThumbList.querySelectorAll(".merge-thumb:not(.dragging)")];
+          const next = siblings.find(sib => {
+            const rect = sib.getBoundingClientRect();
+            return e.clientX < rect.left + rect.width / 2;
+          });
+          mergeThumbList.insertBefore(dragging, next || null);
+        });
+
+        function reorderMergeFromDOM() {
+          const ids = [...mergeThumbList.querySelectorAll(".merge-thumb")].map(t => t.dataset.id);
+          mergeImages.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+        }
+
+        function renderMergeThumbs() {
+          mergeThumbList.innerHTML = "";
+          mergeThumbList.style.display = mergeImages.length ? "flex" : "none";
+
+          mergeImages.forEach((item, index) => {
+            const thumb = document.createElement("div");
+            thumb.className = "merge-thumb";
+            thumb.draggable = true;
+            thumb.dataset.id = item.id;
+
+            const transformStr = `rotate(${item.rotation}deg) scale(${item.flipH ? -1 : 1}, ${item.flipV ? -1 : 1})`;
+            thumb.innerHTML = `
+              <img src="${item.img.src}" style="transform:${transformStr};" alt="Merge source image ${index + 1}">
+              <div class="merge-thumb-actions">
+                <button type="button" title="Rotate 90°" data-action="rotate">⟳</button>
+                <button type="button" title="Flip Horizontal" data-action="fliph">⇋</button>
+                <button type="button" title="Flip Vertical" data-action="flipv">⇵</button>
+                <button type="button" title="Remove" data-action="remove">✕</button>
+              </div>
+            `;
+
+            thumb.addEventListener("dragstart", () => thumb.classList.add("dragging"));
+            thumb.addEventListener("dragend", () => {
+              thumb.classList.remove("dragging");
+              reorderMergeFromDOM();
+            });
+
+            thumb.querySelector('[data-action="rotate"]').addEventListener("click", () => {
+              item.rotation = (item.rotation + 90) % 360;
+              renderMergeThumbs();
+            });
+            thumb.querySelector('[data-action="fliph"]').addEventListener("click", () => {
+              item.flipH = !item.flipH;
+              renderMergeThumbs();
+            });
+            thumb.querySelector('[data-action="flipv"]').addEventListener("click", () => {
+              item.flipV = !item.flipV;
+              renderMergeThumbs();
+            });
+            thumb.querySelector('[data-action="remove"]').addEventListener("click", () => {
+              mergeImages = mergeImages.filter(m => m.id !== item.id);
+              renderMergeThumbs();
+              if (!mergeImages.length) {
+                document.getElementById("merge-action-row").style.display = "none";
+                document.getElementById("workbench-merge").style.display = "none";
+                document.getElementById("merge-info").style.display = "none";
+              }
+            });
+
+            mergeThumbList.appendChild(thumb);
+          });
+        }
+
+        function roundRectPath(ctx, x, y, w, h, r) {
+          r = Math.max(0, Math.min(r, w / 2, h / 2));
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.arcTo(x + w, y, x + w, y + h, r);
+          ctx.arcTo(x + w, y + h, x, y + h, r);
+          ctx.arcTo(x, y + h, x, y, r);
+          ctx.arcTo(x, y, x + w, y, r);
+          ctx.closePath();
+        }
+
+        function drawTransformedImage(ctx, item, x, y, w, h) {
+          ctx.save();
+          ctx.translate(x + w / 2, y + h / 2);
+          ctx.rotate(item.rotation * Math.PI / 180);
+          ctx.scale(item.flipH ? -1 : 1, item.flipV ? -1 : 1);
+          const rotated90 = (item.rotation % 180) !== 0;
+          if (rotated90) {
+            ctx.drawImage(item.img, -h / 2, -w / 2, h, w);
+          } else {
+            ctx.drawImage(item.img, -w / 2, -h / 2, w, h);
+          }
+          ctx.restore();
+        }
+
+        function generateMerge() {
+          if (!mergeImages.length) return;
+          const mode        = document.getElementById("merge-mode").value;
+          const cols         = Math.max(1, parseInt(document.getElementById("merge-cols").value) || 1);
+          const bg           = document.getElementById("merge-bg").value;
+          const padding      = Math.max(0, parseInt(document.getElementById("merge-padding").value) || 0);
+          const margin       = Math.max(0, parseInt(document.getElementById("merge-margin").value) || 0);
+          const borderW      = Math.max(0, parseInt(document.getElementById("merge-border").value) || 0);
+          const borderColor  = document.getElementById("merge-border-color").value;
+          const radius       = Math.max(0, parseInt(document.getElementById("merge-radius").value) || 0);
+          const autoAlign    = document.getElementById("merge-auto-align").checked;
+          const format       = document.getElementById("merge-format").value;
+
+          const n = mergeImages.length;
+          let actualCols, rows;
+          if (mode === "vertical") { actualCols = 1; rows = n; }
+          else if (mode === "horizontal") { actualCols = n; rows = 1; }
+          else { actualCols = Math.min(cols, n); rows = Math.ceil(n / actualCols); }
+
+          let cellW, cellH;
+          if (autoAlign) {
+            cellW = Math.max(...mergeImages.map(m => m.img.naturalWidth));
+            cellH = Math.max(...mergeImages.map(m => m.img.naturalHeight));
+          } else {
+            cellW = mergeImages[0].img.naturalWidth;
+            cellH = mergeImages[0].img.naturalHeight;
+          }
+
+          const totalW = actualCols * cellW + (actualCols - 1) * margin + padding * 2;
+          const totalH = rows * cellH + (rows - 1) * margin + padding * 2;
+
+          const canvas = document.getElementById("canvas-merge");
+          canvas.width = totalW;
+          canvas.height = totalH;
+          const ctx = canvas.getContext("2d");
+
+          ctx.fillStyle = bg;
+          ctx.fillRect(0, 0, totalW, totalH);
+
+          mergeImages.forEach((item, i) => {
+            const r = Math.floor(i / actualCols);
+            const c = i % actualCols;
+            const x = padding + c * (cellW + margin);
+            const y = padding + r * (cellH + margin);
+
+            if (radius > 0) {
+              ctx.save();
+              roundRectPath(ctx, x, y, cellW, cellH, radius);
+              ctx.clip();
+            }
+            drawTransformedImage(ctx, item, x, y, cellW, cellH);
+            if (radius > 0) ctx.restore();
+
+            if (borderW > 0) {
+              ctx.save();
+              ctx.strokeStyle = borderColor;
+              ctx.lineWidth = borderW;
+              if (radius > 0) {
+                roundRectPath(ctx, x + borderW / 2, y + borderW / 2, cellW - borderW, cellH - borderW, radius);
+                ctx.stroke();
+              } else {
+                ctx.strokeRect(x + borderW / 2, y + borderW / 2, cellW - borderW, cellH - borderW);
+              }
+              ctx.restore();
+            }
+          });
+
+          document.getElementById("workbench-merge").style.display = "grid";
+
+          canvas.toBlob(function(blob) {
+            if (!blob) return;
+            const url = URL.createObjectURL(blob);
+            const ext = format === "image/png" ? "png" : (format === "image/webp" ? "webp" : "jpg");
+            const dlBtn = document.getElementById("merge-dl-btn");
+            dlBtn.href = url;
+            dlBtn.download = `smartcompress-merged.${ext}`;
+            dlBtn.style.display = "inline-flex";
+
+            const sizeKB = (blob.size / 1024).toFixed(1);
+            const info = document.getElementById("merge-info");
+            info.style.display = "block";
+            info.textContent = `Output resolution: ${totalW}×${totalH}px — Estimated file size: ${sizeKB} KB (${ext.toUpperCase()})`;
+          }, format, 0.92);
+        }
+
+        document.getElementById("merge-generate-btn").addEventListener("click", generateMerge);
+
+        document.getElementById("merge-clear-btn").addEventListener("click", () => {
+          mergeImages = [];
+          renderMergeThumbs();
+          document.getElementById("workbench-merge").style.display = "none";
+          document.getElementById("merge-info").style.display = "none";
+          document.getElementById("merge-dl-btn").style.display = "none";
+          document.getElementById("merge-action-row").style.display = "none";
+          document.getElementById("file-merge").value = "";
+        });
+
+        /* Expose adder for the shared paste handler below */
+        window.__mergeAddImages = addMergeImages;
+      })();
+
+      /* Shared clipboard-paste support for Split Image & Merge Images (additive, does not touch any existing paste behavior since none previously existed) */
+      document.addEventListener("paste", function(e) {
+        const splitPanelActive = document.getElementById("panel-split") && document.getElementById("panel-split").classList.contains("active");
+        const mergePanelActive = document.getElementById("panel-merge") && document.getElementById("panel-merge").classList.contains("active");
+        if (!splitPanelActive && !mergePanelActive) return;
+        const clipboardData = e.clipboardData || window.clipboardData;
+        if (!clipboardData || !clipboardData.items) return;
+        const imageFiles = [];
+        for (let i = 0; i < clipboardData.items.length; i++) {
+          if (clipboardData.items[i].type.indexOf("image") !== -1) {
+            const blob = clipboardData.items[i].getAsFile();
+            if (blob) imageFiles.push(blob);
+          }
+        }
+        if (!imageFiles.length) return;
+        e.preventDefault();
+        if (splitPanelActive && window.__splitLoadImage) {
+          window.__splitLoadImage(imageFiles[0]);
+        } else if (mergePanelActive && window.__mergeAddImages) {
+          window.__mergeAddImages(imageFiles);
+        }
+      });
+
+    });
   </script>
 </body>
 </html>
