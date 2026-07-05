@@ -5,6 +5,34 @@
      crossorigin="anonymous"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <script>
+    /* ===== Smart Compress — App Version (bump on every deploy, keep in sync with sw.js CACHE_VERSION) ===== */
+    window.APP_VERSION = "2.1.0";
+    /* ===== Early settings application — runs before CSS paints to avoid theme flash ===== */
+    (function () {
+      try {
+        var raw = localStorage.getItem("smartcompress_settings_v1");
+        var s = raw ? JSON.parse(raw) : {};
+        var root = document.documentElement;
+        var theme = s.theme || "dark";
+        if (theme === "auto") {
+          theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        root.setAttribute("data-theme", theme);
+        if (s.accent) root.style.setProperty("--accent", s.accent);
+        if (s.accent2) root.style.setProperty("--accent2", s.accent2);
+        if (s.fontSize) root.style.fontSize = s.fontSize + "px";
+        if (s.cornerStyle === "square") {
+          root.style.setProperty("--radius", "0px");
+          root.style.setProperty("--radius-sm", "0px");
+        }
+        root.setAttribute("data-wallpaper", s.wallpaper || "none");
+      } catch (e) { /* fail silently, defaults apply */ }
+    })();
+  </script>
   <meta name="description" content="Smart Compress — Free online image compressor. Compress JPG, PNG, and WebP images instantly in your browser. No uploads, no servers, 100% private and secure." />
   <meta name="keywords" content="image compressor, compress jpg, compress png, compress webp, reduce image size, online image optimizer, free image compression, smart compress, image resizer, crop image, rotate image, png to jpg converter, jpg to png converter, webp converter, image to pdf" />
   <meta name="author" content="Smart Compress" />
@@ -612,112 +640,215 @@
     .blog-faq-item:first-of-type { border-top: none; }
     .blog-faq-item strong { display: block; color: var(--text); font-size: .92rem; margin-bottom: .35rem; }
 
-    /* === Split Image & Merge Images additions (additive only) === */
-    .split-grid-preview {
-      display: grid;
-      gap: 10px;
-      margin-top: 1.4rem;
+    /* ============================================================
+       SETTINGS SYSTEM — Themes, Wallpaper, Accessibility Controls
+       (Default dark theme values above in :root are untouched)
+       ============================================================ */
+
+    [data-theme="light"] {
+      --bg:        #f4f4f7;
+      --surface:   #ffffff;
+      --surface2:  #eeeef3;
+      --border:    #dcdce3;
+      --text:      #16161a;
+      --muted:     #6a6a7a;
     }
-    .split-piece {
-      position: relative;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      overflow: hidden;
-      background: var(--surface2);
-      aspect-ratio: 1 / 1;
+    [data-theme="oled"] {
+      --bg:        #000000;
+      --surface:   #000000;
+      --surface2:  #0a0a0a;
+      --border:    #1c1c1c;
+      --text:      #f0f0f0;
+      --muted:     #7a7a7a;
     }
-    .split-piece img {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-      cursor: zoom-in;
+
+    body.high-contrast {
+      --border: #ffffff44;
+      --muted:  #b8b8c8;
     }
-    .split-piece .split-piece-num {
-      position: absolute;
-      top: 6px;
-      left: 6px;
-      background: rgba(0,0,0,.65);
-      color: #fff;
-      font-family: var(--mono);
-      font-size: .7rem;
-      padding: 2px 8px;
-      border-radius: 99px;
-      pointer-events: none;
+    [data-theme="light"] body.high-contrast, body.high-contrast[data-theme="light"] {
+      --border: #00000055;
+      --muted:  #3a3a45;
     }
-    .split-piece .split-piece-dl {
-      position: absolute;
-      bottom: 6px;
-      right: 6px;
-      background: var(--accent);
-      color: #000;
-      font-family: var(--mono);
-      font-size: .7rem;
-      padding: 3px 9px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 600;
+
+    body.compact-mode header { padding: .7rem 1.4rem; }
+    body.compact-mode .page-section { padding: 3rem 1.5rem; }
+    body.compact-mode .tools-menu-section { padding: 2.5rem 1.5rem; }
+    body.compact-mode .tool-workspace { padding: 1.2rem; }
+    body.compact-mode .tool-controls-panel { padding: .8rem; gap: .7rem; }
+    body.compact-mode footer { padding: 2.2rem 1.5rem 1.5rem; }
+
+    body.reduce-motion, body.reduce-motion * , body.reduce-motion *::before, body.reduce-motion *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
     }
-    .zoom-modal-overlay {
+
+    /* Wallpaper layer — sits behind everything, only shows through where
+       sections/cards have no opaque background (hero, gaps, page-section). */
+    #app-wallpaper-layer {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.88);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      cursor: zoom-out;
-      padding: 2.5rem;
+      z-index: -1;
+      pointer-events: none;
+      background: var(--bg);
+      background-size: cover;
+      background-position: center;
+      transition: background .4s ease;
     }
-    .zoom-modal-overlay img {
-      max-width: 100%;
-      max-height: 100%;
-      border-radius: 8px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.6);
-    }
-    .merge-thumb-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .8rem;
-      margin-top: 1.4rem;
-    }
-    .merge-thumb {
-      position: relative;
-      width: 112px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-      background: var(--surface2);
-      cursor: grab;
-      transition: opacity .15s;
-    }
-    .merge-thumb.dragging { opacity: .35; }
-    .merge-thumb img {
-      width: 100%;
-      height: 80px;
-      object-fit: cover;
-      display: block;
-      background: #111;
-    }
-    .merge-thumb .merge-thumb-actions {
-      display: flex;
-      justify-content: space-between;
-      padding: .25rem .3rem;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-    }
-    .merge-thumb .merge-thumb-actions button {
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: .85rem;
-      padding: 2px 4px;
-      line-height: 1;
-    }
-    .merge-thumb .merge-thumb-actions button:hover { color: var(--accent); }
-  </style>
+    body.has-wallpaper { background: transparent; }
 
+    #app-wallpaper-layer[data-preset="gradient"] {
+      background: radial-gradient(circle at 20% 20%, rgba(127,255,110,.14), transparent 55%),
+                  radial-gradient(circle at 80% 75%, rgba(61,255,208,.12), transparent 55%),
+                  var(--bg);
+    }
+    #app-wallpaper-layer[data-preset="abstract"] {
+      background: conic-gradient(from 210deg at 30% 30%, rgba(127,255,110,.12), rgba(61,255,208,.10), transparent 60%),
+                  conic-gradient(from 30deg at 80% 80%, rgba(255,255,255,.05), transparent 55%),
+                  var(--bg);
+    }
+    #app-wallpaper-layer[data-preset="mountains"] {
+      background:
+        linear-gradient(180deg, rgba(61,255,208,.08), transparent 40%),
+        linear-gradient(200deg, transparent 55%, rgba(0,0,0,.55) 56%, transparent 57%),
+        linear-gradient(160deg, transparent 60%, rgba(0,0,0,.4) 61%, transparent 62%),
+        var(--bg);
+    }
+    #app-wallpaper-layer[data-preset="night"] {
+      background:
+        radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+        radial-gradient(2px 2px at 60% 70%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 80% 20%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 40% 85%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 90% 60%, #fff, transparent),
+        linear-gradient(180deg, #05050a, #0c0c18);
+      background-size: 200% 200%, 200% 200%, 200% 200%, 200% 200%, 200% 200%, cover;
+    }
+    #app-wallpaper-layer[data-preset="nature"] {
+      background: radial-gradient(circle at 30% 20%, rgba(127,255,110,.16), transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(70,180,90,.14), transparent 55%),
+                  var(--bg);
+    }
+    #app-wallpaper-layer[data-preset="space"] {
+      background:
+        radial-gradient(1.5px 1.5px at 10% 20%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 30% 60%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 50% 15%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 70% 75%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 85% 35%, #fff, transparent),
+        radial-gradient(circle at 60% 40%, rgba(120,90,255,.18), transparent 45%),
+        radial-gradient(circle at 25% 75%, rgba(61,255,208,.10), transparent 50%),
+        #04040a;
+    }
+    #app-wallpaper-layer[data-preset="minimal"] {
+      background:
+        linear-gradient(90deg, var(--border) 1px, transparent 1px) 0 0 / 48px 48px,
+        linear-gradient(180deg, var(--border) 1px, transparent 1px) 0 0 / 48px 48px,
+        var(--bg);
+      opacity: 1;
+    }
+    #app-wallpaper-layer[data-preset="glass"] {
+      background:
+        radial-gradient(circle at 25% 25%, rgba(255,255,255,.10), transparent 40%),
+        radial-gradient(circle at 75% 70%, rgba(255,255,255,.06), transparent 45%),
+        var(--surface2);
+      backdrop-filter: blur(40px);
+    }
+    #app-wallpaper-layer[data-preset="custom"] {
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* ===== Settings Nav Item ===== */
+    #nav-settings-link { display: inline-flex !important; align-items: center; gap: .35rem; }
+
+    /* ===== Settings Panel ===== */
+    #settings-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.6);
+      z-index: 999; display: none; backdrop-filter: blur(3px);
+    }
+    #settings-overlay.open { display: block; }
+    #settings-panel {
+      position: fixed; top: 0; right: -420px; width: 400px; max-width: 92vw; height: 100%;
+      background: var(--surface); border-left: 1px solid var(--border);
+      z-index: 1000; overflow-y: auto; transition: right .3s ease;
+      padding: 1.5rem 1.4rem 3rem;
+      box-shadow: -10px 0 40px rgba(0,0,0,.4);
+    }
+    #settings-panel.open { right: 0; }
+    .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.4rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+    .settings-header h3 { font-size: 1.15rem; font-weight: 700; }
+    #settings-close-btn { background: none; border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: var(--radius-sm); cursor: pointer; font-size: 1.1rem; line-height: 1; }
+    #settings-close-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .settings-section { margin-bottom: 1.6rem; }
+    .settings-section h4 { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: .7rem; }
+
+    .settings-btn-group { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .settings-opt-btn {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      padding: .45rem .85rem; border-radius: var(--radius-sm); font-size: .82rem; cursor: pointer;
+      font-family: var(--sans); transition: all .15s;
+    }
+    .settings-opt-btn:hover { border-color: var(--accent); }
+    .settings-opt-btn.active { background: rgba(127,255,110,.1); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+    .settings-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .5rem 0; }
+    .settings-row label { font-size: .9rem; color: var(--text); }
+
+    .settings-toggle { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+    .settings-toggle input { opacity: 0; width: 0; height: 0; }
+    .settings-toggle-slider {
+      position: absolute; cursor: pointer; inset: 0; background: var(--border);
+      border-radius: 99px; transition: .2s;
+    }
+    .settings-toggle-slider::before {
+      content: ""; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px;
+      background: #fff; border-radius: 50%; transition: .2s;
+    }
+    .settings-toggle input:checked + .settings-toggle-slider { background: var(--accent); }
+    .settings-toggle input:checked + .settings-toggle-slider::before { transform: translateX(18px); }
+
+    .settings-wallpaper-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+    .wallpaper-swatch {
+      border: 2px solid var(--border); border-radius: var(--radius-sm); height: 52px; cursor: pointer;
+      position: relative; overflow: hidden; display: flex; align-items: flex-end; justify-content: center;
+    }
+    .wallpaper-swatch span { font-size: .62rem; font-family: var(--mono); background: rgba(0,0,0,.55); color: #fff; width: 100%; text-align: center; padding: .15rem 0; }
+    .wallpaper-swatch.active { border-color: var(--accent); }
+
+    .settings-color-input { width: 100%; height: 38px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); cursor: pointer; padding: 2px; }
+
+    .settings-select, .settings-file-input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+      padding: .5rem .7rem; border-radius: var(--radius-sm); font-family: var(--sans); font-size: .88rem;
+    }
+
+    .settings-action-btn {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      padding: .6rem; border-radius: var(--radius-sm); cursor: pointer; font-family: var(--sans);
+      font-size: .85rem; margin-bottom: .5rem; transition: all .15s;
+    }
+    .settings-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .settings-action-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+    .settings-info-row { display: flex; justify-content: space-between; font-size: .82rem; color: var(--muted); padding: .3rem 0; font-family: var(--mono); }
+    .settings-info-row span:last-child { color: var(--text); }
+
+    .update-toast {
+      position: fixed; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
+      background: var(--surface); border: 1px solid var(--accent); color: var(--text);
+      padding: .8rem 1.2rem; border-radius: var(--radius-sm); z-index: 1200; font-size: .85rem;
+      display: flex; align-items: center; gap: .8rem; box-shadow: 0 10px 30px rgba(0,0,0,.5);
+    }
+    .update-toast button { background: var(--accent); color: #0d0d0f; border: none; padding: .4rem .8rem; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: .8rem; }
+
+    @media (max-width: 480px) {
+      .settings-wallpaper-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
 </head>
 <body>
 
@@ -740,9 +871,12 @@
         <li><a href="#privacy">Privacy Policy</a></li>
         <li><a href="#contact">Contact Us</a></li>
         <li><a href="#terms">Terms & Conditions</a></li>
+        <li><a href="#" id="nav-settings-link">⚙ Settings</a></li>
       </ul>
     </nav>
   </header>
+
+  <div id="app-wallpaper-layer" data-preset="none" aria-hidden="true"></div>
 
   <section class="hero" id="home" aria-labelledby="hero-title">
     <p class="hero-eyebrow">100% Client-Side · Private · Blazing Fast</p>
@@ -796,14 +930,13 @@
         <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-promptstudio" id="tab-promptstudio">
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg> 10. AI Prompt Studio
         </button>
-        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-split" id="tab-split">
-          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg> 11. Split Image
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-splitter" id="tab-splitter">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg> 11. Image Splitter
         </button>
         <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-merge" id="tab-merge">
-          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4h7v7H4zM13 13h7v7h-7zM4 13l7-7M13 4l7 7"/></svg> 12. Merge Images
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h8v8H3zM13 13h8v8h-8zM11 11l6-6M13 3h6v6"/></svg> 12. Merge Images
         </button>
       </div>
-
 
       <div id="suite-workspace-block">
         
@@ -1261,155 +1394,114 @@
           </div>
         </div>
 
-        <div class="tool-workspace" id="panel-split" role="tabpanel" aria-labelledby="tab-split">
+        <div class="tool-workspace" id="panel-splitter" role="tabpanel" aria-labelledby="tab-splitter">
           <div class="tool-title-row">
-            <h2>🧩 Split Image <span>Split any image into multiple high-quality pieces instantly</span></h2>
+            <h2>Image Splitter <span>Slice One Image Into a Grid</span></h2>
           </div>
 
           <div class="tool-controls-panel">
             <div class="control-group">
-              <label for="split-mode">Split Mode</label>
-              <select id="split-mode">
-                <option value="horizontal">Horizontal Split</option>
-                <option value="vertical">Vertical Split</option>
-                <option value="grid" selected>Grid Split</option>
+              <label for="split-pieces">Split Into</label>
+              <select id="split-pieces">
+                <option value="2">2 Pieces</option>
+                <option value="3">3 Pieces</option>
+                <option value="4" selected>4 Pieces</option>
+                <option value="6">6 Pieces</option>
+                <option value="8">8 Pieces</option>
+                <option value="9">9 Pieces</option>
+                <option value="12">12 Pieces</option>
+                <option value="16">16 Pieces</option>
+                <option value="25">25 Pieces</option>
               </select>
-            </div>
-            <div class="control-group">
-              <label for="split-preset">Presets</label>
-              <select id="split-preset">
-                <option value="custom" selected>Custom Rows × Columns</option>
-                <option value="2">2 Parts</option>
-                <option value="3">3 Parts</option>
-                <option value="4">4 Parts (2×2)</option>
-                <option value="6">6 Parts (2×3)</option>
-                <option value="9">9 Parts (3×3)</option>
-                <option value="instagram">Instagram Grid (3×3)</option>
-                <option value="whatsapp">WhatsApp Status Split</option>
-                <option value="panorama">Panorama Split</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label for="split-rows">Rows</label>
-              <input type="number" id="split-rows" min="1" max="10" value="2">
-            </div>
-            <div class="control-group">
-              <label for="split-cols">Columns</label>
-              <input type="number" id="split-cols" min="1" max="10" value="2">
             </div>
             <div class="control-group">
               <label for="split-format">Output Format</label>
               <select id="split-format">
-                <option value="image/png" selected>PNG</option>
+                <option value="image/png" selected>PNG (lossless)</option>
                 <option value="image/jpeg">JPG</option>
-                <option value="image/webp">WebP</option>
               </select>
             </div>
-            <div class="control-group">
-              <label for="split-prefix">Filename Prefix</label>
-              <input type="text" id="split-prefix" value="piece" placeholder="e.g. piece">
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-splitter">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+            <p>Drag & drop or <span>click to browse</span> a single image to split</p>
+            <input type="file" id="file-splitter" class="file-input-hidden" accept="image/png, image/jpeg" />
+          </div>
+
+          <div class="workbench-layout" id="workbench-splitter" style="display:none; grid-template-columns: 1fr 1fr;">
+            <div class="preview-box">
+              <h4>Original</h4>
+              <img id="prev-split-orig" src="#" alt="Original image preview" />
             </div>
-            <div class="control-group" style="justify-content: center; flex-direction: row; gap: 0.5rem; align-items: center; padding-top: 1rem;">
-              <input type="checkbox" id="split-numbering" checked>
-              <label for="split-numbering" style="cursor: pointer; text-transform: none;">Show Piece Numbering</label>
+            <div class="preview-box" style="flex-wrap:wrap; flex-direction:row; align-content:flex-start;">
+              <h4 style="width:100%;">Split Preview (<span id="split-piece-count">4</span> pieces)</h4>
+              <div id="split-grid-preview" style="display:grid; gap:4px; width:100%;"></div>
             </div>
           </div>
 
-          <div class="tool-drop-zone" id="dropzone-split">
-            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
-            <p>Drag & drop, <span>browse files</span>, or paste (Ctrl/Cmd+V) an image to split</p>
-            <input type="file" id="file-split" class="file-input-hidden" accept="image/jpeg, image/png, image/webp" />
-          </div>
-
-          <div id="split-info" style="display:none; margin-top:1.2rem; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:.8rem 1rem; font-family:var(--mono); font-size:.78rem; color:var(--muted);"></div>
-
-          <div id="split-preview-grid" class="split-grid-preview" style="display:none;"></div>
-
-          <div class="action-row" id="split-action-row" style="display:none;">
-            <button id="split-generate-btn" class="btn-primary" type="button">Generate Split Preview</button>
-            <a id="split-dl-zip" class="btn-primary" href="#" style="display:none;">⬇ Download All as ZIP</a>
-            <button id="split-clear-btn" class="btn-secondary" type="button">Clear</button>
+          <div class="action-row">
+            <button id="action-split" class="btn-primary" style="display:none;">Generate Split Preview</button>
+            <a id="dl-split-zip" class="btn-primary" style="display:none;" href="#">⬇ Download All as ZIP</a>
           </div>
         </div>
 
         <div class="tool-workspace" id="panel-merge" role="tabpanel" aria-labelledby="tab-merge">
           <div class="tool-title-row">
-            <h2>🖼 Merge Images <span>Combine multiple images into a single high-quality image</span></h2>
+            <h2>Merge Images <span>Combine Multiple Images Into One</span></h2>
           </div>
 
           <div class="tool-controls-panel">
             <div class="control-group">
-              <label for="merge-mode">Merge Mode</label>
-              <select id="merge-mode">
-                <option value="vertical">Vertical Stack</option>
-                <option value="horizontal">Horizontal Row</option>
-                <option value="grid" selected>Grid Layout</option>
-                <option value="custom">Custom Layout (by Columns)</option>
+              <label for="merge-layout">Merge Layout</label>
+              <select id="merge-layout">
+                <option value="horizontal">Horizontal</option>
+                <option value="vertical">Vertical</option>
+                <option value="grid">Grid</option>
               </select>
             </div>
             <div class="control-group">
-              <label for="merge-cols">Grid / Custom Columns</label>
-              <input type="number" id="merge-cols" min="1" max="10" value="2">
+              <div class="range-label-wrap">
+                <label for="merge-spacing">Spacing (px)</label>
+                <span class="range-val-lbl" id="merge-spacing-lbl">10px</span>
+              </div>
+              <input type="range" id="merge-spacing" min="0" max="80" step="2" value="10">
             </div>
-            <div class="control-group">
-              <label for="merge-bg">Background Color</label>
-              <input type="color" id="merge-bg" value="#0d0d0f" style="height:42px;padding:.3rem;">
+            <div class="control-group" style="justify-content:center; flex-direction:row; gap:.5rem; align-items:center; padding-top:1rem;">
+              <input type="checkbox" id="merge-transparent">
+              <label for="merge-transparent" style="cursor:pointer; text-transform:none;">Transparent Background</label>
             </div>
-            <div class="control-group">
-              <label for="merge-padding">Outer Padding (px)</label>
-              <input type="number" id="merge-padding" min="0" max="200" value="0">
-            </div>
-            <div class="control-group">
-              <label for="merge-margin">Margin Between Images (px)</label>
-              <input type="number" id="merge-margin" min="0" max="200" value="8">
-            </div>
-            <div class="control-group">
-              <label for="merge-border">Border Width (px)</label>
-              <input type="number" id="merge-border" min="0" max="40" value="0">
-            </div>
-            <div class="control-group">
-              <label for="merge-border-color">Border Color</label>
-              <input type="color" id="merge-border-color" value="#00e5ff" style="height:42px;padding:.3rem;">
-            </div>
-            <div class="control-group">
-              <label for="merge-radius">Corner Radius (px)</label>
-              <input type="number" id="merge-radius" min="0" max="100" value="0">
+            <div class="control-group" id="merge-bgcolor-group">
+              <label for="merge-bgcolor">Background Color</label>
+              <input type="color" id="merge-bgcolor" value="#0d0d0f" class="settings-color-input">
             </div>
             <div class="control-group">
               <label for="merge-format">Output Format</label>
               <select id="merge-format">
-                <option value="image/png" selected>PNG</option>
+                <option value="image/png" selected>PNG (supports transparency)</option>
                 <option value="image/jpeg">JPG</option>
-                <option value="image/webp">WebP</option>
               </select>
-            </div>
-            <div class="control-group" style="justify-content: center; flex-direction: row; gap: 0.5rem; align-items: center; padding-top: 1rem;">
-              <input type="checkbox" id="merge-auto-align" checked>
-              <label for="merge-auto-align" style="cursor: pointer; text-transform: none;">Auto Align / Equal Cell Size</label>
             </div>
           </div>
 
           <div class="tool-drop-zone" id="dropzone-merge">
-            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-            <p>Drag & drop, <span>browse files</span>, or paste (Ctrl/Cmd+V) multiple images to merge</p>
-            <input type="file" id="file-merge" class="file-input-hidden" accept="image/jpeg, image/png, image/webp" multiple />
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+            <p>Drag & drop two or more images or <span>browse to add images</span></p>
+            <input type="file" id="file-merge" class="file-input-hidden" accept="image/png, image/jpeg" multiple />
           </div>
 
-          <div id="merge-thumb-list" class="merge-thumb-list" style="display:none;"></div>
+          <div id="merge-file-list" style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:.6rem;"></div>
 
           <div class="workbench-layout" id="workbench-merge" style="display:none; grid-template-columns: 1fr;">
             <div class="preview-box">
-              <h4>Merged Output Preview</h4>
+              <h4>Merged Preview</h4>
               <canvas id="canvas-merge"></canvas>
             </div>
           </div>
 
-          <div id="merge-info" style="display:none; margin-top:1rem; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:.8rem 1rem; font-family:var(--mono); font-size:.78rem; color:var(--muted);"></div>
-
-          <div class="action-row" id="merge-action-row" style="display:none;">
-            <button id="merge-generate-btn" class="btn-primary" type="button">Merge Images</button>
-            <a id="merge-dl-btn" class="btn-primary" href="#" style="display:none;">⬇ Download Merged Image</a>
-            <button id="merge-clear-btn" class="btn-secondary" type="button">Clear</button>
+          <div class="action-row">
+            <button id="action-merge" class="btn-primary" style="display:none;">Merge Images</button>
+            <a id="dl-merge" class="btn-primary" style="display:none;" href="#" download="smartmerge.png">Download Merged Image</a>
           </div>
         </div>
 
@@ -1815,6 +1907,104 @@
       </div>
     </div>
   </section>
+
+  <!-- ===================== SETTINGS PANEL ===================== -->
+  <div id="settings-overlay"></div>
+  <aside id="settings-panel" aria-label="Settings panel" role="dialog" aria-modal="true">
+    <div class="settings-header">
+      <h3>Settings</h3>
+      <button id="settings-close-btn" aria-label="Close settings" type="button">✕</button>
+    </div>
+
+    <div class="settings-section">
+      <h4>Theme</h4>
+      <div class="settings-btn-group" id="settings-theme-group" data-setting="theme">
+        <button class="settings-opt-btn" data-value="light" type="button">Light</button>
+        <button class="settings-opt-btn" data-value="dark" type="button">Dark</button>
+        <button class="settings-opt-btn" data-value="oled" type="button">OLED</button>
+        <button class="settings-opt-btn" data-value="auto" type="button">Auto</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h4>Accent Color</h4>
+      <input type="color" id="settings-accent-input" class="settings-color-input" value="#7fff6e" />
+    </div>
+
+    <div class="settings-section">
+      <h4>Font Size</h4>
+      <div class="settings-btn-group" id="settings-fontsize-group" data-setting="fontSize">
+        <button class="settings-opt-btn" data-value="14" type="button">Small</button>
+        <button class="settings-opt-btn" data-value="16" type="button">Medium</button>
+        <button class="settings-opt-btn" data-value="18" type="button">Large</button>
+        <button class="settings-opt-btn" data-value="20" type="button">XL</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h4>Layout & Accessibility</h4>
+      <div class="settings-row">
+        <label for="settings-compact-toggle">Compact Mode</label>
+        <label class="settings-toggle">
+          <input type="checkbox" id="settings-compact-toggle" />
+          <span class="settings-toggle-slider"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <label for="settings-contrast-toggle">High Contrast</label>
+        <label class="settings-toggle">
+          <input type="checkbox" id="settings-contrast-toggle" />
+          <span class="settings-toggle-slider"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <label for="settings-motion-toggle">Reduce Animations</label>
+        <label class="settings-toggle">
+          <input type="checkbox" id="settings-motion-toggle" />
+          <span class="settings-toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h4>Corner Style</h4>
+      <div class="settings-btn-group" id="settings-corner-group" data-setting="cornerStyle">
+        <button class="settings-opt-btn" data-value="rounded" type="button">Rounded</button>
+        <button class="settings-opt-btn" data-value="square" type="button">Square</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h4>Background Wallpaper</h4>
+      <div class="settings-wallpaper-grid" id="settings-wallpaper-grid">
+        <div class="wallpaper-swatch" data-value="none" style="background:var(--bg);"><span>None</span></div>
+        <div class="wallpaper-swatch" data-value="gradient" style="background:linear-gradient(135deg,#7fff6e55,#3dffd055);"><span>Gradient</span></div>
+        <div class="wallpaper-swatch" data-value="abstract" style="background:conic-gradient(#7fff6e55,#3dffd055,#7fff6e55);"><span>Abstract</span></div>
+        <div class="wallpaper-swatch" data-value="mountains" style="background:linear-gradient(200deg,#1a1a22,#3dffd022);"><span>Mountains</span></div>
+        <div class="wallpaper-swatch" data-value="night" style="background:linear-gradient(180deg,#05050a,#0c0c18);"><span>Night</span></div>
+        <div class="wallpaper-swatch" data-value="nature" style="background:radial-gradient(circle,#7fff6e44,#0d0d0f);"><span>Nature</span></div>
+        <div class="wallpaper-swatch" data-value="space" style="background:radial-gradient(circle,#785aff33,#04040a);"><span>Space</span></div>
+        <div class="wallpaper-swatch" data-value="minimal" style="background:#111114;"><span>Minimal</span></div>
+        <div class="wallpaper-swatch" data-value="glass" style="background:rgba(255,255,255,.08);"><span>Glass</span></div>
+      </div>
+      <input type="file" id="settings-wallpaper-upload" class="settings-file-input" accept="image/*" style="margin-top:.6rem;" />
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.4rem;">Upload a custom image to use as your wallpaper. Only the page background changes — tool cards and buttons stay the same.</p>
+    </div>
+
+    <div class="settings-section">
+      <h4>Backup</h4>
+      <button class="settings-action-btn" id="settings-export-btn" type="button">Export Settings</button>
+      <button class="settings-action-btn" id="settings-import-btn" type="button">Import Settings</button>
+      <input type="file" id="settings-import-input" accept="application/json" style="display:none;" />
+      <button class="settings-action-btn danger" id="settings-reset-btn" type="button">Restore Defaults</button>
+    </div>
+
+    <div class="settings-section">
+      <h4>About</h4>
+      <div class="settings-info-row"><span>App Version</span><span id="settings-version-display">—</span></div>
+      <div class="settings-info-row"><span>Storage Used</span><span id="settings-storage-display">—</span></div>
+    </div>
+  </aside>
 
   <footer>
     <div class="footer-inner">
@@ -2828,464 +3018,546 @@
       });
 
       /* ============================================================
-         11. SPLIT IMAGE — new tool, fully additive, no existing code touched
+         SETTINGS SYSTEM
          ============================================================ */
-      (function() {
-        let splitCurrentImage = null;
-        let splitPieceBlobs = [];
+      const SETTINGS_KEY = "smartcompress_settings_v1";
+      const defaultSettings = {
+        theme: "dark",
+        accent: "#7fff6e",
+        accent2: "#3dffd0",
+        fontSize: "16",
+        compact: false,
+        highContrast: false,
+        reduceAnimations: false,
+        cornerStyle: "rounded",
+        wallpaper: "none",
+        customWallpaperData: null
+      };
 
-        const splitModeSel   = document.getElementById("split-mode");
-        const splitPresetSel = document.getElementById("split-preset");
-        const splitRowsInput = document.getElementById("split-rows");
-        const splitColsInput = document.getElementById("split-cols");
-
-        const SPLIT_PRESETS = {
-          "2":         { mode: "grid", rows: 1, cols: 2 },
-          "3":         { mode: "grid", rows: 1, cols: 3 },
-          "4":         { mode: "grid", rows: 2, cols: 2 },
-          "6":         { mode: "grid", rows: 2, cols: 3 },
-          "9":         { mode: "grid", rows: 3, cols: 3 },
-          "instagram": { mode: "grid", rows: 3, cols: 3 },
-          "whatsapp":  { mode: "grid", rows: 3, cols: 1 },
-          "panorama":  { mode: "grid", rows: 1, cols: 3 }
-        };
-
-        function updateSplitFieldStates() {
-          const mode = splitModeSel.value;
-          splitRowsInput.disabled = (mode === "vertical");
-          splitColsInput.disabled = (mode === "horizontal");
+      function loadSettings() {
+        try {
+          const raw = localStorage.getItem(SETTINGS_KEY);
+          return raw ? Object.assign({}, defaultSettings, JSON.parse(raw)) : Object.assign({}, defaultSettings);
+        } catch (e) {
+          return Object.assign({}, defaultSettings);
         }
-        updateSplitFieldStates();
+      }
 
-        splitPresetSel.addEventListener("change", () => {
-          const val = splitPresetSel.value;
-          if (val === "custom") return;
-          const preset = SPLIT_PRESETS[val];
-          if (!preset) return;
-          splitModeSel.value = preset.mode;
-          splitRowsInput.value = preset.rows;
-          splitColsInput.value = preset.cols;
-          updateSplitFieldStates();
+      function saveSettings(s) {
+        try {
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+          return true;
+        } catch (e) {
+          alert("Could not save settings — your custom wallpaper image may be too large for browser storage. Try a smaller image.");
+          return false;
+        }
+      }
+
+      let currentSettings = loadSettings();
+
+      function applySettings(s) {
+        const root = document.documentElement;
+        let theme = s.theme || "dark";
+        if (theme === "auto") {
+          theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        root.setAttribute("data-theme", theme);
+        root.style.setProperty("--accent", s.accent || defaultSettings.accent);
+        root.style.setProperty("--accent2", s.accent2 || defaultSettings.accent2);
+        root.style.fontSize = (s.fontSize || "16") + "px";
+
+        if (s.cornerStyle === "square") {
+          root.style.setProperty("--radius", "0px");
+          root.style.setProperty("--radius-sm", "0px");
+        } else {
+          root.style.removeProperty("--radius");
+          root.style.removeProperty("--radius-sm");
+        }
+
+        document.body.classList.toggle("compact-mode", !!s.compact);
+        document.body.classList.toggle("high-contrast", !!s.highContrast);
+        document.body.classList.toggle("reduce-motion", !!s.reduceAnimations);
+
+        const wallpaperLayer = document.getElementById("app-wallpaper-layer");
+        const wp = s.wallpaper || "none";
+        document.body.classList.toggle("has-wallpaper", wp !== "none");
+        wallpaperLayer.setAttribute("data-preset", wp);
+        if (wp === "custom" && s.customWallpaperData) {
+          wallpaperLayer.style.backgroundImage = "url(" + s.customWallpaperData + ")";
+        } else {
+          wallpaperLayer.style.backgroundImage = "";
+        }
+      }
+
+      function syncSettingsUI(s) {
+        document.querySelectorAll("#settings-theme-group .settings-opt-btn").forEach(btn => {
+          btn.classList.toggle("active", btn.getAttribute("data-value") === s.theme);
         });
-
-        splitModeSel.addEventListener("change", updateSplitFieldStates);
-        [splitRowsInput, splitColsInput].forEach(el => {
-          el.addEventListener("input", () => { splitPresetSel.value = "custom"; });
+        document.querySelectorAll("#settings-fontsize-group .settings-opt-btn").forEach(btn => {
+          btn.classList.toggle("active", btn.getAttribute("data-value") === String(s.fontSize));
         });
-
-        function getSplitDims() {
-          const mode = splitModeSel.value;
-          let rows = Math.max(1, parseInt(splitRowsInput.value) || 1);
-          let cols = Math.max(1, parseInt(splitColsInput.value) || 1);
-          if (mode === "horizontal") cols = 1;
-          if (mode === "vertical") rows = 1;
-          return { rows, cols };
-        }
-
-        function loadSplitImage(fileObj) {
-          if (!fileObj || fileObj.type.indexOf("image") === -1) return;
-          const img = new Image();
-          img.onload = function() {
-            splitCurrentImage = img;
-            splitPieceBlobs = [];
-            document.getElementById("split-action-row").style.display = "flex";
-            document.getElementById("split-dl-zip").style.display = "none";
-            const grid = document.getElementById("split-preview-grid");
-            grid.innerHTML = "";
-            grid.style.display = "none";
-            const info = document.getElementById("split-info");
-            info.style.display = "block";
-            info.textContent = `Loaded image: ${img.naturalWidth}×${img.naturalHeight}px — configure split settings, then click "Generate Split Preview".`;
-          };
-          img.src = URL.createObjectURL(fileObj);
-        }
-
-        setupDropzoneOperationalBinding("dropzone-split", "file-split", loadSplitImage);
-
-        function openZoomModal(src) {
-          const overlay = document.createElement("div");
-          overlay.className = "zoom-modal-overlay";
-          const imgEl = document.createElement("img");
-          imgEl.src = src;
-          imgEl.alt = "Zoomed split piece preview";
-          overlay.appendChild(imgEl);
-          overlay.addEventListener("click", () => overlay.remove());
-          document.body.appendChild(overlay);
-        }
-
-        function generateSplit() {
-          if (!splitCurrentImage) return;
-          const { rows, cols } = getSplitDims();
-          const format = document.getElementById("split-format").value;
-          const prefix = document.getElementById("split-prefix").value.trim() || "piece";
-          const showNum = document.getElementById("split-numbering").checked;
-          const img = splitCurrentImage;
-          const pieceW = Math.max(1, Math.floor(img.naturalWidth / cols));
-          const pieceH = Math.max(1, Math.floor(img.naturalHeight / rows));
-          const total = rows * cols;
-          const ext = format === "image/png" ? "png" : (format === "image/webp" ? "webp" : "jpg");
-
-          const grid = document.getElementById("split-preview-grid");
-          grid.innerHTML = "";
-          grid.style.display = "grid";
-          grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-
-          splitPieceBlobs = new Array(total);
-          const pieceEls = [];
-
-          for (let i = 0; i < total; i++) {
-            const pieceDiv = document.createElement("div");
-            pieceDiv.className = "split-piece";
-            pieceDiv.innerHTML = (showNum ? `<span class="split-piece-num">${i + 1}</span>` : "") +
-              `<img alt="Split piece ${i + 1} of ${total}"><a class="split-piece-dl" href="#" download>⬇</a>`;
-            grid.appendChild(pieceDiv);
-            pieceEls.push(pieceDiv);
-          }
-
-          document.getElementById("split-dl-zip").style.display = "none";
-
-          let doneCount = 0;
-          let idx = 0;
-          for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-              const myIdx = idx;
-              const pieceCanvas = document.createElement("canvas");
-              pieceCanvas.width = pieceW;
-              pieceCanvas.height = pieceH;
-              const pctx = pieceCanvas.getContext("2d");
-              if (format !== "image/png") {
-                pctx.fillStyle = "#ffffff";
-                pctx.fillRect(0, 0, pieceW, pieceH);
-              }
-              pctx.drawImage(img, c * pieceW, r * pieceH, pieceW, pieceH, 0, 0, pieceW, pieceH);
-              pieceCanvas.toBlob(function(blob) {
-                if (!blob) return;
-                splitPieceBlobs[myIdx] = blob;
-                const url = URL.createObjectURL(blob);
-                const el = pieceEls[myIdx];
-                const imgTag = el.querySelector("img");
-                const aTag = el.querySelector("a");
-                imgTag.src = url;
-                imgTag.addEventListener("click", () => openZoomModal(url));
-                aTag.href = url;
-                aTag.download = `${prefix}-${myIdx + 1}.${ext}`;
-                doneCount++;
-                if (doneCount === total) {
-                  document.getElementById("split-dl-zip").style.display = "inline-flex";
-                }
-              }, format, 0.92);
-              idx++;
-            }
-          }
-
-          const info = document.getElementById("split-info");
-          info.style.display = "block";
-          info.textContent = `Original: ${img.naturalWidth}×${img.naturalHeight}px → ${total} pieces of ${pieceW}×${pieceH}px each (${ext.toUpperCase()})`;
-        }
-
-        document.getElementById("split-generate-btn").addEventListener("click", generateSplit);
-
-        document.getElementById("split-clear-btn").addEventListener("click", () => {
-          splitCurrentImage = null;
-          splitPieceBlobs = [];
-          document.getElementById("split-preview-grid").innerHTML = "";
-          document.getElementById("split-preview-grid").style.display = "none";
-          document.getElementById("split-info").style.display = "none";
-          document.getElementById("split-action-row").style.display = "none";
-          document.getElementById("split-dl-zip").style.display = "none";
-          document.getElementById("file-split").value = "";
+        document.querySelectorAll("#settings-corner-group .settings-opt-btn").forEach(btn => {
+          btn.classList.toggle("active", btn.getAttribute("data-value") === s.cornerStyle);
         });
+        document.querySelectorAll("#settings-wallpaper-grid .wallpaper-swatch").forEach(sw => {
+          sw.classList.toggle("active", sw.getAttribute("data-value") === s.wallpaper);
+        });
+        document.getElementById("settings-accent-input").value = s.accent || defaultSettings.accent;
+        document.getElementById("settings-compact-toggle").checked = !!s.compact;
+        document.getElementById("settings-contrast-toggle").checked = !!s.highContrast;
+        document.getElementById("settings-motion-toggle").checked = !!s.reduceAnimations;
+        document.getElementById("settings-version-display").textContent = window.APP_VERSION || "—";
+        updateStorageUsageDisplay();
+      }
 
-        document.getElementById("split-dl-zip").addEventListener("click", async (e) => {
-          e.preventDefault();
-          if (!window.JSZip || !splitPieceBlobs.length) return;
-          const zip = new JSZip();
-          const prefix = document.getElementById("split-prefix").value.trim() || "piece";
-          const format = document.getElementById("split-format").value;
-          const ext = format === "image/png" ? "png" : (format === "image/webp" ? "webp" : "jpg");
-          splitPieceBlobs.forEach((blob, i) => {
-            if (blob) zip.file(`${prefix}-${i + 1}.${ext}`, blob);
+      function updateStorageUsageDisplay() {
+        const el = document.getElementById("settings-storage-display");
+        if (navigator.storage && navigator.storage.estimate) {
+          navigator.storage.estimate().then(est => {
+            const usedMB = ((est.usage || 0) / (1024 * 1024)).toFixed(2);
+            el.textContent = usedMB + " MB";
+          }).catch(() => {
+            el.textContent = estimateLocalStorageKB() + " KB (localStorage)";
           });
-          const content = await zip.generateAsync({ type: "blob" });
-          const url = URL.createObjectURL(content);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${prefix}-split-pieces.zip`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        });
+        } else {
+          el.textContent = estimateLocalStorageKB() + " KB (localStorage)";
+        }
+      }
+      function estimateLocalStorageKB() {
+        let total = 0;
+        for (const key in localStorage) {
+          if (localStorage.hasOwnProperty(key)) total += (localStorage[key].length + key.length);
+        }
+        return (total / 1024).toFixed(1);
+      }
 
-        /* Expose loader for the shared paste handler below */
-        window.__splitLoadImage = loadSplitImage;
-      })();
+      applySettings(currentSettings);
+
+      /* Panel open/close */
+      const settingsOverlay = document.getElementById("settings-overlay");
+      const settingsPanelEl = document.getElementById("settings-panel");
+      const navSettingsLink = document.getElementById("nav-settings-link");
+
+      function openSettingsPanel() {
+        syncSettingsUI(currentSettings);
+        settingsOverlay.classList.add("open");
+        settingsPanelEl.classList.add("open");
+      }
+      function closeSettingsPanel() {
+        settingsOverlay.classList.remove("open");
+        settingsPanelEl.classList.remove("open");
+      }
+      navSettingsLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        openSettingsPanel();
+      });
+      document.getElementById("settings-close-btn").addEventListener("click", closeSettingsPanel);
+      settingsOverlay.addEventListener("click", closeSettingsPanel);
+
+      /* Button groups (theme / font size / corner style) */
+      ["settings-theme-group", "settings-fontsize-group", "settings-corner-group"].forEach(groupId => {
+        const groupEl = document.getElementById(groupId);
+        const settingKey = groupEl.getAttribute("data-setting");
+        groupEl.querySelectorAll(".settings-opt-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            currentSettings[settingKey] = btn.getAttribute("data-value");
+            saveSettings(currentSettings);
+            applySettings(currentSettings);
+            syncSettingsUI(currentSettings);
+          });
+        });
+      });
+
+      /* Accent color */
+      document.getElementById("settings-accent-input").addEventListener("input", (e) => {
+        currentSettings.accent = e.target.value;
+        saveSettings(currentSettings);
+        applySettings(currentSettings);
+      });
+
+      /* Toggles */
+      document.getElementById("settings-compact-toggle").addEventListener("change", (e) => {
+        currentSettings.compact = e.target.checked;
+        saveSettings(currentSettings);
+        applySettings(currentSettings);
+      });
+      document.getElementById("settings-contrast-toggle").addEventListener("change", (e) => {
+        currentSettings.highContrast = e.target.checked;
+        saveSettings(currentSettings);
+        applySettings(currentSettings);
+      });
+      document.getElementById("settings-motion-toggle").addEventListener("change", (e) => {
+        currentSettings.reduceAnimations = e.target.checked;
+        saveSettings(currentSettings);
+        applySettings(currentSettings);
+      });
+
+      /* Wallpaper swatches */
+      document.querySelectorAll("#settings-wallpaper-grid .wallpaper-swatch").forEach(sw => {
+        sw.addEventListener("click", () => {
+          currentSettings.wallpaper = sw.getAttribute("data-value");
+          if (currentSettings.wallpaper !== "custom") currentSettings.customWallpaperData = null;
+          saveSettings(currentSettings);
+          applySettings(currentSettings);
+          syncSettingsUI(currentSettings);
+        });
+      });
+
+      /* Custom wallpaper upload */
+      document.getElementById("settings-wallpaper-upload").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          currentSettings.customWallpaperData = reader.result;
+          currentSettings.wallpaper = "custom";
+          if (saveSettings(currentSettings)) {
+            applySettings(currentSettings);
+            syncSettingsUI(currentSettings);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+
+      /* Export / Import / Reset */
+      document.getElementById("settings-export-btn").addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(currentSettings, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "smartcompress-settings.json";
+        a.click();
+      });
+
+      document.getElementById("settings-import-btn").addEventListener("click", () => {
+        document.getElementById("settings-import-input").click();
+      });
+      document.getElementById("settings-import-input").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const imported = JSON.parse(reader.result);
+            currentSettings = Object.assign({}, defaultSettings, imported);
+            saveSettings(currentSettings);
+            applySettings(currentSettings);
+            syncSettingsUI(currentSettings);
+          } catch (err) {
+            alert("That file doesn't look like a valid Smart Compress settings export.");
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById("settings-reset-btn").addEventListener("click", () => {
+        if (!confirm("Restore all settings to their defaults?")) return;
+        currentSettings = Object.assign({}, defaultSettings);
+        localStorage.removeItem(SETTINGS_KEY);
+        applySettings(currentSettings);
+        syncSettingsUI(currentSettings);
+      });
+
+      /* React to OS theme change when "Auto" is selected */
+      if (window.matchMedia) {
+        window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
+          if (currentSettings.theme === "auto") applySettings(currentSettings);
+        });
+      }
 
       /* ============================================================
-         12. MERGE IMAGES — new tool, fully additive, no existing code touched
+         11. IMAGE SPLITTER
          ============================================================ */
-      (function() {
-        let mergeImages = [];
-        let mergeIdCounter = 0;
+      let splitterOriginalImage = null;
+      let splitterPieceBlobs = [];
 
-        function addMergeImages(fileList) {
-          Array.from(fileList).forEach(file => {
-            if (!file || file.type.indexOf("image") === -1) return;
-            const img = new Image();
-            const id = "m" + (++mergeIdCounter);
-            img.onload = function() {
-              mergeImages.push({ id: id, img: img, rotation: 0, flipH: false, flipV: false });
-              renderMergeThumbs();
-              document.getElementById("merge-action-row").style.display = "flex";
-            };
-            img.src = URL.createObjectURL(file);
-          });
-        }
+      function computeGridForPieces(n) {
+        const map = { 2: [1, 2], 3: [1, 3], 4: [2, 2], 6: [2, 3], 8: [2, 4], 9: [3, 3], 12: [3, 4], 16: [4, 4], 25: [5, 5] };
+        return map[n] || [2, 2];
+      }
 
-        const mergeDropzone  = document.getElementById("dropzone-merge");
-        const mergeFileInput = document.getElementById("file-merge");
+      setupDropzoneOperationalBinding("dropzone-splitter", "file-splitter", function(fileObj) {
+        const img = new Image();
+        img.onload = () => {
+          splitterOriginalImage = img;
+          document.getElementById("workbench-splitter").style.display = "grid";
+          document.getElementById("prev-split-orig").src = img.src;
+          document.getElementById("action-split").style.display = "inline-flex";
+          document.getElementById("dl-split-zip").style.display = "none";
+          document.getElementById("split-grid-preview").innerHTML = "";
+        };
+        img.src = URL.createObjectURL(fileObj);
+      });
 
-        mergeDropzone.addEventListener("click", () => mergeFileInput.click());
-        mergeDropzone.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          mergeDropzone.classList.add("drag-over");
-        });
-        ["dragleave", "drop"].forEach(evt => {
-          mergeDropzone.addEventListener(evt, () => mergeDropzone.classList.remove("drag-over"));
-        });
-        mergeDropzone.addEventListener("drop", (e) => {
-          e.preventDefault();
-          if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            addMergeImages(e.dataTransfer.files);
-          }
-        });
-        mergeFileInput.addEventListener("change", (e) => {
-          if (e.target.files && e.target.files.length > 0) {
-            addMergeImages(e.target.files);
-          }
-        });
+      document.getElementById("split-pieces").addEventListener("change", (e) => {
+        document.getElementById("split-piece-count").textContent = e.target.value;
+      });
 
-        const mergeThumbList = document.getElementById("merge-thumb-list");
+      document.getElementById("action-split").addEventListener("click", () => {
+        if (!splitterOriginalImage) return;
+        const n = parseInt(document.getElementById("split-pieces").value, 10);
+        const format = document.getElementById("split-format").value;
+        const ext = format === "image/jpeg" ? "jpg" : "png";
+        const [rows, cols] = computeGridForPieces(n);
+        document.getElementById("split-piece-count").textContent = n;
 
-        mergeThumbList.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          const dragging = mergeThumbList.querySelector(".merge-thumb.dragging");
-          if (!dragging) return;
-          const siblings = [...mergeThumbList.querySelectorAll(".merge-thumb:not(.dragging)")];
-          const next = siblings.find(sib => {
-            const rect = sib.getBoundingClientRect();
-            return e.clientX < rect.left + rect.width / 2;
-          });
-          mergeThumbList.insertBefore(dragging, next || null);
-        });
+        const img = splitterOriginalImage;
+        const fullW = img.naturalWidth, fullH = img.naturalHeight;
+        const pieceW = Math.floor(fullW / cols);
+        const pieceH = Math.floor(fullH / rows);
 
-        function reorderMergeFromDOM() {
-          const ids = [...mergeThumbList.querySelectorAll(".merge-thumb")].map(t => t.dataset.id);
-          mergeImages.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
-        }
+        const previewGrid = document.getElementById("split-grid-preview");
+        previewGrid.innerHTML = "";
+        previewGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        splitterPieceBlobs = [];
 
-        function renderMergeThumbs() {
-          mergeThumbList.innerHTML = "";
-          mergeThumbList.style.display = mergeImages.length ? "flex" : "none";
+        let piecesProcessed = 0;
+        const totalPieces = rows * cols;
 
-          mergeImages.forEach((item, index) => {
-            const thumb = document.createElement("div");
-            thumb.className = "merge-thumb";
-            thumb.draggable = true;
-            thumb.dataset.id = item.id;
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const cnv = document.createElement("canvas");
+            const isLastCol = c === cols - 1;
+            const isLastRow = r === rows - 1;
+            const thisW = isLastCol ? (fullW - pieceW * (cols - 1)) : pieceW;
+            const thisH = isLastRow ? (fullH - pieceH * (rows - 1)) : pieceH;
+            cnv.width = thisW;
+            cnv.height = thisH;
+            const ctx = cnv.getContext("2d");
+            ctx.drawImage(img, c * pieceW, r * pieceH, thisW, thisH, 0, 0, thisW, thisH);
 
-            const transformStr = `rotate(${item.rotation}deg) scale(${item.flipH ? -1 : 1}, ${item.flipV ? -1 : 1})`;
-            thumb.innerHTML = `
-              <img src="${item.img.src}" style="transform:${transformStr};" alt="Merge source image ${index + 1}">
-              <div class="merge-thumb-actions">
-                <button type="button" title="Rotate 90°" data-action="rotate">⟳</button>
-                <button type="button" title="Flip Horizontal" data-action="fliph">⇋</button>
-                <button type="button" title="Flip Vertical" data-action="flipv">⇵</button>
-                <button type="button" title="Remove" data-action="remove">✕</button>
-              </div>
-            `;
+            const thumb = document.createElement("img");
+            thumb.style.width = "100%";
+            thumb.style.borderRadius = "4px";
+            thumb.style.border = "1px solid var(--border)";
+            thumb.src = cnv.toDataURL(format, 0.95);
+            previewGrid.appendChild(thumb);
 
-            thumb.addEventListener("dragstart", () => thumb.classList.add("dragging"));
-            thumb.addEventListener("dragend", () => {
-              thumb.classList.remove("dragging");
-              reorderMergeFromDOM();
-            });
-
-            thumb.querySelector('[data-action="rotate"]').addEventListener("click", () => {
-              item.rotation = (item.rotation + 90) % 360;
-              renderMergeThumbs();
-            });
-            thumb.querySelector('[data-action="fliph"]').addEventListener("click", () => {
-              item.flipH = !item.flipH;
-              renderMergeThumbs();
-            });
-            thumb.querySelector('[data-action="flipv"]').addEventListener("click", () => {
-              item.flipV = !item.flipV;
-              renderMergeThumbs();
-            });
-            thumb.querySelector('[data-action="remove"]').addEventListener("click", () => {
-              mergeImages = mergeImages.filter(m => m.id !== item.id);
-              renderMergeThumbs();
-              if (!mergeImages.length) {
-                document.getElementById("merge-action-row").style.display = "none";
-                document.getElementById("workbench-merge").style.display = "none";
-                document.getElementById("merge-info").style.display = "none";
+            cnv.toBlob((blob) => {
+              splitterPieceBlobs.push({ name: `piece-${r + 1}-${c + 1}.${ext}`, blob });
+              piecesProcessed++;
+              if (piecesProcessed === totalPieces) {
+                document.getElementById("dl-split-zip").style.display = "inline-flex";
               }
-            });
-
-            mergeThumbList.appendChild(thumb);
-          });
-        }
-
-        function roundRectPath(ctx, x, y, w, h, r) {
-          r = Math.max(0, Math.min(r, w / 2, h / 2));
-          ctx.beginPath();
-          ctx.moveTo(x + r, y);
-          ctx.arcTo(x + w, y, x + w, y + h, r);
-          ctx.arcTo(x + w, y + h, x, y + h, r);
-          ctx.arcTo(x, y + h, x, y, r);
-          ctx.arcTo(x, y, x + w, y, r);
-          ctx.closePath();
-        }
-
-        function drawTransformedImage(ctx, item, x, y, w, h) {
-          ctx.save();
-          ctx.translate(x + w / 2, y + h / 2);
-          ctx.rotate(item.rotation * Math.PI / 180);
-          ctx.scale(item.flipH ? -1 : 1, item.flipV ? -1 : 1);
-          const rotated90 = (item.rotation % 180) !== 0;
-          if (rotated90) {
-            ctx.drawImage(item.img, -h / 2, -w / 2, h, w);
-          } else {
-            ctx.drawImage(item.img, -w / 2, -h / 2, w, h);
+            }, format, 0.95);
           }
-          ctx.restore();
-        }
-
-        function generateMerge() {
-          if (!mergeImages.length) return;
-          const mode        = document.getElementById("merge-mode").value;
-          const cols         = Math.max(1, parseInt(document.getElementById("merge-cols").value) || 1);
-          const bg           = document.getElementById("merge-bg").value;
-          const padding      = Math.max(0, parseInt(document.getElementById("merge-padding").value) || 0);
-          const margin       = Math.max(0, parseInt(document.getElementById("merge-margin").value) || 0);
-          const borderW      = Math.max(0, parseInt(document.getElementById("merge-border").value) || 0);
-          const borderColor  = document.getElementById("merge-border-color").value;
-          const radius       = Math.max(0, parseInt(document.getElementById("merge-radius").value) || 0);
-          const autoAlign    = document.getElementById("merge-auto-align").checked;
-          const format       = document.getElementById("merge-format").value;
-
-          const n = mergeImages.length;
-          let actualCols, rows;
-          if (mode === "vertical") { actualCols = 1; rows = n; }
-          else if (mode === "horizontal") { actualCols = n; rows = 1; }
-          else { actualCols = Math.min(cols, n); rows = Math.ceil(n / actualCols); }
-
-          let cellW, cellH;
-          if (autoAlign) {
-            cellW = Math.max(...mergeImages.map(m => m.img.naturalWidth));
-            cellH = Math.max(...mergeImages.map(m => m.img.naturalHeight));
-          } else {
-            cellW = mergeImages[0].img.naturalWidth;
-            cellH = mergeImages[0].img.naturalHeight;
-          }
-
-          const totalW = actualCols * cellW + (actualCols - 1) * margin + padding * 2;
-          const totalH = rows * cellH + (rows - 1) * margin + padding * 2;
-
-          const canvas = document.getElementById("canvas-merge");
-          canvas.width = totalW;
-          canvas.height = totalH;
-          const ctx = canvas.getContext("2d");
-
-          ctx.fillStyle = bg;
-          ctx.fillRect(0, 0, totalW, totalH);
-
-          mergeImages.forEach((item, i) => {
-            const r = Math.floor(i / actualCols);
-            const c = i % actualCols;
-            const x = padding + c * (cellW + margin);
-            const y = padding + r * (cellH + margin);
-
-            if (radius > 0) {
-              ctx.save();
-              roundRectPath(ctx, x, y, cellW, cellH, radius);
-              ctx.clip();
-            }
-            drawTransformedImage(ctx, item, x, y, cellW, cellH);
-            if (radius > 0) ctx.restore();
-
-            if (borderW > 0) {
-              ctx.save();
-              ctx.strokeStyle = borderColor;
-              ctx.lineWidth = borderW;
-              if (radius > 0) {
-                roundRectPath(ctx, x + borderW / 2, y + borderW / 2, cellW - borderW, cellH - borderW, radius);
-                ctx.stroke();
-              } else {
-                ctx.strokeRect(x + borderW / 2, y + borderW / 2, cellW - borderW, cellH - borderW);
-              }
-              ctx.restore();
-            }
-          });
-
-          document.getElementById("workbench-merge").style.display = "grid";
-
-          canvas.toBlob(function(blob) {
-            if (!blob) return;
-            const url = URL.createObjectURL(blob);
-            const ext = format === "image/png" ? "png" : (format === "image/webp" ? "webp" : "jpg");
-            const dlBtn = document.getElementById("merge-dl-btn");
-            dlBtn.href = url;
-            dlBtn.download = `smartcompress-merged.${ext}`;
-            dlBtn.style.display = "inline-flex";
-
-            const sizeKB = (blob.size / 1024).toFixed(1);
-            const info = document.getElementById("merge-info");
-            info.style.display = "block";
-            info.textContent = `Output resolution: ${totalW}×${totalH}px — Estimated file size: ${sizeKB} KB (${ext.toUpperCase()})`;
-          }, format, 0.92);
-        }
-
-        document.getElementById("merge-generate-btn").addEventListener("click", generateMerge);
-
-        document.getElementById("merge-clear-btn").addEventListener("click", () => {
-          mergeImages = [];
-          renderMergeThumbs();
-          document.getElementById("workbench-merge").style.display = "none";
-          document.getElementById("merge-info").style.display = "none";
-          document.getElementById("merge-dl-btn").style.display = "none";
-          document.getElementById("merge-action-row").style.display = "none";
-          document.getElementById("file-merge").value = "";
-        });
-
-        /* Expose adder for the shared paste handler below */
-        window.__mergeAddImages = addMergeImages;
-      })();
-
-      /* Shared clipboard-paste support for Split Image & Merge Images (additive, does not touch any existing paste behavior since none previously existed) */
-      document.addEventListener("paste", function(e) {
-        const splitPanelActive = document.getElementById("panel-split") && document.getElementById("panel-split").classList.contains("active");
-        const mergePanelActive = document.getElementById("panel-merge") && document.getElementById("panel-merge").classList.contains("active");
-        if (!splitPanelActive && !mergePanelActive) return;
-        const clipboardData = e.clipboardData || window.clipboardData;
-        if (!clipboardData || !clipboardData.items) return;
-        const imageFiles = [];
-        for (let i = 0; i < clipboardData.items.length; i++) {
-          if (clipboardData.items[i].type.indexOf("image") !== -1) {
-            const blob = clipboardData.items[i].getAsFile();
-            if (blob) imageFiles.push(blob);
-          }
-        }
-        if (!imageFiles.length) return;
-        e.preventDefault();
-        if (splitPanelActive && window.__splitLoadImage) {
-          window.__splitLoadImage(imageFiles[0]);
-        } else if (mergePanelActive && window.__mergeAddImages) {
-          window.__mergeAddImages(imageFiles);
         }
       });
 
+      document.getElementById("dl-split-zip").addEventListener("click", async (e) => {
+        e.preventDefault();
+        if (!window.JSZip || !splitterPieceBlobs.length) return;
+        const zip = new JSZip();
+        splitterPieceBlobs.forEach(item => zip.file(item.name, item.blob));
+        const content = await zip.generateAsync({ type: "blob" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(content);
+        a.download = "smartcompress-split-pieces.zip";
+        a.click();
+      });
+
+      /* ============================================================
+         12. MERGE IMAGES
+         ============================================================ */
+      let mergeImages = []; /* { img, name } */
+
+      function renderMergeFileList() {
+        const list = document.getElementById("merge-file-list");
+        list.innerHTML = "";
+        mergeImages.forEach((item, idx) => {
+          const chip = document.createElement("div");
+          chip.style.cssText = "display:flex;align-items:center;gap:.4rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.3rem .3rem .3rem .3rem;";
+          const thumb = document.createElement("img");
+          thumb.src = item.img.src;
+          thumb.style.cssText = "width:34px;height:34px;object-fit:cover;border-radius:4px;";
+          const label = document.createElement("span");
+          label.textContent = item.name.length > 14 ? item.name.slice(0, 12) + "…" : item.name;
+          label.style.cssText = "font-size:.75rem;color:var(--muted);padding:0 .3rem;";
+          const removeBtn = document.createElement("button");
+          removeBtn.textContent = "✕";
+          removeBtn.type = "button";
+          removeBtn.style.cssText = "background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:0 .3rem;";
+          removeBtn.addEventListener("click", () => {
+            mergeImages.splice(idx, 1);
+            renderMergeFileList();
+          });
+          chip.appendChild(thumb);
+          chip.appendChild(label);
+          chip.appendChild(removeBtn);
+          list.appendChild(chip);
+        });
+        document.getElementById("action-merge").style.display = mergeImages.length >= 2 ? "inline-flex" : "none";
+      }
+
+      function addMergeFile(fileObj) {
+        const img = new Image();
+        img.onload = () => {
+          mergeImages.push({ img, name: fileObj.name });
+          renderMergeFileList();
+        };
+        img.src = URL.createObjectURL(fileObj);
+      }
+
+      const mergeDropzone = document.getElementById("dropzone-merge");
+      const mergeFileInput = document.getElementById("file-merge");
+      mergeDropzone.addEventListener("click", () => mergeFileInput.click());
+      mergeDropzone.addEventListener("dragover", (e) => { e.preventDefault(); mergeDropzone.classList.add("drag-over"); });
+      ["dragleave", "drop"].forEach(evt => mergeDropzone.addEventListener(evt, () => mergeDropzone.classList.remove("drag-over")));
+      mergeDropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        Array.from(e.dataTransfer.files || []).forEach(addMergeFile);
+      });
+      mergeFileInput.addEventListener("change", (e) => {
+        Array.from(e.target.files || []).forEach(addMergeFile);
+      });
+
+      document.getElementById("merge-spacing").addEventListener("input", (e) => {
+        document.getElementById("merge-spacing-lbl").textContent = e.target.value + "px";
+      });
+
+      document.getElementById("merge-transparent").addEventListener("change", (e) => {
+        document.getElementById("merge-bgcolor-group").style.opacity = e.target.checked ? "0.35" : "1";
+        document.getElementById("merge-bgcolor").disabled = e.target.checked;
+      });
+
+      document.getElementById("merge-format").addEventListener("change", (e) => {
+        const transparentBox = document.getElementById("merge-transparent");
+        if (e.target.value === "image/jpeg" && transparentBox.checked) {
+          transparentBox.checked = false;
+          transparentBox.dispatchEvent(new Event("change"));
+          alert("JPG does not support transparency, so a background color will be used instead.");
+        }
+      });
+
+      document.getElementById("action-merge").addEventListener("click", () => {
+        if (mergeImages.length < 2) return;
+        const layout = document.getElementById("merge-layout").value;
+        const spacing = parseInt(document.getElementById("merge-spacing").value, 10);
+        const transparent = document.getElementById("merge-transparent").checked;
+        const bgColor = document.getElementById("merge-bgcolor").value;
+        const format = document.getElementById("merge-format").value;
+        const canvas = document.getElementById("canvas-merge");
+        const ctx = canvas.getContext("2d");
+
+        const imgs = mergeImages.map(m => m.img);
+        let canvasW, canvasH;
+        const positions = [];
+
+        if (layout === "horizontal") {
+          const maxH = Math.max(...imgs.map(i => i.naturalHeight));
+          canvasH = maxH;
+          canvasW = imgs.reduce((sum, i) => sum + i.naturalWidth, 0) + spacing * (imgs.length - 1);
+          let x = 0;
+          imgs.forEach(i => {
+            const y = Math.round((maxH - i.naturalHeight) / 2);
+            positions.push({ x, y, w: i.naturalWidth, h: i.naturalHeight });
+            x += i.naturalWidth + spacing;
+          });
+        } else if (layout === "vertical") {
+          const maxW = Math.max(...imgs.map(i => i.naturalWidth));
+          canvasW = maxW;
+          canvasH = imgs.reduce((sum, i) => sum + i.naturalHeight, 0) + spacing * (imgs.length - 1);
+          let y = 0;
+          imgs.forEach(i => {
+            const x = Math.round((maxW - i.naturalWidth) / 2);
+            positions.push({ x, y, w: i.naturalWidth, h: i.naturalHeight });
+            y += i.naturalHeight + spacing;
+          });
+        } else {
+          const cols = Math.ceil(Math.sqrt(imgs.length));
+          const rows = Math.ceil(imgs.length / cols);
+          const cellW = Math.max(...imgs.map(i => i.naturalWidth));
+          const cellH = Math.max(...imgs.map(i => i.naturalHeight));
+          canvasW = cellW * cols + spacing * (cols - 1);
+          canvasH = cellH * rows + spacing * (rows - 1);
+          imgs.forEach((i, idx) => {
+            const r = Math.floor(idx / cols);
+            const c = idx % cols;
+            const x = c * (cellW + spacing) + Math.round((cellW - i.naturalWidth) / 2);
+            const y = r * (cellH + spacing) + Math.round((cellH - i.naturalHeight) / 2);
+            positions.push({ x, y, w: i.naturalWidth, h: i.naturalHeight });
+          });
+        }
+
+        canvas.width = canvasW;
+        canvas.height = canvasH;
+        ctx.clearRect(0, 0, canvasW, canvasH);
+        if (!transparent) {
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, canvasW, canvasH);
+        }
+        imgs.forEach((img, idx) => {
+          const p = positions[idx];
+          ctx.drawImage(img, p.x, p.y, p.w, p.h);
+        });
+
+        document.getElementById("workbench-merge").style.display = "grid";
+        const dlBtn = document.getElementById("dl-merge");
+        const ext = format === "image/jpeg" ? "jpg" : "png";
+        canvas.toBlob((blob) => {
+          dlBtn.href = URL.createObjectURL(blob);
+          dlBtn.download = "smartmerge." + ext;
+          dlBtn.style.display = "inline-flex";
+        }, format, 0.95);
+      });
+
     });
+
+    /* ============================================================
+       PWA — SERVICE WORKER REGISTRATION, UPDATE DETECTION & RELOAD
+       ============================================================ */
+    (function () {
+      if (!("serviceWorker" in navigator)) return;
+
+      function showUpdateToast(onReload) {
+        const existing = document.getElementById("sc-update-toast");
+        if (existing) existing.remove();
+        const toast = document.createElement("div");
+        toast.id = "sc-update-toast";
+        toast.className = "update-toast";
+        toast.innerHTML = '<span>A new version of Smart Compress is available.</span><button type="button">Refresh</button>';
+        toast.querySelector("button").addEventListener("click", onReload);
+        document.body.appendChild(toast);
+      }
+
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").then((registration) => {
+
+          /* Detect a waiting worker on initial load (e.g. tab was open during a deploy) */
+          if (registration.waiting && navigator.serviceWorker.controller) {
+            showUpdateToast(() => {
+              registration.waiting.postMessage({ type: "SKIP_WAITING" });
+            });
+          }
+
+          registration.addEventListener("updatefound", () => {
+            const newWorker = registration.installing;
+            if (!newWorker) return;
+            newWorker.addEventListener("statechange", () => {
+              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                /* A new version has been installed and is waiting to activate */
+                showUpdateToast(() => {
+                  newWorker.postMessage({ type: "SKIP_WAITING" });
+                });
+              }
+            });
+          });
+
+          /* Periodically check for a new deployment */
+          setInterval(() => registration.update(), 60 * 1000);
+          document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") registration.update();
+          });
+        }).catch(() => { /* SW registration failed — app still works without offline support */ });
+
+        /* Reload exactly once when the new service worker takes control */
+        let hasReloaded = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (hasReloaded) return;
+          hasReloaded = true;
+          window.location.reload();
+        });
+      });
+    })();
   </script>
 </body>
 </html>
