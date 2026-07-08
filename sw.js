@@ -9,7 +9,7 @@
    Keep this number in sync with window.APP_VERSION in index.html
    (used only for the human-readable display in Settings).
    ============================================================ */
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 const CACHE_NAME = `smartcompress-v${CACHE_VERSION}`;
 
 /* Only pre-cache the app shell. Everything else is cached

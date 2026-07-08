@@ -10,7 +10,7 @@
   <meta http-equiv="Expires" content="0" />
   <script>
     /* ===== Smart Compress — App Version (bump on every deploy, keep in sync with sw.js CACHE_VERSION) ===== */
-    window.APP_VERSION = "2.1.0";
+    window.APP_VERSION = "2.2.0";
     /* ===== Early settings application — runs before CSS paints to avoid theme flash ===== */
     (function () {
       try {
@@ -34,7 +34,7 @@
     })();
   </script>
   <meta name="description" content="Smart Compress — Free online image compressor. Compress JPG, PNG, and WebP images instantly in your browser. No uploads, no servers, 100% private and secure." />
-  <meta name="keywords" content="image compressor, compress jpg, compress png, compress webp, reduce image size, online image optimizer, free image compression, smart compress, image resizer, crop image, rotate image, png to jpg converter, jpg to png converter, webp converter, image to pdf" />
+  <meta name="keywords" content="image compressor, compress jpg, compress png, compress webp, reduce image size, online image optimizer, free image compression, smart compress, image resizer, crop image, rotate image, png to jpg converter, jpg to png converter, webp converter, image to pdf, online document editor, word style editor, docx editor, pdf toolkit, merge pdf, split pdf, compress pdf, rotate pdf pages, delete pdf pages" />
   <meta name="author" content="Smart Compress" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#0d0d0f" />
@@ -67,6 +67,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
+  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 
   <script type="application/ld+json">
   {
@@ -848,6 +852,177 @@
     @media (max-width: 480px) {
       .settings-wallpaper-grid { grid-template-columns: repeat(2, 1fr); }
     }
+    /* ================= Smart Document Editor & PDF Toolkit (additive) ================= */
+    .pdf-subtabs { display: flex; gap: .6rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
+    .pdf-subtab-btn {
+      background: var(--surface); border: 1px solid var(--border); color: var(--muted);
+      padding: .6rem 1rem; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600;
+      font-size: .82rem; font-family: var(--sans); transition: all .2s ease;
+    }
+    .pdf-subtab-btn:hover { border-color: var(--muted); color: var(--text); background: var(--surface2); }
+    .pdf-subtab-btn.active { background: rgba(127,255,110,0.06); border-color: var(--accent); color: var(--accent); }
+    .pdf-subpanel { display: none; animation: fadeUp .35s ease both; }
+    .pdf-subpanel.active { display: block; }
+    .pdf-subnote { font-size: .82rem; color: var(--muted); margin-bottom: 1.2rem; line-height: 1.6; }
+    .pdf-subnote button.linklike, .doc-toast button.linklike {
+      background: none; border: none; color: var(--accent2); font-family: var(--mono); cursor: pointer;
+      text-decoration: underline; font-size: inherit; padding: 0;
+    }
+
+    .pdf-thumb-grid {
+      display: flex; flex-wrap: wrap; gap: .9rem; margin: 1.2rem 0;
+    }
+    .pdf-thumb-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: .6rem; width: 150px; display: flex; flex-direction: column; align-items: center; gap: .5rem;
+      cursor: grab; transition: border-color .15s, transform .15s; position: relative;
+    }
+    .pdf-thumb-card.dragging { opacity: .4; }
+    .pdf-thumb-card.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+    .pdf-thumb-card canvas, .pdf-thumb-card img { max-width: 100%; border-radius: 4px; background: #fff; display: block; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+    .pdf-thumb-card .pdf-thumb-label { font-family: var(--mono); font-size: .72rem; color: var(--muted); }
+    .pdf-thumb-card .pdf-thumb-tools { display: flex; gap: .35rem; flex-wrap: wrap; justify-content: center; }
+    .pdf-thumb-card .pdf-thumb-tools button {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: .8rem; line-height: 1;
+    }
+    .pdf-thumb-card .pdf-thumb-tools button:hover { border-color: var(--accent); color: var(--accent); }
+    .pdf-thumb-card input[type="checkbox"] { position: absolute; top: .5rem; left: .5rem; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+
+    .pdf-progress-wrap { margin-top: 1.2rem; }
+    .pdf-progress-track { height: 6px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+    .pdf-progress-bar { height: 100%; width: 0%; background: var(--accent); border-radius: 99px; transition: width .2s; }
+    .pdf-progress-label { font-family: var(--mono); font-size: .78rem; color: var(--muted); margin-bottom: .4rem; display: block; }
+
+    /* ---- Document Editor ---- */
+    .doceditor-wrap { display: flex; flex-direction: column; gap: 1rem; }
+    .doceditor-toolbar {
+      display: flex; flex-wrap: wrap; gap: .35rem; align-items: center;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: .6rem; position: sticky; top: 70px; z-index: 20;
+    }
+    .doceditor-toolbar .dted-sep { width: 1px; align-self: stretch; background: var(--border); margin: 0 .25rem; }
+    .doceditor-toolbar button.dted-btn {
+      background: transparent; border: 1px solid transparent; color: var(--text);
+      width: 34px; height: 32px; border-radius: 6px; cursor: pointer; font-size: .95rem;
+      display: inline-flex; align-items: center; justify-content: center; transition: all .15s;
+      font-family: var(--sans);
+    }
+    .doceditor-toolbar button.dted-btn:hover { background: var(--surface); border-color: var(--border); }
+    .doceditor-toolbar button.dted-btn.active { background: rgba(127,255,110,.12); border-color: var(--accent); color: var(--accent); }
+    .doceditor-toolbar button.dted-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .doceditor-toolbar select.dted-select {
+      background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: .82rem;
+      padding: .4rem .5rem; border-radius: 6px; outline: none; max-width: 130px; font-family: var(--sans);
+    }
+    .doceditor-toolbar input[type="color"].dted-color {
+      width: 30px; height: 30px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg);
+      cursor: pointer; padding: 2px;
+    }
+    .doceditor-toolbar .dted-group { display: flex; gap: .25rem; align-items: center; }
+    .doceditor-toolbar .dted-label { font-family: var(--mono); font-size: .68rem; color: var(--muted); margin-right: .15rem; }
+
+    .doceditor-menurow { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .doceditor-menurow .btn-secondary, .doceditor-menurow .btn-primary { font-size: .8rem; padding: .55rem 1rem; }
+
+    .doceditor-page-outer {
+      background: #0a0a0c; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 2rem clamp(1rem, 4vw, 3rem); max-height: 70vh; overflow: auto;
+    }
+    .doceditor-content {
+      background: var(--surface); color: var(--text); max-width: 850px; margin: 0 auto;
+      min-height: 500px; padding: 3rem clamp(1.2rem, 5vw, 4rem); border-radius: 6px;
+      box-shadow: 0 25px 50px rgba(0,0,0,.5); outline: none; line-height: 1.7; font-size: 1rem;
+      transform-origin: top center; transition: transform .15s ease;
+    }
+    .doceditor-content:focus { box-shadow: 0 0 0 2px var(--accent), 0 25px 50px rgba(0,0,0,.5); }
+    .doceditor-content h1, .doceditor-content h2, .doceditor-content h3,
+    .doceditor-content h4, .doceditor-content h5, .doceditor-content h6 { margin: 1.2em 0 .5em; line-height: 1.3; }
+    .doceditor-content h1 { font-size: 2em; } .doceditor-content h2 { font-size: 1.6em; }
+    .doceditor-content h3 { font-size: 1.35em; } .doceditor-content h4 { font-size: 1.15em; }
+    .doceditor-content h5 { font-size: 1.03em; } .doceditor-content h6 { font-size: .92em; color: var(--muted); }
+    .doceditor-content p { margin: 0 0 1em; }
+    .doceditor-content ul, .doceditor-content ol { margin: 0 0 1em 1.4em; }
+    .doceditor-content a { color: var(--accent2); }
+    .doceditor-content blockquote {
+      border-left: 3px solid var(--accent); margin: 0 0 1em; padding: .4rem 0 .4rem 1rem; color: var(--muted); font-style: italic;
+    }
+    .doceditor-content pre {
+      background: #0a0a0c; border: 1px solid var(--border); border-radius: 6px; padding: 1rem;
+      overflow-x: auto; font-family: var(--mono); font-size: .88em; margin: 0 0 1em;
+    }
+    .doceditor-content code { font-family: var(--mono); background: rgba(127,255,110,.08); padding: .1em .35em; border-radius: 4px; }
+    .doceditor-content pre code { background: none; padding: 0; }
+    .doceditor-content hr { border: none; border-top: 1px solid var(--border); margin: 1.5em 0; }
+    .doceditor-content table { border-collapse: collapse; width: 100%; margin: 0 0 1em; }
+    .doceditor-content table td, .doceditor-content table th {
+      border: 1px solid var(--border); padding: .5em .7em; min-width: 40px;
+    }
+    .doceditor-content table th { background: var(--surface2); }
+    .doceditor-content img { max-width: 100%; border-radius: 4px; }
+    .doceditor-content ul.doc-checklist { list-style: none; margin-left: 0; }
+    .doceditor-content ul.doc-checklist li { display: flex; align-items: flex-start; gap: .5rem; margin-bottom: .35rem; }
+    .doceditor-content ul.doc-checklist li input[type="checkbox"] { margin-top: .3em; accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; }
+    .doceditor-content:empty::before, .doceditor-content .doc-empty::before {
+      content: attr(data-placeholder); color: var(--muted); pointer-events: none;
+    }
+    .doceditor-wrap.dted-focus .doceditor-toolbar .dted-focus-hide { display: none; }
+    .doceditor-wrap.dted-fullscreen {
+      position: fixed; inset: 0; z-index: 5000; background: var(--bg); padding: 1rem 1.2rem 1.2rem;
+      overflow-y: auto; margin: 0;
+    }
+    .doceditor-wrap.dted-fullscreen .doceditor-toolbar { top: 0; }
+
+    .doceditor-statusbar {
+      display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center;
+      font-family: var(--mono); font-size: .74rem; color: var(--muted); padding: .5rem .2rem;
+    }
+    .doceditor-statusbar .dted-stats { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .doceditor-statusbar .dted-save-state { display: flex; align-items: center; gap: .4rem; }
+    .doceditor-statusbar .dted-save-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .doceditor-statusbar .dted-save-dot.dirty { background: var(--muted); box-shadow: none; }
+
+    .doc-toast {
+      display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
+      background: rgba(127,255,110,.07); border: 1px solid var(--accent); border-radius: var(--radius-sm);
+      padding: .8rem 1rem; font-size: .85rem; color: var(--text); margin-bottom: 1rem;
+    }
+
+    .dted-findbar {
+      display: none; flex-wrap: wrap; gap: .5rem; align-items: center;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .7rem;
+    }
+    .dted-findbar.open { display: flex; }
+    .dted-findbar input[type="text"] {
+      background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: .45rem .6rem;
+      border-radius: 6px; font-size: .85rem; outline: none; flex: 1 1 140px; min-width: 120px;
+    }
+    .dted-findbar input:focus { border-color: var(--accent2); }
+    .dted-findbar span.dted-findcount { font-family: var(--mono); font-size: .75rem; color: var(--muted); white-space: nowrap; }
+
+    .dted-modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(5,5,7,.72); z-index: 6000;
+      align-items: center; justify-content: center; padding: 1.5rem; backdrop-filter: blur(4px);
+    }
+    .dted-modal-overlay.open { display: flex; }
+    .dted-modal {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.6rem; width: 100%; max-width: 420px; box-shadow: 0 30px 60px rgba(0,0,0,.55);
+      animation: fadeUp .25s ease both;
+    }
+    .dted-modal h3 { font-size: 1.05rem; margin-bottom: 1.1rem; }
+    .dted-modal .control-group { margin-bottom: 1rem; }
+    .dted-modal .dted-modal-actions { display: flex; justify-content: flex-end; gap: .6rem; margin-top: .5rem; }
+
+    mark.dted-highlight { background: rgba(127,255,110,.4); color: inherit; border-radius: 2px; }
+    mark.dted-highlight.current { background: var(--accent); color: #0d0d0f; }
+
+    @media (max-width: 768px) {
+      .doceditor-toolbar { top: 0; position: static; }
+      .doceditor-page-outer { padding: 1rem .6rem; }
+      .doceditor-content { padding: 1.5rem 1.1rem; }
+      .pdf-thumb-card { width: 130px; }
+    }
   </style>
 </head>
 <body>
@@ -935,6 +1110,12 @@
         </button>
         <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-merge" id="tab-merge">
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h8v8H3zM13 13h8v8h-8zM11 11l6-6M13 3h6v6"/></svg> 12. Merge Images
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-doceditor" id="tab-doceditor">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/></svg> 13. Smart Document Editor
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-pdftoolkit" id="tab-pdftoolkit">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15h6M9 11h6"/></svg> 14. PDF Toolkit
         </button>
       </div>
 
@@ -1502,6 +1683,327 @@
           <div class="action-row">
             <button id="action-merge" class="btn-primary" style="display:none;">Merge Images</button>
             <a id="dl-merge" class="btn-primary" style="display:none;" href="#" download="smartmerge.png">Download Merged Image</a>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-doceditor" role="tabpanel" aria-labelledby="tab-doceditor">
+          <div class="tool-title-row">
+            <h2>Smart Document Editor <span>Full Word-Style Rich Text Editor — 100% Offline</span></h2>
+          </div>
+
+          <div id="dted-restore-toast" class="doc-toast" style="display:none;">
+            <span>📝 We found an unsaved draft from your last session.</span>
+            <button type="button" class="btn-primary" id="dted-restore-btn" style="padding:.4rem .9rem; font-size:.78rem;">Restore Draft</button>
+            <button type="button" class="linklike" id="dted-discard-btn">Discard it</button>
+          </div>
+
+          <div class="doceditor-wrap" id="dted-wrap">
+            <div class="doceditor-menurow">
+              <button type="button" class="btn-secondary" id="dted-new-btn" title="New blank document">🆕 New</button>
+              <button type="button" class="btn-secondary" id="dted-open-btn" title="Open TXT, HTML, DOCX or a saved .sdoc file">📂 Open File</button>
+              <input type="file" id="dted-open-input" class="file-input-hidden" accept=".txt,.html,.htm,.docx,.sdoc,.json" />
+              <button type="button" class="btn-secondary" id="dted-save-browser-btn" title="Save this document into browser storage">💾 Save to Browser</button>
+              <select class="dted-select" id="dted-saved-docs" title="Open a document saved to browser storage" style="max-width:170px;">
+                <option value="">📁 Saved Documents…</option>
+              </select>
+              <div class="dted-group" style="position:relative;">
+                <select class="dted-select" id="dted-export-select" title="Export document">
+                  <option value="">⬇ Export As…</option>
+                  <option value="pdf">PDF (.pdf)</option>
+                  <option value="docx">Word (.docx)</option>
+                  <option value="doc">Word 97-2003 (.doc)</option>
+                  <option value="txt">Plain Text (.txt)</option>
+                  <option value="html">Web Page (.html)</option>
+                  <option value="sdoc">Smart Document (.sdoc)</option>
+                </select>
+              </div>
+              <button type="button" class="btn-secondary" id="dted-print-btn" title="Print (Ctrl+P)">🖨 Print</button>
+              <button type="button" class="btn-secondary" id="dted-printpreview-btn" title="Print Preview">👁 Preview</button>
+            </div>
+
+            <div class="doceditor-toolbar" id="dted-toolbar" role="toolbar" aria-label="Document formatting toolbar">
+              <div class="dted-group dted-focus-hide">
+                <button type="button" class="dted-btn" data-cmd="undo" title="Undo (Ctrl+Z)">↶</button>
+                <button type="button" class="dted-btn" data-cmd="redo" title="Redo (Ctrl+Y)">↷</button>
+              </div>
+              <div class="dted-sep dted-focus-hide"></div>
+              <select class="dted-select dted-focus-hide" id="dted-block-format" title="Paragraph style">
+                <option value="p">Paragraph</option>
+                <option value="h1">Heading 1</option>
+                <option value="h2">Heading 2</option>
+                <option value="h3">Heading 3</option>
+                <option value="h4">Heading 4</option>
+                <option value="h5">Heading 5</option>
+                <option value="h6">Heading 6</option>
+                <option value="blockquote">Quote</option>
+                <option value="pre">Code Block</option>
+              </select>
+              <select class="dted-select" id="dted-font-family" title="Font family">
+                <option value="'Space Grotesk', sans-serif" selected>Space Grotesk</option>
+                <option value="Arial, sans-serif">Arial</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="'Courier New', monospace">Courier New</option>
+                <option value="Verdana, sans-serif">Verdana</option>
+                <option value="Tahoma, sans-serif">Tahoma</option>
+                <option value="'Space Mono', monospace">Space Mono</option>
+              </select>
+              <select class="dted-select" id="dted-font-size" title="Font size" style="max-width:78px;">
+                <option value="1">8pt</option><option value="2">10pt</option>
+                <option value="3" selected>12pt</option><option value="4">14pt</option>
+                <option value="5">18pt</option><option value="6">24pt</option><option value="7">36pt</option>
+              </select>
+              <div class="dted-sep"></div>
+              <div class="dted-group">
+                <button type="button" class="dted-btn" data-cmd="bold" title="Bold (Ctrl+B)" style="font-weight:800;">B</button>
+                <button type="button" class="dted-btn" data-cmd="italic" title="Italic (Ctrl+I)" style="font-style:italic;">I</button>
+                <button type="button" class="dted-btn" data-cmd="underline" title="Underline (Ctrl+U)" style="text-decoration:underline;">U</button>
+                <button type="button" class="dted-btn" data-cmd="strikeThrough" title="Strikethrough" style="text-decoration:line-through;">S</button>
+                <button type="button" class="dted-btn" data-cmd="superscript" title="Superscript">x²</button>
+                <button type="button" class="dted-btn" data-cmd="subscript" title="Subscript">x₂</button>
+              </div>
+              <div class="dted-sep"></div>
+              <div class="dted-group">
+                <label class="dted-label" for="dted-text-color">A</label>
+                <input type="color" class="dted-color" id="dted-text-color" value="#e8e8f0" title="Text color">
+                <label class="dted-label" for="dted-highlight-color" style="margin-left:.35rem;">✎</label>
+                <input type="color" class="dted-color" id="dted-highlight-color" value="#7fff6e" title="Highlight color">
+              </div>
+              <div class="dted-sep dted-focus-hide"></div>
+              <div class="dted-group dted-focus-hide">
+                <button type="button" class="dted-btn" data-cmd="justifyLeft" title="Align left">≡◧</button>
+                <button type="button" class="dted-btn" data-cmd="justifyCenter" title="Align center">≡◫</button>
+                <button type="button" class="dted-btn" data-cmd="justifyRight" title="Align right">≡◨</button>
+                <button type="button" class="dted-btn" data-cmd="justifyFull" title="Justify">☰</button>
+              </div>
+              <div class="dted-sep dted-focus-hide"></div>
+              <div class="dted-group dted-focus-hide">
+                <button type="button" class="dted-btn" data-cmd="insertUnorderedList" title="Bullet list">• ≡</button>
+                <button type="button" class="dted-btn" data-cmd="insertOrderedList" title="Numbered list">1. ≡</button>
+                <button type="button" class="dted-btn" id="dted-checklist-btn" title="Checklist">☑ ≡</button>
+              </div>
+              <div class="dted-sep dted-focus-hide"></div>
+              <div class="dted-group dted-focus-hide">
+                <button type="button" class="dted-btn" id="dted-image-btn" title="Insert image">🖼</button>
+                <input type="file" id="dted-image-input" class="file-input-hidden" accept="image/*" />
+                <button type="button" class="dted-btn" id="dted-table-btn" title="Insert table">▦</button>
+                <button type="button" class="dted-btn" id="dted-link-btn" title="Insert hyperlink">🔗</button>
+                <button type="button" class="dted-btn" data-cmd="insertHorizontalRule" title="Insert horizontal line">―</button>
+                <button type="button" class="dted-btn" id="dted-datetime-btn" title="Insert date & time">🕐</button>
+              </div>
+              <div class="dted-sep dted-focus-hide"></div>
+              <div class="dted-group dted-focus-hide">
+                <button type="button" class="dted-btn" id="dted-find-btn" title="Find & Replace (Ctrl+F)">🔍</button>
+                <button type="button" class="dted-btn" id="dted-selectall-btn" title="Select all (Ctrl+A)">⛶</button>
+                <button type="button" class="dted-btn" id="dted-clearfmt-btn" title="Clear formatting">⌫✎</button>
+                <button type="button" class="dted-btn" id="dted-duplicate-btn" title="Duplicate current block">⧉</button>
+              </div>
+              <div class="dted-sep"></div>
+              <div class="dted-group">
+                <button type="button" class="dted-btn" id="dted-copy-btn" title="Copy">📋</button>
+                <button type="button" class="dted-btn" id="dted-cut-btn" title="Cut">✂</button>
+                <button type="button" class="dted-btn" id="dted-paste-btn" title="Paste">📥</button>
+              </div>
+              <div class="dted-sep"></div>
+              <div class="dted-group">
+                <button type="button" class="dted-btn" id="dted-zoomout-btn" title="Zoom out">－</button>
+                <button type="button" class="dted-btn" id="dted-zoomin-btn" title="Zoom in">＋</button>
+                <button type="button" class="dted-btn" id="dted-fullscreen-btn" title="Fullscreen">⛶</button>
+                <button type="button" class="dted-btn" id="dted-focus-btn" title="Focus mode">◎</button>
+              </div>
+            </div>
+
+            <div class="dted-findbar" id="dted-findbar">
+              <input type="text" id="dted-find-input" placeholder="Find…" />
+              <input type="text" id="dted-replace-input" placeholder="Replace with…" />
+              <span class="dted-findcount" id="dted-find-count">0 matches</span>
+              <button type="button" class="btn-secondary" id="dted-find-prev" style="padding:.4rem .7rem; font-size:.78rem;">◀ Prev</button>
+              <button type="button" class="btn-secondary" id="dted-find-next" style="padding:.4rem .7rem; font-size:.78rem;">Next ▶</button>
+              <button type="button" class="btn-secondary" id="dted-replace-one" style="padding:.4rem .7rem; font-size:.78rem;">Replace</button>
+              <button type="button" class="btn-primary" id="dted-replace-all" style="padding:.4rem .7rem; font-size:.78rem;">Replace All</button>
+              <button type="button" class="linklike" id="dted-find-close">✕ Close</button>
+            </div>
+
+            <div class="doceditor-page-outer" id="dted-page-outer">
+              <div class="doceditor-content" id="dted-content" contenteditable="true" spellcheck="true"
+                   data-placeholder="Start typing your document here…" aria-label="Document editing area"></div>
+            </div>
+
+            <div class="doceditor-statusbar">
+              <div class="dted-stats">
+                <span id="dted-stat-words">0 words</span>
+                <span id="dted-stat-chars">0 characters</span>
+                <span id="dted-stat-paras">0 paragraphs</span>
+                <span id="dted-stat-time">0 min read</span>
+                <span id="dted-stat-zoom">Zoom: 100%</span>
+              </div>
+              <div class="dted-save-state">
+                <span class="dted-save-dot" id="dted-save-dot"></span>
+                <span id="dted-save-label">All changes saved</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-pdftoolkit" role="tabpanel" aria-labelledby="tab-pdftoolkit">
+          <div class="tool-title-row">
+            <h2>PDF Toolkit <span>Compress, Merge, Split & Manage PDF Pages — 100% Offline</span></h2>
+          </div>
+
+          <p class="pdf-subnote">Need to convert images to PDF or a PDF into images? Use <button type="button" class="linklike" id="pdftk-goto-img2pdf">Image → PDF</button> or <button type="button" class="linklike" id="pdftk-goto-pdf2img">PDF → Image</button> above — every other PDF page operation lives right here.</p>
+
+          <div class="pdf-subtabs" role="tablist" aria-label="PDF toolkit operations">
+            <button type="button" class="pdf-subtab-btn active" data-subpanel="pdftk-compress">🗜 Compressor</button>
+            <button type="button" class="pdf-subtab-btn" data-subpanel="pdftk-merge">➕ Merge PDFs</button>
+            <button type="button" class="pdf-subtab-btn" data-subpanel="pdftk-split">✂ Split PDF</button>
+            <button type="button" class="pdf-subtab-btn" data-subpanel="pdftk-rotate">↻ Rotate Pages</button>
+            <button type="button" class="pdf-subtab-btn" data-subpanel="pdftk-extract">📑 Extract Pages</button>
+            <button type="button" class="pdf-subtab-btn" data-subpanel="pdftk-rearrange">⇅ Rearrange Pages</button>
+            <button type="button" class="pdf-subtab-btn" data-subpanel="pdftk-delete">🗑 Delete Pages</button>
+          </div>
+
+          <!-- PDF Compressor -->
+          <div class="pdf-subpanel active" id="pdftk-compress">
+            <div class="tool-controls-panel">
+              <div class="control-group">
+                <div class="range-label-wrap">
+                  <label for="pdftk-compress-quality">Image Quality</label>
+                  <span class="range-val-lbl" id="pdftk-compress-quality-lbl">60%</span>
+                </div>
+                <input type="range" id="pdftk-compress-quality" min="10" max="95" step="5" value="60">
+              </div>
+              <div class="control-group">
+                <label for="pdftk-compress-scale">Resolution</label>
+                <select id="pdftk-compress-scale">
+                  <option value="0.75">Low (smallest file)</option>
+                  <option value="1" selected>Medium (recommended)</option>
+                  <option value="1.5">High</option>
+                  <option value="2">Original</option>
+                </select>
+              </div>
+            </div>
+            <div class="tool-drop-zone" id="pdftk-compress-dropzone">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <p>Drop a PDF or <span>browse files</span> to shrink its file size</p>
+              <input type="file" id="pdftk-compress-input" class="file-input-hidden" accept="application/pdf" />
+            </div>
+            <div class="pdf-progress-wrap" id="pdftk-compress-progress" style="display:none;">
+              <span class="pdf-progress-label" id="pdftk-compress-progress-label">Processing 0 / 0</span>
+              <div class="pdf-progress-track"><div class="pdf-progress-bar" id="pdftk-compress-progress-bar"></div></div>
+            </div>
+            <div class="action-row" id="pdftk-compress-actions" style="margin-top:1rem;">
+              <button type="button" class="btn-primary" id="pdftk-compress-run" style="display:none;">Compress PDF</button>
+              <a class="btn-primary" id="pdftk-compress-dl" style="display:none;" href="#" download="compressed.pdf">Download Compressed PDF</a>
+              <span id="pdftk-compress-result" style="font-family:var(--mono); font-size:.82rem; color:var(--muted); align-self:center;"></span>
+            </div>
+          </div>
+
+          <!-- Merge PDFs -->
+          <div class="pdf-subpanel" id="pdftk-merge">
+            <div class="tool-drop-zone" id="pdftk-merge-dropzone">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+              <p>Drop two or more PDFs or <span>browse files</span> — merged in the order listed below</p>
+              <input type="file" id="pdftk-merge-input" class="file-input-hidden" accept="application/pdf" multiple />
+            </div>
+            <div id="pdftk-merge-list" style="margin-top:1rem; display:flex; flex-direction:column; gap:.5rem;"></div>
+            <div class="action-row" style="margin-top:1rem;">
+              <button type="button" class="btn-primary" id="pdftk-merge-run" style="display:none;">Merge PDFs</button>
+              <a class="btn-primary" id="pdftk-merge-dl" style="display:none;" href="#" download="merged.pdf">Download Merged PDF</a>
+            </div>
+          </div>
+
+          <!-- Split PDF -->
+          <div class="pdf-subpanel" id="pdftk-split">
+            <div class="tool-controls-panel">
+              <div class="control-group">
+                <label for="pdftk-split-mode">Split Mode</label>
+                <select id="pdftk-split-mode">
+                  <option value="every">Every page → separate PDF</option>
+                  <option value="range">Custom ranges</option>
+                </select>
+              </div>
+              <div class="control-group" id="pdftk-split-range-group" style="display:none;">
+                <label for="pdftk-split-ranges">Ranges (e.g. 1-3, 4, 5-7)</label>
+                <input type="text" id="pdftk-split-ranges" placeholder="1-3, 4-6">
+              </div>
+            </div>
+            <div class="tool-drop-zone" id="pdftk-split-dropzone">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <p>Drop a PDF or <span>browse files</span> to split it apart</p>
+              <input type="file" id="pdftk-split-input" class="file-input-hidden" accept="application/pdf" />
+            </div>
+            <div class="action-row" style="margin-top:1rem;">
+              <button type="button" class="btn-primary" id="pdftk-split-run" style="display:none;">Split PDF</button>
+              <a class="btn-primary" id="pdftk-split-dl" style="display:none;" href="#">⬇ Download All as ZIP</a>
+            </div>
+          </div>
+
+          <!-- Rotate PDF Pages -->
+          <div class="pdf-subpanel" id="pdftk-rotate">
+            <div class="tool-drop-zone" id="pdftk-rotate-dropzone">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <p>Drop a PDF or <span>browse files</span> — rotate individual pages or all at once</p>
+              <input type="file" id="pdftk-rotate-input" class="file-input-hidden" accept="application/pdf" />
+            </div>
+            <div class="action-row" id="pdftk-rotate-bulkrow" style="display:none; margin-top:1rem;">
+              <button type="button" class="btn-secondary" id="pdftk-rotate-all-left">↺ Rotate All Left</button>
+              <button type="button" class="btn-secondary" id="pdftk-rotate-all-right">↻ Rotate All Right</button>
+            </div>
+            <div class="pdf-thumb-grid" id="pdftk-rotate-grid"></div>
+            <div class="action-row">
+              <button type="button" class="btn-primary" id="pdftk-rotate-run" style="display:none;">Apply & Save PDF</button>
+              <a class="btn-primary" id="pdftk-rotate-dl" style="display:none;" href="#" download="rotated.pdf">Download Rotated PDF</a>
+            </div>
+          </div>
+
+          <!-- Extract Pages -->
+          <div class="pdf-subpanel" id="pdftk-extract">
+            <div class="tool-drop-zone" id="pdftk-extract-dropzone">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <p>Drop a PDF or <span>browse files</span> then tick the pages to extract</p>
+              <input type="file" id="pdftk-extract-input" class="file-input-hidden" accept="application/pdf" />
+            </div>
+            <div class="action-row" id="pdftk-extract-bulkrow" style="display:none; margin-top:1rem;">
+              <button type="button" class="btn-secondary" id="pdftk-extract-selectall">Select All</button>
+              <button type="button" class="btn-secondary" id="pdftk-extract-selectnone">Select None</button>
+            </div>
+            <div class="pdf-thumb-grid" id="pdftk-extract-grid"></div>
+            <div class="action-row">
+              <button type="button" class="btn-primary" id="pdftk-extract-run" style="display:none;">Extract Selected Pages</button>
+              <a class="btn-primary" id="pdftk-extract-dl" style="display:none;" href="#" download="extracted.pdf">Download Extracted PDF</a>
+            </div>
+          </div>
+
+          <!-- Rearrange Pages -->
+          <div class="pdf-subpanel" id="pdftk-rearrange">
+            <div class="tool-drop-zone" id="pdftk-rearrange-dropzone">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+              <p>Drop a PDF or <span>browse files</span> then drag thumbnails to reorder pages</p>
+              <input type="file" id="pdftk-rearrange-input" class="file-input-hidden" accept="application/pdf" />
+            </div>
+            <div class="pdf-thumb-grid" id="pdftk-rearrange-grid"></div>
+            <div class="action-row">
+              <button type="button" class="btn-primary" id="pdftk-rearrange-run" style="display:none;">Save New Page Order</button>
+              <a class="btn-primary" id="pdftk-rearrange-dl" style="display:none;" href="#" download="reordered.pdf">Download Reordered PDF</a>
+            </div>
+          </div>
+
+          <!-- Delete Pages -->
+          <div class="pdf-subpanel" id="pdftk-delete">
+            <div class="tool-drop-zone" id="pdftk-delete-dropzone">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"/></svg>
+              <p>Drop a PDF or <span>browse files</span> then tick the pages to delete</p>
+              <input type="file" id="pdftk-delete-input" class="file-input-hidden" accept="application/pdf" />
+            </div>
+            <div class="action-row" id="pdftk-delete-bulkrow" style="display:none; margin-top:1rem;">
+              <button type="button" class="btn-secondary" id="pdftk-delete-selectall">Select All</button>
+              <button type="button" class="btn-secondary" id="pdftk-delete-selectnone">Select None</button>
+            </div>
+            <div class="pdf-thumb-grid" id="pdftk-delete-grid"></div>
+            <div class="action-row">
+              <button type="button" class="btn-primary" id="pdftk-delete-run" style="display:none;">Delete Ticked Pages</button>
+              <a class="btn-primary" id="pdftk-delete-dl" style="display:none;" href="#" download="deleted-pages.pdf">Download Result PDF</a>
+            </div>
           </div>
         </div>
 
@@ -2085,6 +2587,14 @@
 
       suiteTabButtons.forEach(tabButtonElement => {
         tabButtonElement.addEventListener("click", () => {
+          /* Bugfix: buttons that reuse .tool-tab-btn for a nested/local tab
+             group (e.g. Prompt Studio's internal Generator/Image sub-tabs)
+             have no aria-controls target and must be ignored here, otherwise
+             this handler used to wipe every panel's "active" class and then
+             throw on document.getElementById(null). */
+          const targetedPanelId = tabButtonElement.getAttribute("aria-controls");
+          if (!targetedPanelId || !document.getElementById(targetedPanelId)) return;
+
           suiteTabButtons.forEach(btn => {
             btn.classList.remove("active");
             btn.setAttribute("aria-selected", "false");
@@ -2093,8 +2603,7 @@
 
           tabButtonElement.classList.add("active");
           tabButtonElement.setAttribute("aria-selected", "true");
-          
-          const targetedPanelId = tabButtonElement.getAttribute("aria-controls");
+
           document.getElementById(targetedPanelId).classList.add("active");
         });
       });
@@ -3558,6 +4067,1293 @@
         });
       });
     })();
+  </script>
+
+  <!-- Smart Document Editor: Insert Table modal -->
+  <div class="dted-modal-overlay" id="dted-table-modal">
+    <div class="dted-modal" role="dialog" aria-modal="true" aria-labelledby="dted-table-modal-title">
+      <h3 id="dted-table-modal-title">Insert Table</h3>
+      <div class="control-group">
+        <label for="dted-table-rows">Rows</label>
+        <input type="number" id="dted-table-rows" min="1" max="30" value="3">
+      </div>
+      <div class="control-group">
+        <label for="dted-table-cols">Columns</label>
+        <input type="number" id="dted-table-cols" min="1" max="15" value="3">
+      </div>
+      <div class="dted-modal-actions">
+        <button type="button" class="btn-secondary" id="dted-table-cancel">Cancel</button>
+        <button type="button" class="btn-primary" id="dted-table-confirm">Insert Table</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Smart Document Editor: Insert Link modal -->
+  <div class="dted-modal-overlay" id="dted-link-modal">
+    <div class="dted-modal" role="dialog" aria-modal="true" aria-labelledby="dted-link-modal-title">
+      <h3 id="dted-link-modal-title">Insert Hyperlink</h3>
+      <div class="control-group">
+        <label for="dted-link-text">Link Text</label>
+        <input type="text" id="dted-link-text" placeholder="Click here">
+      </div>
+      <div class="control-group">
+        <label for="dted-link-url">URL</label>
+        <input type="text" id="dted-link-url" placeholder="https://example.com">
+      </div>
+      <div class="dted-modal-actions">
+        <button type="button" class="btn-secondary" id="dted-link-cancel">Cancel</button>
+        <button type="button" class="btn-primary" id="dted-link-confirm">Insert Link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Smart Document Editor: Save-to-Browser (name prompt) modal -->
+  <div class="dted-modal-overlay" id="dted-savename-modal">
+    <div class="dted-modal" role="dialog" aria-modal="true" aria-labelledby="dted-savename-modal-title">
+      <h3 id="dted-savename-modal-title">Save Document</h3>
+      <div class="control-group">
+        <label for="dted-savename-input">Document Name</label>
+        <input type="text" id="dted-savename-input" placeholder="Untitled Document">
+      </div>
+      <div class="dted-modal-actions">
+        <button type="button" class="btn-secondary" id="dted-savename-cancel">Cancel</button>
+        <button type="button" class="btn-primary" id="dted-savename-confirm">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  /* ========================================================================
+     SMART DOCUMENT EDITOR + PDF TOOLKIT
+     100% client-side, additive module — does not touch any existing
+     Smart Compress tool code, IDs, storage keys, or the service worker.
+     ======================================================================== */
+  document.addEventListener("DOMContentLoaded", function () {
+
+    /* ---------------------------------------------------------------------
+       Small shared helpers
+    --------------------------------------------------------------------- */
+    function $(id) { return document.getElementById(id); }
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+    }
+    function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = reject;
+        r.readAsText(file);
+      });
+    }
+    function readFileAsArrayBuffer(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = reject;
+        r.readAsArrayBuffer(file);
+      });
+    }
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+    function setupGenericDropzone(zoneId, inputId, onFiles) {
+      const zone = $(zoneId), input = $(inputId);
+      if (!zone || !input) return;
+      zone.addEventListener("click", () => input.click());
+      zone.addEventListener("dragover", (e) => { e.preventDefault(); zone.classList.add("drag-over"); });
+      ["dragleave", "drop"].forEach(evt => zone.addEventListener(evt, () => zone.classList.remove("drag-over")));
+      zone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        if (e.dataTransfer.files && e.dataTransfer.files.length) onFiles(e.dataTransfer.files);
+      });
+      input.addEventListener("change", () => {
+        if (input.files && input.files.length) onFiles(input.files);
+        input.value = "";
+      });
+    }
+    function ensurePdfWorker() {
+      if (window.pdfjsLib && !window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      }
+    }
+
+    /* =======================================================================
+       PART 1 — SMART DOCUMENT EDITOR
+    ======================================================================= */
+    (function initDocumentEditor() {
+      const editor = $("dted-content");
+      if (!editor) return;
+
+      const AUTOSAVE_KEY = "smartcompress_doceditor_autosave_v1";
+      const SAVED_DOCS_KEY = "smartcompress_doceditor_saved_v1";
+      const wrap = $("dted-wrap");
+      let zoomLevel = 100;
+      let isDirty = false;
+      let autosaveTimer = null;
+
+      /* ---- placeholder empty-state handling ---- */
+      function refreshEmptyState() {
+        const empty = editor.innerText.trim() === "";
+        editor.classList.toggle("doc-empty", empty);
+      }
+      refreshEmptyState();
+
+      /* ---- exec command wrapper ---- */
+      function execCmd(cmd, value) {
+        editor.focus();
+        try { document.execCommand(cmd, false, value || null); } catch (e) { /* unsupported in this browser */ }
+        onEditorChanged();
+      }
+
+      /* ---- toolbar: simple exec-command buttons ---- */
+      document.querySelectorAll("#dted-toolbar [data-cmd]").forEach(btn => {
+        btn.addEventListener("click", () => execCmd(btn.getAttribute("data-cmd")));
+      });
+
+      /* ---- block format (headings / quote / code / paragraph) ---- */
+      $("dted-block-format").addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (val === "pre") {
+          execCmd("formatBlock", "<pre>");
+        } else {
+          execCmd("formatBlock", "<" + val + ">");
+        }
+      });
+
+      /* ---- font family / size ---- */
+      $("dted-font-family").addEventListener("change", (e) => execCmd("fontName", e.target.value));
+      $("dted-font-size").addEventListener("change", (e) => execCmd("fontSize", e.target.value));
+
+      /* ---- colors ---- */
+      $("dted-text-color").addEventListener("input", (e) => execCmd("foreColor", e.target.value));
+      $("dted-highlight-color").addEventListener("input", (e) => execCmd("hiliteColor", e.target.value));
+
+      /* ---- checklist ---- */
+      $("dted-checklist-btn").addEventListener("click", () => {
+        editor.focus();
+        const ul = document.createElement("ul");
+        ul.className = "doc-checklist";
+        const li = document.createElement("li");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        const span = document.createElement("span");
+        span.textContent = "List item";
+        li.appendChild(cb); li.appendChild(span);
+        ul.appendChild(li);
+        insertNodeAtCursor(ul);
+        onEditorChanged();
+      });
+      editor.addEventListener("keydown", (e) => {
+        /* Enter inside a checklist item creates a new checklist item */
+        if (e.key === "Enter") {
+          const sel = window.getSelection();
+          if (!sel.rangeCount) return;
+          const li = closestWithin(sel.anchorNode, "LI");
+          if (li && li.parentElement && li.parentElement.classList.contains("doc-checklist")) {
+            e.preventDefault();
+            const newLi = document.createElement("li");
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            const span = document.createElement("span");
+            span.textContent = "";
+            newLi.appendChild(cb); newLi.appendChild(span);
+            li.parentElement.insertBefore(newLi, li.nextSibling);
+            placeCaretAt(span, 0);
+            onEditorChanged();
+          }
+        }
+      });
+      editor.addEventListener("click", (e) => {
+        if (e.target && e.target.tagName === "INPUT" && e.target.type === "checkbox" && e.target.closest(".doc-checklist")) {
+          onEditorChanged();
+        }
+      });
+
+      function closestWithin(node, tagName) {
+        let n = node;
+        while (n && n !== editor) {
+          if (n.nodeType === 1 && n.tagName === tagName) return n;
+          n = n.parentNode;
+        }
+        return null;
+      }
+      function closestBlock(node) {
+        const blockTags = ["P","DIV","H1","H2","H3","H4","H5","H6","LI","BLOCKQUOTE","PRE","TABLE"];
+        let n = node;
+        while (n && n !== editor) {
+          if (n.nodeType === 1 && blockTags.includes(n.tagName)) return n;
+          n = n.parentNode;
+        }
+        return null;
+      }
+      function insertNodeAtCursor(node) {
+        editor.focus();
+        const sel = window.getSelection();
+        if (!sel.rangeCount) { editor.appendChild(node); return; }
+        const range = sel.getRangeAt(0);
+        range.collapse(false);
+        range.insertNode(node);
+        range.setStartAfter(node);
+        range.setEndAfter(node);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      function placeCaretAt(node, offset) {
+        const range = document.createRange();
+        const sel = window.getSelection();
+        try {
+          range.setStart(node, offset);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } catch (e) { /* ignore */ }
+      }
+
+      /* ---- insert image (toolbar + drag & drop) ---- */
+      $("dted-image-btn").addEventListener("click", () => $("dted-image-input").click());
+      $("dted-image-input").addEventListener("change", async () => {
+        const file = $("dted-image-input").files[0];
+        if (file) await insertImageFile(file);
+        $("dted-image-input").value = "";
+      });
+      async function insertImageFile(file) {
+        if (!file.type.startsWith("image/")) return;
+        const dataUrl = await readFileAsDataURL(file);
+        const img = document.createElement("img");
+        img.src = dataUrl;
+        img.alt = file.name || "inserted image";
+        insertNodeAtCursor(img);
+        onEditorChanged();
+      }
+      editor.addEventListener("dragover", (e) => { e.preventDefault(); });
+      editor.addEventListener("drop", async (e) => {
+        if (e.dataTransfer.files && e.dataTransfer.files.length) {
+          e.preventDefault();
+          for (const f of e.dataTransfer.files) {
+            if (f.type.startsWith("image/")) await insertImageFile(f);
+          }
+        }
+      });
+
+      /* ---- insert table (via modal) ---- */
+      $("dted-table-btn").addEventListener("click", () => { $("dted-table-modal").classList.add("open"); });
+      $("dted-table-cancel").addEventListener("click", () => { $("dted-table-modal").classList.remove("open"); });
+      $("dted-table-confirm").addEventListener("click", () => {
+        const rows = Math.max(1, Math.min(30, parseInt($("dted-table-rows").value, 10) || 1));
+        const cols = Math.max(1, Math.min(15, parseInt($("dted-table-cols").value, 10) || 1));
+        const table = document.createElement("table");
+        for (let r = 0; r < rows; r++) {
+          const tr = document.createElement("tr");
+          for (let c = 0; c < cols; c++) {
+            const cell = document.createElement(r === 0 ? "th" : "td");
+            cell.innerHTML = "&nbsp;";
+            tr.appendChild(cell);
+          }
+          table.appendChild(tr);
+        }
+        insertNodeAtCursor(table);
+        $("dted-table-modal").classList.remove("open");
+        onEditorChanged();
+      });
+
+      /* ---- insert hyperlink (via modal) ---- */
+      let savedSelectionRange = null;
+      $("dted-link-btn").addEventListener("click", () => {
+        const sel = window.getSelection();
+        savedSelectionRange = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
+        $("dted-link-text").value = sel.toString() || "";
+        $("dted-link-url").value = "https://";
+        $("dted-link-modal").classList.add("open");
+        $("dted-link-url").focus();
+      });
+      $("dted-link-cancel").addEventListener("click", () => { $("dted-link-modal").classList.remove("open"); });
+      $("dted-link-confirm").addEventListener("click", () => {
+        const url = $("dted-link-url").value.trim();
+        const text = $("dted-link-text").value.trim() || url;
+        if (!url) { $("dted-link-modal").classList.remove("open"); return; }
+        editor.focus();
+        if (savedSelectionRange) {
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(savedSelectionRange);
+        }
+        const a = document.createElement("a");
+        a.href = /^https?:\/\//i.test(url) || url.startsWith("mailto:") ? url : "https://" + url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = text;
+        insertNodeAtCursor(a);
+        $("dted-link-modal").classList.remove("open");
+        onEditorChanged();
+      });
+
+      /* ---- insert date & time ---- */
+      $("dted-datetime-btn").addEventListener("click", () => {
+        const now = new Date();
+        const text = now.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }) +
+          " — " + now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+        editor.focus();
+        document.execCommand("insertText", false, text);
+        onEditorChanged();
+      });
+
+      /* ---- clear formatting ---- */
+      $("dted-clearfmt-btn").addEventListener("click", () => {
+        execCmd("removeFormat");
+        execCmd("formatBlock", "<p>");
+      });
+
+      /* ---- select all / duplicate block ---- */
+      $("dted-selectall-btn").addEventListener("click", () => {
+        editor.focus();
+        document.execCommand("selectAll");
+      });
+      $("dted-duplicate-btn").addEventListener("click", () => {
+        const sel = window.getSelection();
+        const anchor = sel.rangeCount ? sel.anchorNode : editor.lastChild;
+        const block = closestBlock(anchor) || editor.lastElementChild;
+        if (block) {
+          const clone = block.cloneNode(true);
+          block.parentNode.insertBefore(clone, block.nextSibling);
+          onEditorChanged();
+        }
+      });
+
+      /* ---- copy / cut / paste toolbar buttons ---- */
+      $("dted-copy-btn").addEventListener("click", () => {
+        editor.focus();
+        try { document.execCommand("copy"); } catch (e) { /* clipboard blocked */ }
+      });
+      $("dted-cut-btn").addEventListener("click", () => {
+        editor.focus();
+        try { document.execCommand("cut"); } catch (e) { /* clipboard blocked */ }
+        onEditorChanged();
+      });
+      $("dted-paste-btn").addEventListener("click", async () => {
+        editor.focus();
+        try {
+          if (navigator.clipboard && navigator.clipboard.readText) {
+            const text = await navigator.clipboard.readText();
+            document.execCommand("insertText", false, text);
+          } else {
+            document.execCommand("paste");
+          }
+        } catch (e) {
+          alert("Your browser blocked programmatic paste for security reasons. Please use Ctrl+V / Cmd+V instead.");
+        }
+        onEditorChanged();
+      });
+      /* Sanitize pasted content so external formatting/scripts don't leak in */
+      editor.addEventListener("paste", (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData("text/html") ||
+          (e.clipboardData || window.clipboardData).getData("text/plain");
+        const isHtml = !!(e.clipboardData || window.clipboardData).getData("text/html");
+        if (isHtml) {
+          const clean = sanitizeHtmlFragment(text);
+          document.execCommand("insertHTML", false, clean);
+        } else {
+          document.execCommand("insertText", false, text);
+        }
+        onEditorChanged();
+      });
+      function sanitizeHtmlFragment(html) {
+        const container = document.createElement("div");
+        container.innerHTML = html;
+        container.querySelectorAll("script, style, iframe, object, embed, link, meta").forEach(n => n.remove());
+        container.querySelectorAll("*").forEach(n => {
+          [...n.attributes].forEach(attr => {
+            if (/^on/i.test(attr.name) || (attr.name === "href" && /^javascript:/i.test(attr.value))) {
+              n.removeAttribute(attr.name);
+            }
+          });
+        });
+        return container.innerHTML;
+      }
+
+      /* ---- zoom ---- */
+      function applyZoom() {
+        editor.style.transform = "scale(" + (zoomLevel / 100) + ")";
+        $("dted-stat-zoom").textContent = "Zoom: " + zoomLevel + "%";
+      }
+      $("dted-zoomin-btn").addEventListener("click", () => { zoomLevel = Math.min(200, zoomLevel + 10); applyZoom(); });
+      $("dted-zoomout-btn").addEventListener("click", () => { zoomLevel = Math.max(50, zoomLevel - 10); applyZoom(); });
+
+      /* ---- fullscreen & focus mode ---- */
+      $("dted-fullscreen-btn").addEventListener("click", () => {
+        wrap.classList.toggle("dted-fullscreen");
+        $("dted-fullscreen-btn").classList.toggle("active", wrap.classList.contains("dted-fullscreen"));
+      });
+      $("dted-focus-btn").addEventListener("click", () => {
+        wrap.classList.toggle("dted-focus");
+        $("dted-focus-btn").classList.toggle("active", wrap.classList.contains("dted-focus"));
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && wrap.classList.contains("dted-fullscreen")) {
+          wrap.classList.remove("dted-fullscreen");
+          $("dted-fullscreen-btn").classList.remove("active");
+        }
+      });
+
+      /* ---- find & replace ---- */
+      let findMatches = [];
+      let findIndex = -1;
+      function clearHighlights() {
+        editor.querySelectorAll("mark.dted-highlight").forEach(m => {
+          const parent = m.parentNode;
+          while (m.firstChild) parent.insertBefore(m.firstChild, m);
+          parent.removeChild(m);
+        });
+        editor.normalize();
+      }
+      function runFind() {
+        clearHighlights();
+        const term = $("dted-find-input").value;
+        findMatches = [];
+        findIndex = -1;
+        if (!term) { $("dted-find-count").textContent = "0 matches"; return; }
+        const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null);
+        const textNodes = [];
+        let node;
+        while ((node = walker.nextNode())) textNodes.push(node);
+        const lowerTerm = term.toLowerCase();
+        textNodes.forEach(tn => {
+          const text = tn.nodeValue;
+          const lower = text.toLowerCase();
+          let start = 0, idx;
+          const ranges = [];
+          while ((idx = lower.indexOf(lowerTerm, start)) !== -1) {
+            ranges.push([idx, idx + term.length]);
+            start = idx + term.length;
+          }
+          if (!ranges.length) return;
+          const parent = tn.parentNode;
+          let lastEnd = 0;
+          const frag = document.createDocumentFragment();
+          ranges.forEach(([s, e]) => {
+            if (s > lastEnd) frag.appendChild(document.createTextNode(text.slice(lastEnd, s)));
+            const mark = document.createElement("mark");
+            mark.className = "dted-highlight";
+            mark.textContent = text.slice(s, e);
+            frag.appendChild(mark);
+            findMatches.push(mark);
+            lastEnd = e;
+          });
+          if (lastEnd < text.length) frag.appendChild(document.createTextNode(text.slice(lastEnd)));
+          parent.replaceChild(frag, tn);
+        });
+        $("dted-find-count").textContent = findMatches.length + " match" + (findMatches.length === 1 ? "" : "es");
+        if (findMatches.length) goToMatch(0);
+      }
+      function goToMatch(i) {
+        findMatches.forEach(m => m.classList.remove("current"));
+        if (!findMatches.length) return;
+        findIndex = ((i % findMatches.length) + findMatches.length) % findMatches.length;
+        const m = findMatches[findIndex];
+        m.classList.add("current");
+        m.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+      $("dted-find-btn").addEventListener("click", () => {
+        $("dted-findbar").classList.toggle("open");
+        if ($("dted-findbar").classList.contains("open")) $("dted-find-input").focus();
+      });
+      $("dted-find-close").addEventListener("click", () => { $("dted-findbar").classList.remove("open"); clearHighlights(); });
+      $("dted-find-input").addEventListener("input", runFind);
+      $("dted-find-next").addEventListener("click", () => goToMatch(findIndex + 1));
+      $("dted-find-prev").addEventListener("click", () => goToMatch(findIndex - 1));
+      $("dted-replace-one").addEventListener("click", () => {
+        if (findIndex < 0 || !findMatches[findIndex]) return;
+        findMatches[findIndex].textContent = $("dted-replace-input").value;
+        onEditorChanged();
+        runFind();
+      });
+      $("dted-replace-all").addEventListener("click", () => {
+        const replacement = $("dted-replace-input").value;
+        findMatches.forEach(m => { m.textContent = replacement; });
+        onEditorChanged();
+        runFind();
+      });
+
+      /* ---- statistics ---- */
+      function updateStats() {
+        const text = editor.innerText.trim();
+        const words = text ? (text.match(/\S+/g) || []).length : 0;
+        const chars = text.length;
+        const paras = editor.querySelectorAll("p, h1, h2, h3, h4, h5, h6, li, blockquote").length || (text ? 1 : 0);
+        const readMins = Math.max(1, Math.round(words / 200));
+        $("dted-stat-words").textContent = words + " word" + (words === 1 ? "" : "s");
+        $("dted-stat-chars").textContent = chars + " character" + (chars === 1 ? "" : "s");
+        $("dted-stat-paras").textContent = paras + " paragraph" + (paras === 1 ? "" : "s");
+        $("dted-stat-time").textContent = (text ? readMins : 0) + " min read";
+      }
+
+      /* ---- autosave ---- */
+      function markDirty() {
+        isDirty = true;
+        $("dted-save-dot").classList.add("dirty");
+        $("dted-save-label").textContent = "Saving…";
+        clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(doAutosave, 900);
+      }
+      function doAutosave() {
+        try {
+          localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ html: editor.innerHTML, savedAt: Date.now() }));
+          isDirty = false;
+          $("dted-save-dot").classList.remove("dirty");
+          $("dted-save-label").textContent = "All changes saved";
+        } catch (e) { $("dted-save-label").textContent = "Autosave unavailable (storage full)"; }
+      }
+      function onEditorChanged() {
+        refreshEmptyState();
+        updateStats();
+        markDirty();
+        updateToolbarState();
+      }
+      editor.addEventListener("input", onEditorChanged);
+      editor.addEventListener("keyup", updateToolbarState);
+      editor.addEventListener("mouseup", updateToolbarState);
+
+      /* ---- toolbar active-state reflection ---- */
+      function updateToolbarState() {
+        const map = { bold: "bold", italic: "italic", underline: "underline", strikeThrough: "strikeThrough",
+          superscript: "superscript", subscript: "subscript", justifyLeft: "justifyLeft",
+          justifyCenter: "justifyCenter", justifyRight: "justifyRight", justifyFull: "justifyFull",
+          insertUnorderedList: "insertUnorderedList", insertOrderedList: "insertOrderedList" };
+        Object.keys(map).forEach(cmd => {
+          const btn = document.querySelector('#dted-toolbar [data-cmd="' + cmd + '"]');
+          if (!btn) return;
+          let state = false;
+          try { state = document.queryCommandState(cmd); } catch (e) { state = false; }
+          btn.classList.toggle("active", state);
+        });
+      }
+
+      /* ---- restore draft on load ---- */
+      try {
+        const raw = localStorage.getItem(AUTOSAVE_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (data && data.html && data.html.trim()) {
+            $("dted-restore-toast").style.display = "flex";
+          }
+        }
+      } catch (e) { /* ignore corrupt autosave */ }
+      $("dted-restore-btn").addEventListener("click", () => {
+        try {
+          const data = JSON.parse(localStorage.getItem(AUTOSAVE_KEY));
+          editor.innerHTML = data.html || "";
+        } catch (e) { /* ignore */ }
+        $("dted-restore-toast").style.display = "none";
+        onEditorChanged();
+      });
+      $("dted-discard-btn").addEventListener("click", () => {
+        localStorage.removeItem(AUTOSAVE_KEY);
+        $("dted-restore-toast").style.display = "none";
+      });
+
+      /* ---- New document ---- */
+      $("dted-new-btn").addEventListener("click", () => {
+        if (editor.innerText.trim() && !confirm("Start a new blank document? Unsaved changes in the editor will be lost (autosave draft stays available).")) return;
+        editor.innerHTML = "";
+        onEditorChanged();
+      });
+
+      /* ---- Open file (TXT / HTML / DOCX / SDOC) ---- */
+      $("dted-open-btn").addEventListener("click", () => $("dted-open-input").click());
+      $("dted-open-input").addEventListener("change", async () => {
+        const file = $("dted-open-input").files[0];
+        if (!file) return;
+        const name = file.name.toLowerCase();
+        try {
+          if (name.endsWith(".txt")) {
+            const text = await readFileAsText(file);
+            editor.innerHTML = "";
+            text.split(/\r?\n/).forEach(line => {
+              const p = document.createElement("p");
+              p.textContent = line || "\u00A0";
+              editor.appendChild(p);
+            });
+          } else if (name.endsWith(".html") || name.endsWith(".htm")) {
+            const html = await readFileAsText(file);
+            const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+            editor.innerHTML = sanitizeHtmlFragment(bodyMatch ? bodyMatch[1] : html);
+          } else if (name.endsWith(".docx")) {
+            if (!window.mammoth) { alert("DOCX support is still loading — please try again in a moment."); return; }
+            const buf = await readFileAsArrayBuffer(file);
+            const result = await window.mammoth.convertToHtml({ arrayBuffer: buf });
+            editor.innerHTML = sanitizeHtmlFragment(result.value);
+          } else if (name.endsWith(".sdoc") || name.endsWith(".json")) {
+            const text = await readFileAsText(file);
+            const data = JSON.parse(text);
+            editor.innerHTML = sanitizeHtmlFragment(data.html || "");
+          } else {
+            alert("Unsupported file type. Please open a .txt, .html, .docx or .sdoc file.");
+            return;
+          }
+          onEditorChanged();
+        } catch (err) {
+          alert("Could not open this file: " + (err && err.message ? err.message : "unknown error"));
+        }
+        $("dted-open-input").value = "";
+      });
+
+      /* ---- Save to Browser (named documents list) ---- */
+      function getSavedDocs() {
+        try { return JSON.parse(localStorage.getItem(SAVED_DOCS_KEY) || "{}"); } catch (e) { return {}; }
+      }
+      function setSavedDocs(obj) {
+        try { localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(obj)); } catch (e) { alert("Browser storage is full — could not save."); }
+      }
+      function refreshSavedDocsSelect() {
+        const docs = getSavedDocs();
+        const sel = $("dted-saved-docs");
+        sel.innerHTML = '<option value="">📁 Saved Documents…</option>';
+        Object.keys(docs).sort().forEach(name => {
+          const opt = document.createElement("option");
+          opt.value = name; opt.textContent = name;
+          sel.appendChild(opt);
+        });
+      }
+      refreshSavedDocsSelect();
+      $("dted-save-browser-btn").addEventListener("click", () => {
+        $("dted-savename-input").value = "Document " + new Date().toLocaleDateString();
+        $("dted-savename-modal").classList.add("open");
+        $("dted-savename-input").focus();
+      });
+      $("dted-savename-cancel").addEventListener("click", () => $("dted-savename-modal").classList.remove("open"));
+      $("dted-savename-confirm").addEventListener("click", () => {
+        const name = $("dted-savename-input").value.trim() || "Untitled Document";
+        const docs = getSavedDocs();
+        docs[name] = { html: editor.innerHTML, savedAt: Date.now() };
+        setSavedDocs(docs);
+        refreshSavedDocsSelect();
+        $("dted-savename-modal").classList.remove("open");
+        $("dted-save-label").textContent = "Saved as “" + name + "”";
+      });
+      $("dted-saved-docs").addEventListener("change", (e) => {
+        const name = e.target.value;
+        if (!name) return;
+        const docs = getSavedDocs();
+        if (docs[name]) {
+          if (editor.innerText.trim() && !confirm('Open "' + name + '"? Unsaved editor changes will be replaced.')) { e.target.value = ""; return; }
+          editor.innerHTML = docs[name].html || "";
+          onEditorChanged();
+        }
+        e.target.value = "";
+      });
+
+      /* ---- Export ---- */
+      function getDocTitle() {
+        const first = editor.querySelector("h1, h2, p");
+        const t = first ? first.textContent.trim().slice(0, 40) : "";
+        return (t || "document").replace(/[\\/:*?"<>|]+/g, "").trim() || "document";
+      }
+      function buildFullHtmlDocument() {
+        return "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>" + escapeHtml(getDocTitle()) +
+          "</title><style>body{font-family:Georgia,serif;max-width:800px;margin:2rem auto;padding:0 1.5rem;line-height:1.7;color:#111;} " +
+          "table{border-collapse:collapse;width:100%;} td,th{border:1px solid #999;padding:.5em .7em;} " +
+          "blockquote{border-left:3px solid #999;margin:0;padding-left:1rem;color:#555;} " +
+          "pre{background:#f4f4f4;padding:1rem;border-radius:6px;overflow-x:auto;} img{max-width:100%;}</style></head><body>" +
+          editor.innerHTML + "</body></html>";
+      }
+
+      $("dted-export-select").addEventListener("change", async (e) => {
+        const type = e.target.value;
+        e.target.value = "";
+        if (!type) return;
+        const title = getDocTitle();
+        try {
+          if (type === "txt") {
+            const blob = new Blob([editor.innerText], { type: "text/plain;charset=utf-8" });
+            downloadBlob(blob, title + ".txt");
+          } else if (type === "html") {
+            const blob = new Blob([buildFullHtmlDocument()], { type: "text/html;charset=utf-8" });
+            downloadBlob(blob, title + ".html");
+          } else if (type === "doc") {
+            /* Word 97-2003 compatible: MS Word natively opens well-formed HTML saved with a .doc extension */
+            const docHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>" +
+              "<head><meta charset='UTF-8'><title>" + escapeHtml(title) + "</title></head><body>" + editor.innerHTML + "</body></html>";
+            const blob = new Blob(["\ufeff", docHtml], { type: "application/msword" });
+            downloadBlob(blob, title + ".doc");
+          } else if (type === "sdoc") {
+            const blob = new Blob([JSON.stringify({ html: editor.innerHTML, title: title, savedAt: Date.now(), app: "SmartCompress Document Editor" }, null, 2)], { type: "application/json" });
+            downloadBlob(blob, title + ".sdoc");
+          } else if (type === "pdf") {
+            await exportAsPdf(title);
+          } else if (type === "docx") {
+            await exportAsDocx(title);
+          }
+        } catch (err) {
+          alert("Export failed: " + (err && err.message ? err.message : "unknown error"));
+        }
+      });
+
+      async function exportAsPdf(title) {
+        if (!window.jspdf || !window.html2canvas) { alert("PDF export library is still loading — please try again in a moment."); return; }
+        const { jsPDF } = window.jspdf;
+        const clone = editor.cloneNode(true);
+        clone.style.transform = "none";
+        clone.style.maxWidth = "800px";
+        clone.style.boxShadow = "none";
+        clone.style.background = "#ffffff";
+        clone.style.color = "#111111";
+        clone.querySelectorAll("mark.dted-highlight").forEach(m => { m.style.background = "transparent"; });
+        const holder = document.createElement("div");
+        holder.style.position = "fixed";
+        holder.style.left = "-9999px";
+        holder.style.top = "0";
+        holder.style.width = "800px";
+        holder.appendChild(clone);
+        document.body.appendChild(holder);
+        try {
+          const canvas = await window.html2canvas(clone, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
+          const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
+          const imgWidth = pageWidth;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          let heightLeft = imgHeight;
+          let position = 0;
+          const imgData = canvas.toDataURL("image/jpeg", 0.92);
+          pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+          while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+          }
+          pdf.save(title + ".pdf");
+        } finally {
+          document.body.removeChild(holder);
+        }
+      }
+
+      async function exportAsDocx(title) {
+        if (!window.docx) { alert("DOCX export library is still loading — please try again in a moment."); return; }
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell, ImageRun } = window.docx;
+        const headingMap = { H1: HeadingLevel.HEADING_1, H2: HeadingLevel.HEADING_2, H3: HeadingLevel.HEADING_3, H4: HeadingLevel.HEADING_4, H5: HeadingLevel.HEADING_5, H6: HeadingLevel.HEADING_6 };
+        const children = [];
+
+        function alignmentOf(el) {
+          const ta = el.style && el.style.textAlign;
+          if (ta === "center") return AlignmentType.CENTER;
+          if (ta === "right") return AlignmentType.RIGHT;
+          if (ta === "justify") return AlignmentType.JUSTIFIED;
+          return AlignmentType.LEFT;
+        }
+        function runsFromInline(node, base) {
+          base = base || {};
+          const runs = [];
+          node.childNodes.forEach(child => {
+            if (child.nodeType === 3) {
+              const t = child.nodeValue;
+              if (t) runs.push(new TextRun(Object.assign({ text: t }, base)));
+              return;
+            }
+            if (child.nodeType !== 1) return;
+            const tag = child.tagName;
+            const next = Object.assign({}, base);
+            if (tag === "B" || tag === "STRONG") next.bold = true;
+            if (tag === "I" || tag === "EM") next.italics = true;
+            if (tag === "U") next.underline = {};
+            if (tag === "S" || tag === "STRIKE" || tag === "DEL") next.strike = true;
+            if (tag === "SUP") next.superScript = true;
+            if (tag === "SUB") next.subScript = true;
+            if (tag === "A") next.style = "Hyperlink";
+            runs.push(...runsFromInline(child, next));
+          });
+          return runs.length ? runs : [new TextRun(Object.assign({ text: "" }, base))];
+        }
+        function blockToParagraph(el) {
+          const tag = el.tagName;
+          if (headingMap[tag]) {
+            return new Paragraph({ heading: headingMap[tag], alignment: alignmentOf(el), children: runsFromInline(el) });
+          }
+          if (tag === "BLOCKQUOTE") {
+            return new Paragraph({ alignment: alignmentOf(el), indent: { left: 480 }, children: runsFromInline(el) });
+          }
+          if (tag === "PRE") {
+            return new Paragraph({ children: [new TextRun({ text: el.textContent, font: "Courier New" })] });
+          }
+          return new Paragraph({ alignment: alignmentOf(el), children: runsFromInline(el) });
+        }
+        function listToParagraphs(el, ordered) {
+          const paras = [];
+          Array.from(el.children).forEach(li => {
+            if (li.tagName !== "LI") return;
+            paras.push(new Paragraph({
+              bullet: ordered ? undefined : { level: 0 },
+              numbering: ordered ? { reference: "smartcompress-numbering", level: 0 } : undefined,
+              children: runsFromInline(li)
+            }));
+          });
+          return paras;
+        }
+        function tableToDocxTable(el) {
+          const rows = [];
+          el.querySelectorAll("tr").forEach(tr => {
+            const cells = [];
+            tr.querySelectorAll("td,th").forEach(td => {
+              cells.push(new TableCell({ children: [new Paragraph({ children: runsFromInline(td) })] }));
+            });
+            if (cells.length) rows.push(new TableRow({ children: cells }));
+          });
+          return rows.length ? new Table({ rows }) : null;
+        }
+
+        Array.from(editor.children).forEach(el => {
+          const tag = el.tagName;
+          if (tag === "UL" && el.classList.contains("doc-checklist")) {
+            el.querySelectorAll("li").forEach(li => {
+              const checked = li.querySelector('input[type="checkbox"]') && li.querySelector('input[type="checkbox"]').checked;
+              children.push(new Paragraph({ children: [new TextRun({ text: (checked ? "☑ " : "☐ ") + li.textContent })] }));
+            });
+          } else if (tag === "UL") {
+            children.push(...listToParagraphs(el, false));
+          } else if (tag === "OL") {
+            children.push(...listToParagraphs(el, true));
+          } else if (tag === "TABLE") {
+            const t = tableToDocxTable(el);
+            if (t) children.push(t);
+          } else if (tag === "HR") {
+            children.push(new Paragraph({ children: [new TextRun({ text: "────────────────────────" })] }));
+          } else if (tag === "IMG") {
+            /* Skipped: base64 image bytes are embedded only when small enough to avoid huge export times */
+            children.push(new Paragraph({ children: [new TextRun({ text: "[image]", italics: true })] }));
+          } else {
+            children.push(blockToParagraph(el));
+          }
+        });
+        if (!children.length) children.push(new Paragraph({ children: [new TextRun("")] }));
+
+        const doc = new Document({
+          numbering: { config: [{ reference: "smartcompress-numbering", levels: [{ level: 0, format: "decimal", text: "%1.", alignment: AlignmentType.START }] }] },
+          sections: [{ properties: {}, children }]
+        });
+        const blob = await Packer.toBlob(doc);
+        downloadBlob(blob, title + ".docx");
+      }
+
+      /* ---- print & print preview ---- */
+      function printEditor() {
+        const w = window.open("", "_blank");
+        if (!w) { alert("Please allow pop-ups to print this document."); return; }
+        w.document.write(buildFullHtmlDocument());
+        w.document.close();
+        w.onload = () => { w.focus(); w.print(); };
+      }
+      $("dted-print-btn").addEventListener("click", printEditor);
+      $("dted-printpreview-btn").addEventListener("click", printEditor);
+
+      /* ---- keyboard shortcuts ---- */
+      editor.addEventListener("keydown", (e) => {
+        const mod = e.ctrlKey || e.metaKey;
+        if (mod && e.key.toLowerCase() === "b") { e.preventDefault(); execCmd("bold"); }
+        else if (mod && e.key.toLowerCase() === "i") { e.preventDefault(); execCmd("italic"); }
+        else if (mod && e.key.toLowerCase() === "u") { e.preventDefault(); execCmd("underline"); }
+        else if (mod && e.key.toLowerCase() === "f") { e.preventDefault(); $("dted-findbar").classList.add("open"); $("dted-find-input").focus(); }
+        else if (mod && e.key.toLowerCase() === "p") { e.preventDefault(); printEditor(); }
+      });
+
+      /* ---- init ---- */
+      applyZoom();
+      updateStats();
+      updateToolbarState();
+    })();
+
+    /* =======================================================================
+       PART 2 — PDF TOOLKIT
+    ======================================================================= */
+    (function initPdfToolkit() {
+      const panel = $("panel-pdftoolkit");
+      if (!panel) return;
+      ensurePdfWorker();
+
+      /* Cross-links to the existing Image→PDF / PDF→Image tabs (no duplication) */
+      $("pdftk-goto-img2pdf").addEventListener("click", () => $("tab-pdf").click());
+      $("pdftk-goto-pdf2img").addEventListener("click", () => $("tab-pdf2img").click());
+
+      /* ---- sub-tab switching (scoped, does not touch the top-level tool tabs) ---- */
+      const subtabButtons = panel.querySelectorAll(".pdf-subtab-btn");
+      const subpanels = panel.querySelectorAll(".pdf-subpanel");
+      subtabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          subtabButtons.forEach(b => b.classList.remove("active"));
+          subpanels.forEach(p => p.classList.remove("active"));
+          btn.classList.add("active");
+          $(btn.getAttribute("data-subpanel")).classList.add("active");
+        });
+      });
+
+      async function loadPdfDoc(file) {
+        const buf = await readFileAsArrayBuffer(file);
+        return { buf, pdfjsDoc: await window.pdfjsLib.getDocument({ data: buf.slice(0) }).promise };
+      }
+      async function renderThumbCanvas(pdfjsDoc, pageNum, rotationDeg) {
+        const page = await pdfjsDoc.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 0.4, rotation: (rotationDeg || 0) });
+        const canvas = document.createElement("canvas");
+        canvas.width = viewport.width; canvas.height = viewport.height;
+        await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+        return canvas;
+      }
+      function parseRanges(str, maxPage) {
+        const out = [];
+        str.split(",").forEach(part => {
+          part = part.trim();
+          if (!part) return;
+          const m = part.match(/^(\d+)\s*-\s*(\d+)$/);
+          if (m) {
+            let a = parseInt(m[1], 10), b = parseInt(m[2], 10);
+            if (a > b) { const t = a; a = b; b = t; }
+            for (let i = a; i <= b; i++) if (i >= 1 && i <= maxPage) out.push(i);
+          } else if (/^\d+$/.test(part)) {
+            const n = parseInt(part, 10);
+            if (n >= 1 && n <= maxPage) out.push(n);
+          }
+        });
+        return [...new Set(out)].sort((a, b) => a - b);
+      }
+      async function buildPdfFromPageIndexes(srcBuf, pageIndexesZeroBased, rotations) {
+        const src = await window.PDFLib.PDFDocument.load(srcBuf);
+        const out = await window.PDFLib.PDFDocument.create();
+        const copied = await out.copyPages(src, pageIndexesZeroBased);
+        copied.forEach((p, i) => {
+          if (rotations && rotations[i]) {
+            const current = p.getRotation().angle || 0;
+            p.setRotation(window.PDFLib.degrees(current + rotations[i]));
+          }
+          out.addPage(p);
+        });
+        return await out.save();
+      }
+
+      /* =================== 1. PDF Compressor =================== */
+      (function () {
+        const qEl = $("pdftk-compress-quality"), qLbl = $("pdftk-compress-quality-lbl");
+        qEl.addEventListener("input", () => qLbl.textContent = qEl.value + "%");
+        let selectedFile = null;
+
+        setupGenericDropzone("pdftk-compress-dropzone", "pdftk-compress-input", (files) => {
+          selectedFile = files[0];
+          $("pdftk-compress-run").style.display = "inline-flex";
+          $("pdftk-compress-dl").style.display = "none";
+          $("pdftk-compress-result").textContent = selectedFile.name + " (" + (selectedFile.size / 1024).toFixed(0) + " KB)";
+        });
+
+        $("pdftk-compress-run").addEventListener("click", async () => {
+          if (!selectedFile || !window.jspdf || !window.pdfjsLib) return;
+          const { jsPDF } = window.jspdf;
+          const scale = parseFloat($("pdftk-compress-scale").value);
+          const quality = parseInt($("pdftk-compress-quality").value, 10) / 100;
+          const progWrap = $("pdftk-compress-progress"), progBar = $("pdftk-compress-progress-bar"), progLbl = $("pdftk-compress-progress-label");
+          progWrap.style.display = "block";
+          $("pdftk-compress-run").disabled = true;
+          try {
+            const buf = await readFileAsArrayBuffer(selectedFile);
+            const pdfjsDoc = await window.pdfjsLib.getDocument({ data: buf }).promise;
+            let outDoc = null;
+            for (let i = 1; i <= pdfjsDoc.numPages; i++) {
+              progLbl.textContent = "Processing " + i + " / " + pdfjsDoc.numPages;
+              progBar.style.width = Math.round((i / pdfjsDoc.numPages) * 100) + "%";
+              const page = await pdfjsDoc.getPage(i);
+              const viewport = page.getViewport({ scale: scale });
+              const canvas = document.createElement("canvas");
+              canvas.width = viewport.width; canvas.height = viewport.height;
+              await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+              const imgData = canvas.toDataURL("image/jpeg", quality);
+              const orientation = viewport.width > viewport.height ? "landscape" : "portrait";
+              if (!outDoc) {
+                outDoc = new jsPDF({ orientation, unit: "pt", format: [viewport.width, viewport.height] });
+              } else {
+                outDoc.addPage([viewport.width, viewport.height], orientation);
+              }
+              outDoc.addImage(imgData, "JPEG", 0, 0, viewport.width, viewport.height);
+              await new Promise(r => setTimeout(r, 0));
+            }
+            const blob = outDoc.output("blob");
+            $("pdftk-compress-dl").href = URL.createObjectURL(blob);
+            $("pdftk-compress-dl").download = selectedFile.name.replace(/\.pdf$/i, "") + "-compressed.pdf";
+            $("pdftk-compress-dl").style.display = "inline-flex";
+            $("pdftk-compress-result").textContent = "Original: " + (selectedFile.size / 1024).toFixed(0) + " KB → Compressed: " + (blob.size / 1024).toFixed(0) + " KB";
+          } catch (err) {
+            alert("Compression failed: " + (err && err.message ? err.message : "unknown error"));
+          } finally {
+            progWrap.style.display = "none";
+            $("pdftk-compress-run").disabled = false;
+          }
+        });
+      })();
+
+      /* =================== 2. Merge PDFs =================== */
+      (function () {
+        let files = [];
+        function renderList() {
+          const list = $("pdftk-merge-list");
+          list.innerHTML = "";
+          files.forEach((f, i) => {
+            const row = document.createElement("div");
+            row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;";
+            row.innerHTML = '<span style="font-size:.85rem;">' + (i + 1) + ". " + escapeHtml(f.name) + '</span>';
+            const btnGroup = document.createElement("div");
+            btnGroup.style.cssText = "display:flex;gap:.3rem;";
+            const up = document.createElement("button"); up.textContent = "↑"; up.type = "button";
+            up.className = "btn-secondary"; up.style.cssText = "padding:.25rem .55rem;font-size:.78rem;";
+            up.addEventListener("click", () => { if (i > 0) { [files[i - 1], files[i]] = [files[i], files[i - 1]]; renderList(); } });
+            const down = document.createElement("button"); down.textContent = "↓"; down.type = "button";
+            down.className = "btn-secondary"; down.style.cssText = "padding:.25rem .55rem;font-size:.78rem;";
+            down.addEventListener("click", () => { if (i < files.length - 1) { [files[i + 1], files[i]] = [files[i], files[i + 1]]; renderList(); } });
+            const rm = document.createElement("button"); rm.textContent = "✕"; rm.type = "button";
+            rm.className = "btn-secondary"; rm.style.cssText = "padding:.25rem .55rem;font-size:.78rem;color:var(--danger);";
+            rm.addEventListener("click", () => { files.splice(i, 1); renderList(); });
+            btnGroup.appendChild(up); btnGroup.appendChild(down); btnGroup.appendChild(rm);
+            row.appendChild(btnGroup);
+            list.appendChild(row);
+          });
+          $("pdftk-merge-run").style.display = files.length >= 2 ? "inline-flex" : "none";
+          $("pdftk-merge-dl").style.display = "none";
+        }
+        setupGenericDropzone("pdftk-merge-dropzone", "pdftk-merge-input", (fl) => {
+          files.push(...Array.from(fl));
+          renderList();
+        });
+        $("pdftk-merge-run").addEventListener("click", async () => {
+          if (files.length < 2 || !window.PDFLib) return;
+          try {
+            const out = await window.PDFLib.PDFDocument.create();
+            for (const f of files) {
+              const buf = await readFileAsArrayBuffer(f);
+              const src = await window.PDFLib.PDFDocument.load(buf);
+              const pages = await out.copyPages(src, src.getPageIndices());
+              pages.forEach(p => out.addPage(p));
+            }
+            const bytes = await out.save();
+            const blob = new Blob([bytes], { type: "application/pdf" });
+            $("pdftk-merge-dl").href = URL.createObjectURL(blob);
+            $("pdftk-merge-dl").style.display = "inline-flex";
+          } catch (err) {
+            alert("Merge failed: " + (err && err.message ? err.message : "unknown error"));
+          }
+        });
+      })();
+
+      /* =================== 3. Split PDF =================== */
+      (function () {
+        let currentFile = null;
+        $("pdftk-split-mode").addEventListener("change", (e) => {
+          $("pdftk-split-range-group").style.display = e.target.value === "range" ? "flex" : "none";
+        });
+        setupGenericDropzone("pdftk-split-dropzone", "pdftk-split-input", (files) => {
+          currentFile = files[0];
+          $("pdftk-split-run").style.display = "inline-flex";
+          $("pdftk-split-dl").style.display = "none";
+        });
+        $("pdftk-split-run").addEventListener("click", async () => {
+          if (!currentFile || !window.PDFLib || !window.JSZip) return;
+          try {
+            const buf = await readFileAsArrayBuffer(currentFile);
+            const src = await window.PDFLib.PDFDocument.load(buf);
+            const total = src.getPageCount();
+            const mode = $("pdftk-split-mode").value;
+            const zip = new window.JSZip();
+            const baseName = currentFile.name.replace(/\.pdf$/i, "");
+            if (mode === "every") {
+              for (let i = 0; i < total; i++) {
+                const out = await window.PDFLib.PDFDocument.create();
+                const [p] = await out.copyPages(src, [i]);
+                out.addPage(p);
+                const bytes = await out.save();
+                zip.file(baseName + "-page-" + (i + 1) + ".pdf", bytes);
+              }
+            } else {
+              const ranges = parseRanges($("pdftk-split-ranges").value, total);
+              if (!ranges.length) { alert("Please enter valid page ranges, e.g. 1-3, 5, 7-9"); return; }
+              const out = await window.PDFLib.PDFDocument.create();
+              const pages = await out.copyPages(src, ranges.map(n => n - 1));
+              pages.forEach(p => out.addPage(p));
+              const bytes = await out.save();
+              zip.file(baseName + "-selected-pages.pdf", bytes);
+            }
+            const zipBlob = await zip.generateAsync({ type: "blob" });
+            $("pdftk-split-dl").href = URL.createObjectURL(zipBlob);
+            $("pdftk-split-dl").download = baseName + "-split.zip";
+            $("pdftk-split-dl").style.display = "inline-flex";
+          } catch (err) {
+            alert("Split failed: " + (err && err.message ? err.message : "unknown error"));
+          }
+        });
+      })();
+
+      /* =================== 4. Rotate PDF Pages =================== */
+      (function () {
+        let currentFile = null, currentBuf = null, currentDoc = null, rotations = [];
+        setupGenericDropzone("pdftk-rotate-dropzone", "pdftk-rotate-input", async (files) => {
+          currentFile = files[0];
+          currentBuf = await readFileAsArrayBuffer(currentFile);
+          currentDoc = await window.pdfjsLib.getDocument({ data: currentBuf.slice(0) }).promise;
+          rotations = new Array(currentDoc.numPages).fill(0);
+          await renderGrid();
+          $("pdftk-rotate-bulkrow").style.display = "flex";
+          $("pdftk-rotate-run").style.display = "inline-flex";
+          $("pdftk-rotate-dl").style.display = "none";
+        });
+        async function renderGrid() {
+          const grid = $("pdftk-rotate-grid");
+          grid.innerHTML = "";
+          for (let i = 1; i <= currentDoc.numPages; i++) {
+            const card = document.createElement("div");
+            card.className = "pdf-thumb-card";
+            const canvas = await renderThumbCanvas(currentDoc, i, rotations[i - 1]);
+            const label = document.createElement("div"); label.className = "pdf-thumb-label"; label.textContent = "Page " + i;
+            const tools = document.createElement("div"); tools.className = "pdf-thumb-tools";
+            const left = document.createElement("button"); left.type = "button"; left.textContent = "↺";
+            left.addEventListener("click", async () => { rotations[i - 1] = (rotations[i - 1] - 90 + 360) % 360; card.replaceChild(await renderThumbCanvas(currentDoc, i, rotations[i - 1]), card.querySelector("canvas")); });
+            const right = document.createElement("button"); right.type = "button"; right.textContent = "↻";
+            right.addEventListener("click", async () => { rotations[i - 1] = (rotations[i - 1] + 90) % 360; card.replaceChild(await renderThumbCanvas(currentDoc, i, rotations[i - 1]), card.querySelector("canvas")); });
+            tools.appendChild(left); tools.appendChild(right);
+            card.appendChild(canvas); card.appendChild(label); card.appendChild(tools);
+            grid.appendChild(card);
+          }
+        }
+        $("pdftk-rotate-all-left").addEventListener("click", async () => { rotations = rotations.map(r => (r - 90 + 360) % 360); await renderGrid(); });
+        $("pdftk-rotate-all-right").addEventListener("click", async () => { rotations = rotations.map(r => (r + 90) % 360); await renderGrid(); });
+        $("pdftk-rotate-run").addEventListener("click", async () => {
+          if (!currentBuf || !window.PDFLib) return;
+          try {
+            const bytes = await buildPdfFromPageIndexes(currentBuf, rotations.map((_, i) => i), rotations);
+            const blob = new Blob([bytes], { type: "application/pdf" });
+            $("pdftk-rotate-dl").href = URL.createObjectURL(blob);
+            $("pdftk-rotate-dl").download = currentFile.name.replace(/\.pdf$/i, "") + "-rotated.pdf";
+            $("pdftk-rotate-dl").style.display = "inline-flex";
+          } catch (err) {
+            alert("Rotate failed: " + (err && err.message ? err.message : "unknown error"));
+          }
+        });
+      })();
+
+      /* =================== 5. Extract Pages & 7. Delete Pages (shared logic) =================== */
+      function buildCheckablePageTool(prefix, keepSelectedMeansOutput) {
+        let currentFile = null, currentBuf = null, currentDoc = null, checked = [];
+        setupGenericDropzone(prefix + "-dropzone", prefix + "-input", async (files) => {
+          currentFile = files[0];
+          currentBuf = await readFileAsArrayBuffer(currentFile);
+          currentDoc = await window.pdfjsLib.getDocument({ data: currentBuf.slice(0) }).promise;
+          checked = new Array(currentDoc.numPages).fill(keepSelectedMeansOutput ? true : false);
+          await renderGrid();
+          $(prefix + "-bulkrow").style.display = "flex";
+          $(prefix + "-run").style.display = "inline-flex";
+          $(prefix + "-dl").style.display = "none";
+        });
+        async function renderGrid() {
+          const grid = $(prefix + "-grid");
+          grid.innerHTML = "";
+          for (let i = 1; i <= currentDoc.numPages; i++) {
+            const card = document.createElement("div");
+            card.className = "pdf-thumb-card" + (checked[i - 1] ? " selected" : "");
+            const cb = document.createElement("input");
+            cb.type = "checkbox"; cb.checked = checked[i - 1];
+            cb.addEventListener("change", () => { checked[i - 1] = cb.checked; card.classList.toggle("selected", cb.checked); });
+            const canvas = await renderThumbCanvas(currentDoc, i, 0);
+            const label = document.createElement("div"); label.className = "pdf-thumb-label"; label.textContent = "Page " + i;
+            card.appendChild(cb); card.appendChild(canvas); card.appendChild(label);
+            grid.appendChild(card);
+          }
+        }
+        $(prefix + "-selectall").addEventListener("click", () => { checked = checked.map(() => true); renderGrid(); });
+        $(prefix + "-selectnone").addEventListener("click", () => { checked = checked.map(() => false); renderGrid(); });
+        $(prefix + "-run").addEventListener("click", async () => {
+          if (!currentBuf || !window.PDFLib) return;
+          try {
+            let indexes;
+            if (keepSelectedMeansOutput) {
+              indexes = checked.map((c, i) => c ? i : -1).filter(i => i >= 0);
+              if (!indexes.length) { alert("Please tick at least one page."); return; }
+            } else {
+              indexes = checked.map((c, i) => c ? -1 : i).filter(i => i >= 0);
+              if (!indexes.length) { alert("All pages are ticked for deletion — nothing would remain. Untick at least one page."); return; }
+            }
+            const bytes = await buildPdfFromPageIndexes(currentBuf, indexes, null);
+            const blob = new Blob([bytes], { type: "application/pdf" });
+            $(prefix + "-dl").href = URL.createObjectURL(blob);
+            $(prefix + "-dl").download = currentFile.name.replace(/\.pdf$/i, "") + (keepSelectedMeansOutput ? "-extracted.pdf" : "-edited.pdf");
+            $(prefix + "-dl").style.display = "inline-flex";
+          } catch (err) {
+            alert("Operation failed: " + (err && err.message ? err.message : "unknown error"));
+          }
+        });
+      }
+      buildCheckablePageTool("pdftk-extract", true);
+      buildCheckablePageTool("pdftk-delete", false);
+
+      /* =================== 6. Rearrange Pages (drag & drop reorder) =================== */
+      (function () {
+        let currentFile = null, currentBuf = null, currentDoc = null, order = [];
+        setupGenericDropzone("pdftk-rearrange-dropzone", "pdftk-rearrange-input", async (files) => {
+          currentFile = files[0];
+          currentBuf = await readFileAsArrayBuffer(currentFile);
+          currentDoc = await window.pdfjsLib.getDocument({ data: currentBuf.slice(0) }).promise;
+          order = Array.from({ length: currentDoc.numPages }, (_, i) => i);
+          await renderGrid();
+          $("pdftk-rearrange-run").style.display = "inline-flex";
+          $("pdftk-rearrange-dl").style.display = "none";
+        });
+        let dragSrcIndex = null;
+        async function renderGrid() {
+          const grid = $("pdftk-rearrange-grid");
+          grid.innerHTML = "";
+          for (let pos = 0; pos < order.length; pos++) {
+            const pageIndex = order[pos];
+            const card = document.createElement("div");
+            card.className = "pdf-thumb-card";
+            card.draggable = true;
+            card.dataset.pos = pos;
+            const canvas = await renderThumbCanvas(currentDoc, pageIndex + 1, 0);
+            const label = document.createElement("div"); label.className = "pdf-thumb-label"; label.textContent = "Position " + (pos + 1) + " (orig. page " + (pageIndex + 1) + ")";
+            card.appendChild(canvas); card.appendChild(label);
+            card.addEventListener("dragstart", () => { dragSrcIndex = pos; card.classList.add("dragging"); });
+            card.addEventListener("dragend", () => { card.classList.remove("dragging"); });
+            card.addEventListener("dragover", (e) => e.preventDefault());
+            card.addEventListener("drop", (e) => {
+              e.preventDefault();
+              const destIndex = parseInt(card.dataset.pos, 10);
+              if (dragSrcIndex === null || dragSrcIndex === destIndex) return;
+              const moved = order.splice(dragSrcIndex, 1)[0];
+              order.splice(destIndex, 0, moved);
+              renderGrid();
+            });
+            grid.appendChild(card);
+          }
+        }
+        $("pdftk-rearrange-run").addEventListener("click", async () => {
+          if (!currentBuf || !window.PDFLib) return;
+          try {
+            const bytes = await buildPdfFromPageIndexes(currentBuf, order, null);
+            const blob = new Blob([bytes], { type: "application/pdf" });
+            $("pdftk-rearrange-dl").href = URL.createObjectURL(blob);
+            $("pdftk-rearrange-dl").download = currentFile.name.replace(/\.pdf$/i, "") + "-reordered.pdf";
+            $("pdftk-rearrange-dl").style.display = "inline-flex";
+          } catch (err) {
+            alert("Save failed: " + (err && err.message ? err.message : "unknown error"));
+          }
+        });
+      })();
+
+    })();
+
+  });
   </script>
 </body>
 </html>
