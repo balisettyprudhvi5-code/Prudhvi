@@ -72,6 +72,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
   <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
 
   <script type="application/ld+json">
   {
@@ -1136,6 +1138,27 @@
         <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-pdftoolkit" id="tab-pdftoolkit">
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15h6M9 11h6"/></svg> 14. PDF Toolkit
         </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-docconverter" id="tab-docconverter">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6h-2"/><path d="M12 3v6h6M9 17l3-3 3 3M12 14v6"/></svg> 15. Document Converter
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-jsontools" id="tab-jsontools">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 7V5a2 2 0 0 1 2-2h1M4 17v2a2 2 0 0 0 2 2h1M20 7V5a2 2 0 0 0-2-2h-1M20 17v2a2 2 0 0 1-2 2h-1M8 9c1 0 1 1 1 2v2c0 1-.5 1.5-1 1.5M8 9c-1 0-1 1-1 2v2c0 1 .5 1.5 1 1.5M16 9c-1 0-1 1-1 2v2c0 1 .5 1.5 1 1.5"/></svg> 16. JSON Tools
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-codeminifier" id="tab-codeminifier">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> 17. Code Minifier
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-ocr" id="tab-ocr">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg> 18. OCR Image to Text
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-qrgen" id="tab-qrgen">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14h1v1h-1zM14 20h1v1h-1zM17 17h1v1h-1zM20 20h1v1h-1z"/></svg> 19. QR Code Generator
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-pwgen" id="tab-pwgen">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> 20. Password Generator
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-urlcodec" id="tab-urlcodec">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> 21. URL Encoder / Decoder
+        </button>
       </div>
 
       <div id="suite-workspace-block">
@@ -2024,6 +2047,289 @@
               <a class="btn-primary" id="pdftk-delete-dl" style="display:none;" href="#" download="deleted-pages.pdf">Download Result PDF</a>
             </div>
           </div>
+        </div>
+
+        <!-- ============ 15. DOCUMENT CONVERTER ============ -->
+        <div class="tool-workspace" id="panel-docconverter" role="tabpanel" aria-labelledby="tab-docconverter">
+          <div class="tool-title-row">
+            <h2>Document Converter <span>Word ⇄ PDF — 100% Offline in Your Browser</span></h2>
+          </div>
+
+          <div class="pdf-subtabs" role="tablist" aria-label="Document converter direction">
+            <button type="button" class="pdf-subtab-btn active" data-subpanel="docconv-w2p">📄 Word → PDF</button>
+            <button type="button" class="pdf-subtab-btn" data-subpanel="docconv-p2w">📝 PDF → Word</button>
+          </div>
+
+          <!-- Word to PDF -->
+          <div class="pdf-subpanel active" id="docconv-w2p">
+            <div class="tool-drop-zone" id="docconv-w2p-dropzone">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <p>Drop a .docx file or <span>browse files</span> to convert it to PDF</p>
+              <input type="file" id="docconv-w2p-input" class="file-input-hidden" accept=".docx" />
+            </div>
+            <div class="pdf-progress-wrap" id="docconv-w2p-progress" style="display:none;">
+              <span class="pdf-progress-label" id="docconv-w2p-progress-label">Converting…</span>
+              <div class="pdf-progress-track"><div class="pdf-progress-bar" id="docconv-w2p-progress-bar" style="width:100%;"></div></div>
+            </div>
+            <div class="action-row" style="margin-top:1rem;">
+              <span id="docconv-w2p-result" style="font-family:var(--mono); font-size:.82rem; color:var(--muted); align-self:center;"></span>
+            </div>
+          </div>
+
+          <!-- PDF to Word -->
+          <div class="pdf-subpanel" id="docconv-p2w">
+            <p class="pdf-subnote">Extracts the text content of every page into an editable .docx file. Complex layouts, images and exact formatting from the original PDF are not preserved.</p>
+            <div class="tool-drop-zone" id="docconv-p2w-dropzone">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <p>Drop a PDF or <span>browse files</span> to convert it to Word</p>
+              <input type="file" id="docconv-p2w-input" class="file-input-hidden" accept="application/pdf" />
+            </div>
+            <div class="pdf-progress-wrap" id="docconv-p2w-progress" style="display:none;">
+              <span class="pdf-progress-label" id="docconv-p2w-progress-label">Extracting page 0 / 0</span>
+              <div class="pdf-progress-track"><div class="pdf-progress-bar" id="docconv-p2w-progress-bar"></div></div>
+            </div>
+            <div class="action-row" style="margin-top:1rem;">
+              <span id="docconv-p2w-result" style="font-family:var(--mono); font-size:.82rem; color:var(--muted); align-self:center;"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ 16. JSON TOOLS ============ -->
+        <div class="tool-workspace" id="panel-jsontools" role="tabpanel" aria-labelledby="tab-jsontools">
+          <div class="tool-title-row">
+            <h2>JSON Tools <span>Format, Beautify, Minify &amp; Validate JSON</span></h2>
+          </div>
+
+          <div class="pdf-subtabs" role="tablist" aria-label="JSON tool select">
+            <button type="button" class="pdf-subtab-btn active" data-subpanel="json-formatter">🎨 JSON Formatter</button>
+            <button type="button" class="pdf-subtab-btn" data-subpanel="json-validator">✅ JSON Validator</button>
+          </div>
+
+          <!-- JSON Formatter -->
+          <div class="pdf-subpanel active" id="json-formatter">
+            <div class="control-group" style="margin-bottom:1rem;">
+              <label for="jsonfmt-input">Paste JSON</label>
+              <textarea id="jsonfmt-input" placeholder='{"hello": "world"}' style="width:100%;min-height:180px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:.8rem;font-family:var(--mono);font-size:.85rem;resize:vertical;"></textarea>
+            </div>
+            <div class="action-row">
+              <button type="button" class="btn-primary" id="jsonfmt-beautify">Beautify</button>
+              <button type="button" class="btn-secondary" id="jsonfmt-minify">Minify</button>
+              <button type="button" class="btn-secondary" id="jsonfmt-copy">Copy</button>
+              <a class="btn-secondary" id="jsonfmt-download" href="#" download="formatted.json" style="display:none;">Download JSON</a>
+              <button type="button" class="btn-secondary" id="jsonfmt-clear">Clear</button>
+            </div>
+            <div class="control-group" id="jsonfmt-output-wrap" style="display:none; margin-top:1rem;">
+              <label>Result</label>
+              <textarea id="jsonfmt-output" readonly style="width:100%;min-height:180px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent2);padding:.8rem;font-family:var(--mono);font-size:.85rem;resize:vertical;"></textarea>
+            </div>
+            <span id="jsonfmt-error" style="display:none; color:#ff6b6b; font-family:var(--mono); font-size:.82rem; margin-top:.6rem;"></span>
+          </div>
+
+          <!-- JSON Validator -->
+          <div class="pdf-subpanel" id="json-validator">
+            <div class="control-group" style="margin-bottom:1rem;">
+              <label for="jsonval-input">Paste JSON to validate</label>
+              <textarea id="jsonval-input" placeholder='{"hello": "world"}' style="width:100%;min-height:180px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:.8rem;font-family:var(--mono);font-size:.85rem;resize:vertical;"></textarea>
+            </div>
+            <div class="action-row">
+              <button type="button" class="btn-primary" id="jsonval-run">Validate JSON</button>
+              <button type="button" class="btn-secondary" id="jsonval-clear">Clear</button>
+            </div>
+            <div id="jsonval-result" style="margin-top:1rem;"></div>
+            <div class="control-group" id="jsonval-output-wrap" style="display:none; margin-top:1rem;">
+              <label>Pretty Printed</label>
+              <textarea id="jsonval-output" readonly style="width:100%;min-height:160px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent2);padding:.8rem;font-family:var(--mono);font-size:.85rem;resize:vertical;"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ 17. CODE MINIFIER ============ -->
+        <div class="tool-workspace" id="panel-codeminifier" role="tabpanel" aria-labelledby="tab-codeminifier">
+          <div class="tool-title-row">
+            <h2>Code Minifier <span>Shrink HTML, CSS &amp; JavaScript — Client-Side Only</span></h2>
+          </div>
+
+          <div class="pdf-subtabs" role="tablist" aria-label="Code minifier language select">
+            <button type="button" class="pdf-subtab-btn active" data-subpanel="min-html">🌐 HTML Minifier</button>
+            <button type="button" class="pdf-subtab-btn" data-subpanel="min-css">🎨 CSS Minifier</button>
+            <button type="button" class="pdf-subtab-btn" data-subpanel="min-js">⚙ JavaScript Minifier</button>
+          </div>
+
+          <!-- HTML Minifier -->
+          <div class="pdf-subpanel active" id="min-html">
+            <div class="tool-drop-zone" id="min-html-dropzone" style="min-height:110px;">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+              <p>Drop a .html file or <span>browse files</span> — or paste code below</p>
+              <input type="file" id="min-html-input" class="file-input-hidden" accept=".html,.htm" />
+            </div>
+            <div class="control-group" style="margin:1rem 0;">
+              <label for="min-html-src">Paste HTML</label>
+              <textarea id="min-html-src" style="width:100%;min-height:160px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:.8rem;font-family:var(--mono);font-size:.82rem;resize:vertical;"></textarea>
+            </div>
+            <div class="action-row">
+              <button type="button" class="btn-primary" id="min-html-run">Minify</button>
+              <button type="button" class="btn-secondary" id="min-html-copy">Copy</button>
+              <a class="btn-secondary" id="min-html-download" href="#" download="minified.html" style="display:none;">Download</a>
+              <span id="min-html-stats" style="font-family:var(--mono); font-size:.8rem; color:var(--muted); align-self:center;"></span>
+            </div>
+            <div class="control-group" id="min-html-out-wrap" style="display:none; margin-top:1rem;">
+              <label>Minified Output</label>
+              <textarea id="min-html-out" readonly style="width:100%;min-height:140px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent2);padding:.8rem;font-family:var(--mono);font-size:.82rem;resize:vertical;"></textarea>
+            </div>
+          </div>
+
+          <!-- CSS Minifier -->
+          <div class="pdf-subpanel" id="min-css">
+            <div class="tool-drop-zone" id="min-css-dropzone" style="min-height:110px;">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+              <p>Drop a .css file or <span>browse files</span> — or paste code below</p>
+              <input type="file" id="min-css-input" class="file-input-hidden" accept=".css" />
+            </div>
+            <div class="control-group" style="margin:1rem 0;">
+              <label for="min-css-src">Paste CSS</label>
+              <textarea id="min-css-src" style="width:100%;min-height:160px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:.8rem;font-family:var(--mono);font-size:.82rem;resize:vertical;"></textarea>
+            </div>
+            <div class="action-row">
+              <button type="button" class="btn-primary" id="min-css-run">Minify</button>
+              <button type="button" class="btn-secondary" id="min-css-copy">Copy</button>
+              <a class="btn-secondary" id="min-css-download" href="#" download="minified.css" style="display:none;">Download</a>
+              <span id="min-css-stats" style="font-family:var(--mono); font-size:.8rem; color:var(--muted); align-self:center;"></span>
+            </div>
+            <div class="control-group" id="min-css-out-wrap" style="display:none; margin-top:1rem;">
+              <label>Minified Output</label>
+              <textarea id="min-css-out" readonly style="width:100%;min-height:140px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent2);padding:.8rem;font-family:var(--mono);font-size:.82rem;resize:vertical;"></textarea>
+            </div>
+          </div>
+
+          <!-- JS Minifier -->
+          <div class="pdf-subpanel" id="min-js">
+            <div class="tool-drop-zone" id="min-js-dropzone" style="min-height:110px;">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+              <p>Drop a .js file or <span>browse files</span> — or paste code below</p>
+              <input type="file" id="min-js-input" class="file-input-hidden" accept=".js" />
+            </div>
+            <div class="control-group" style="margin:1rem 0;">
+              <label for="min-js-src">Paste JavaScript</label>
+              <textarea id="min-js-src" style="width:100%;min-height:160px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:.8rem;font-family:var(--mono);font-size:.82rem;resize:vertical;"></textarea>
+            </div>
+            <div class="action-row">
+              <button type="button" class="btn-primary" id="min-js-run">Minify</button>
+              <button type="button" class="btn-secondary" id="min-js-copy">Copy</button>
+              <a class="btn-secondary" id="min-js-download" href="#" download="minified.js" style="display:none;">Download</a>
+              <span id="min-js-stats" style="font-family:var(--mono); font-size:.8rem; color:var(--muted); align-self:center;"></span>
+            </div>
+            <div class="control-group" id="min-js-out-wrap" style="display:none; margin-top:1rem;">
+              <label>Minified Output</label>
+              <textarea id="min-js-out" readonly style="width:100%;min-height:140px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent2);padding:.8rem;font-family:var(--mono);font-size:.82rem;resize:vertical;"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ 18. OCR IMAGE TO TEXT ============ -->
+        <div class="tool-workspace" id="panel-ocr" role="tabpanel" aria-labelledby="tab-ocr">
+          <div class="tool-title-row">
+            <h2>OCR Image to Text <span>Extract Text From Images Right In Your Browser</span></h2>
+          </div>
+          <div class="tool-drop-zone" id="ocr-dropzone">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <p>Drop an image (JPG, PNG, WebP) or <span>browse files</span> to extract its text</p>
+            <input type="file" id="ocr-input" class="file-input-hidden" accept="image/*" />
+          </div>
+          <div class="pdf-progress-wrap" id="ocr-progress" style="display:none;">
+            <span class="pdf-progress-label" id="ocr-progress-label">Recognizing… 0%</span>
+            <div class="pdf-progress-track"><div class="pdf-progress-bar" id="ocr-progress-bar"></div></div>
+          </div>
+          <div class="action-row" style="margin-top:1rem;">
+            <button type="button" class="btn-secondary" id="ocr-copy" style="display:none;">Copy Text</button>
+            <a class="btn-secondary" id="ocr-download" href="#" download="extracted-text.txt" style="display:none;">Download TXT</a>
+          </div>
+          <div class="control-group" id="ocr-out-wrap" style="display:none; margin-top:1rem;">
+            <label>Extracted Text</label>
+            <textarea id="ocr-output" readonly style="width:100%;min-height:180px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent2);padding:.8rem;font-family:var(--mono);font-size:.85rem;resize:vertical;"></textarea>
+          </div>
+        </div>
+
+        <!-- ============ 19. QR CODE GENERATOR ============ -->
+        <div class="tool-workspace" id="panel-qrgen" role="tabpanel" aria-labelledby="tab-qrgen">
+          <div class="tool-title-row">
+            <h2>QR Code Generator <span>Create Scannable QR Codes Instantly</span></h2>
+          </div>
+          <div class="tool-controls-panel">
+            <div class="control-group" style="flex:2 1 260px;">
+              <label for="qrgen-text">Text or URL</label>
+              <input type="text" id="qrgen-text" placeholder="https://example.com" />
+            </div>
+            <div class="control-group">
+              <div class="range-label-wrap">
+                <label for="qrgen-size">Size</label>
+                <span class="range-val-lbl" id="qrgen-size-lbl">256px</span>
+              </div>
+              <input type="range" id="qrgen-size" min="128" max="512" step="32" value="256">
+            </div>
+          </div>
+          <div class="action-row" style="margin-top:1rem;">
+            <button type="button" class="btn-primary" id="qrgen-run">Generate QR Code</button>
+            <a class="btn-secondary" id="qrgen-download" href="#" download="qrcode.png" style="display:none;">Download PNG</a>
+          </div>
+          <div id="qrgen-output" style="margin-top:1.5rem; display:flex; justify-content:center; align-items:center; min-height:100px;"></div>
+        </div>
+
+        <!-- ============ 20. PASSWORD GENERATOR ============ -->
+        <div class="tool-workspace" id="panel-pwgen" role="tabpanel" aria-labelledby="tab-pwgen">
+          <div class="tool-title-row">
+            <h2>Password Generator <span>Strong, Random Passwords Generated Locally</span></h2>
+          </div>
+          <div class="tool-controls-panel">
+            <div class="control-group">
+              <div class="range-label-wrap">
+                <label for="pwgen-length">Length</label>
+                <span class="range-val-lbl" id="pwgen-length-lbl">16</span>
+              </div>
+              <input type="range" id="pwgen-length" min="6" max="64" step="1" value="16">
+            </div>
+            <div class="control-group" style="flex-direction:row; align-items:center; gap:.5rem;">
+              <input type="checkbox" id="pwgen-upper" checked><label for="pwgen-upper" style="margin:0;">Uppercase (A-Z)</label>
+            </div>
+            <div class="control-group" style="flex-direction:row; align-items:center; gap:.5rem;">
+              <input type="checkbox" id="pwgen-lower" checked><label for="pwgen-lower" style="margin:0;">Lowercase (a-z)</label>
+            </div>
+            <div class="control-group" style="flex-direction:row; align-items:center; gap:.5rem;">
+              <input type="checkbox" id="pwgen-numbers" checked><label for="pwgen-numbers" style="margin:0;">Numbers (0-9)</label>
+            </div>
+            <div class="control-group" style="flex-direction:row; align-items:center; gap:.5rem;">
+              <input type="checkbox" id="pwgen-symbols" checked><label for="pwgen-symbols" style="margin:0;">Symbols (!@#$…)</label>
+            </div>
+          </div>
+          <div class="action-row" style="margin-top:1rem;">
+            <button type="button" class="btn-primary" id="pwgen-run">Generate Password</button>
+            <button type="button" class="btn-secondary" id="pwgen-copy" style="display:none;">Copy</button>
+          </div>
+          <div class="control-group" id="pwgen-out-wrap" style="display:none; margin-top:1rem;">
+            <label>Generated Password <span id="pwgen-strength" style="font-family:var(--mono); font-size:.78rem;"></span></label>
+            <input type="text" id="pwgen-output" readonly style="font-family:var(--mono); font-size:1.05rem; letter-spacing:.03em; color:var(--accent2);" />
+          </div>
+        </div>
+
+        <!-- ============ 21. URL ENCODER / DECODER ============ -->
+        <div class="tool-workspace" id="panel-urlcodec" role="tabpanel" aria-labelledby="tab-urlcodec">
+          <div class="tool-title-row">
+            <h2>URL Encoder / Decoder <span>Encode &amp; Decode URL Components Instantly</span></h2>
+          </div>
+          <div class="control-group" style="margin-bottom:1rem;">
+            <label for="urlcodec-input">Text or URL</label>
+            <textarea id="urlcodec-input" placeholder="https://example.com/search?q=hello world" style="width:100%;min-height:140px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:.8rem;font-family:var(--mono);font-size:.85rem;resize:vertical;"></textarea>
+          </div>
+          <div class="action-row">
+            <button type="button" class="btn-primary" id="urlcodec-encode">Encode</button>
+            <button type="button" class="btn-secondary" id="urlcodec-decode">Decode</button>
+            <button type="button" class="btn-secondary" id="urlcodec-copy">Copy</button>
+            <button type="button" class="btn-secondary" id="urlcodec-clear">Clear</button>
+          </div>
+          <div class="control-group" id="urlcodec-out-wrap" style="display:none; margin-top:1rem;">
+            <label>Result</label>
+            <textarea id="urlcodec-output" readonly style="width:100%;min-height:140px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent2);padding:.8rem;font-family:var(--mono);font-size:.85rem;resize:vertical;"></textarea>
+          </div>
+          <span id="urlcodec-error" style="display:none; color:#ff6b6b; font-family:var(--mono); font-size:.82rem; margin-top:.6rem;"></span>
         </div>
 
       </div>
@@ -5370,6 +5676,548 @@
         });
       })();
 
+    })();
+
+    /* =======================================================================
+       SHARED HELPER — scoped sub-tab switching (reused by the new
+       multi-tool workspaces below: Document Converter, JSON Tools,
+       Code Minifier). Mirrors the existing PDF Toolkit sub-tab pattern.
+    ======================================================================= */
+    function initScopedSubtabs(panelId) {
+      const panel = $(panelId);
+      if (!panel) return;
+      const subtabButtons = panel.querySelectorAll(".pdf-subtab-btn");
+      const subpanels = panel.querySelectorAll(".pdf-subpanel");
+      subtabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          subtabButtons.forEach(b => b.classList.remove("active"));
+          subpanels.forEach(p => p.classList.remove("active"));
+          btn.classList.add("active");
+          const target = $(btn.getAttribute("data-subpanel"));
+          if (target) target.classList.add("active");
+        });
+      });
+    }
+
+    function copyTextToClipboard(text, btn) {
+      if (!text) return;
+      const done = () => {
+        if (!btn) return;
+        const orig = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(done);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); } catch (e) { /* clipboard blocked */ }
+        ta.remove();
+        done();
+      }
+    }
+
+    /* =======================================================================
+       PART 3 — DOCUMENT CONVERTER (Word ⇄ PDF)
+    ======================================================================= */
+    (function initDocumentConverter() {
+      const panel = $("panel-docconverter");
+      if (!panel) return;
+      initScopedSubtabs("panel-docconverter");
+
+      /* ---- Word (.docx) → PDF ---- */
+      setupGenericDropzone("docconv-w2p-dropzone", "docconv-w2p-input", async (files) => {
+        const file = files[0];
+        if (!file) return;
+        const resultEl = $("docconv-w2p-result");
+        const progressWrap = $("docconv-w2p-progress");
+        if (!window.mammoth || !window.jspdf || !window.html2canvas) {
+          resultEl.textContent = "Converter libraries are still loading — please try again in a moment.";
+          return;
+        }
+        progressWrap.style.display = "block";
+        resultEl.textContent = "";
+        let container = null;
+        try {
+          const buf = await readFileAsArrayBuffer(file);
+          const converted = await window.mammoth.convertToHtml({ arrayBuffer: buf });
+
+          container = document.createElement("div");
+          container.style.position = "fixed";
+          container.style.left = "-99999px";
+          container.style.top = "0";
+          container.style.width = "760px";
+          container.style.background = "#ffffff";
+          container.style.color = "#111111";
+          container.style.padding = "24px";
+          container.style.fontFamily = "Arial, sans-serif";
+          container.style.fontSize = "13px";
+          container.style.lineHeight = "1.5";
+          container.innerHTML = converted.value || "<p></p>";
+          document.body.appendChild(container);
+
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+          await new Promise((resolve, reject) => {
+            try {
+              doc.html(container, {
+                margin: [40, 40, 40, 40],
+                autoPaging: "text",
+                width: 515,
+                windowWidth: 760,
+                callback: function () { resolve(); }
+              });
+            } catch (err) { reject(err); }
+          });
+
+          const outName = file.name.replace(/\.docx$/i, "") + ".pdf";
+          doc.save(outName);
+          resultEl.textContent = "Done — \"" + outName + "\" downloaded.";
+        } catch (err) {
+          resultEl.textContent = "Conversion failed: " + (err && err.message ? err.message : "unknown error");
+        } finally {
+          if (container) container.remove();
+          progressWrap.style.display = "none";
+        }
+      });
+
+      /* ---- PDF → Word (.docx) ---- */
+      setupGenericDropzone("docconv-p2w-dropzone", "docconv-p2w-input", async (files) => {
+        const file = files[0];
+        if (!file) return;
+        const resultEl = $("docconv-p2w-result");
+        const progressWrap = $("docconv-p2w-progress");
+        const progressLabel = $("docconv-p2w-progress-label");
+        const progressBar = $("docconv-p2w-progress-bar");
+        if (!window.pdfjsLib || !window.docx) {
+          resultEl.textContent = "Converter libraries are still loading — please try again in a moment.";
+          return;
+        }
+        ensurePdfWorker();
+        progressWrap.style.display = "block";
+        progressBar.style.width = "0%";
+        resultEl.textContent = "";
+        try {
+          const buf = await readFileAsArrayBuffer(file);
+          const pdfDoc = await window.pdfjsLib.getDocument({ data: buf }).promise;
+          const { Document, Packer, Paragraph, TextRun } = window.docx;
+          const paragraphs = [];
+
+          for (let i = 1; i <= pdfDoc.numPages; i++) {
+            progressLabel.textContent = "Extracting page " + i + " / " + pdfDoc.numPages;
+            progressBar.style.width = Math.round((i / pdfDoc.numPages) * 100) + "%";
+            const page = await pdfDoc.getPage(i);
+            const textContent = await page.getTextContent();
+            const lines = {};
+            textContent.items.forEach(item => {
+              const y = Math.round(item.transform[5]);
+              if (!lines[y]) lines[y] = [];
+              lines[y].push(item.str);
+            });
+            const sortedYs = Object.keys(lines).map(Number).sort((a, b) => b - a);
+            sortedYs.forEach(y => {
+              const lineText = lines[y].join(" ").trim();
+              if (lineText) paragraphs.push(new Paragraph({ children: [new TextRun(lineText)] }));
+            });
+            if (i < pdfDoc.numPages) paragraphs.push(new Paragraph({ children: [new TextRun("")], pageBreakBefore: false }));
+          }
+
+          if (!paragraphs.length) paragraphs.push(new Paragraph({ children: [new TextRun("")] }));
+
+          const outDoc = new Document({ sections: [{ properties: {}, children: paragraphs }] });
+          const blob = await Packer.toBlob(outDoc);
+          const outName = file.name.replace(/\.pdf$/i, "") + ".docx";
+          downloadBlob(blob, outName);
+          resultEl.textContent = "Done — \"" + outName + "\" downloaded.";
+        } catch (err) {
+          resultEl.textContent = "Conversion failed: " + (err && err.message ? err.message : "unknown error");
+        } finally {
+          progressWrap.style.display = "none";
+        }
+      });
+    })();
+
+    /* =======================================================================
+       PART 4 — JSON TOOLS (Formatter + Validator)
+    ======================================================================= */
+    (function initJsonTools() {
+      const panel = $("panel-jsontools");
+      if (!panel) return;
+      initScopedSubtabs("panel-jsontools");
+
+      /* ---- Formatter ---- */
+      const fmtInput = $("jsonfmt-input");
+      const fmtOutput = $("jsonfmt-output");
+      const fmtOutputWrap = $("jsonfmt-output-wrap");
+      const fmtError = $("jsonfmt-error");
+      const fmtDownload = $("jsonfmt-download");
+
+      function showFmtError(msg) {
+        fmtError.textContent = msg;
+        fmtError.style.display = "block";
+        fmtOutputWrap.style.display = "none";
+        fmtDownload.style.display = "none";
+      }
+      function showFmtResult(text) {
+        fmtError.style.display = "none";
+        fmtOutput.value = text;
+        fmtOutputWrap.style.display = "block";
+        const blob = new Blob([text], { type: "application/json" });
+        fmtDownload.href = URL.createObjectURL(blob);
+        fmtDownload.style.display = "inline-flex";
+      }
+
+      $("jsonfmt-beautify").addEventListener("click", () => {
+        try {
+          const parsed = JSON.parse(fmtInput.value);
+          showFmtResult(JSON.stringify(parsed, null, 2));
+        } catch (err) { showFmtError("Invalid JSON: " + err.message); }
+      });
+      $("jsonfmt-minify").addEventListener("click", () => {
+        try {
+          const parsed = JSON.parse(fmtInput.value);
+          showFmtResult(JSON.stringify(parsed));
+        } catch (err) { showFmtError("Invalid JSON: " + err.message); }
+      });
+      $("jsonfmt-copy").addEventListener("click", (e) => copyTextToClipboard(fmtOutput.value || fmtInput.value, e.currentTarget));
+      $("jsonfmt-clear").addEventListener("click", () => {
+        fmtInput.value = ""; fmtOutput.value = "";
+        fmtOutputWrap.style.display = "none"; fmtError.style.display = "none"; fmtDownload.style.display = "none";
+      });
+
+      /* ---- Validator ---- */
+      const valInput = $("jsonval-input");
+      const valResult = $("jsonval-result");
+      const valOutputWrap = $("jsonval-output-wrap");
+      const valOutput = $("jsonval-output");
+
+      function locateErrorPosition(text, message) {
+        const match = /position (\d+)/.exec(message);
+        if (!match) return null;
+        const pos = parseInt(match[1], 10);
+        const upto = text.slice(0, pos);
+        const line = (upto.match(/\n/g) || []).length + 1;
+        const col = pos - upto.lastIndexOf("\n");
+        return { line, col };
+      }
+
+      $("jsonval-run").addEventListener("click", () => {
+        const text = valInput.value;
+        try {
+          const parsed = JSON.parse(text);
+          valResult.innerHTML = '<span style="color:var(--accent); font-family:var(--mono); font-size:.85rem;">✅ Valid JSON</span>';
+          valOutput.value = JSON.stringify(parsed, null, 2);
+          valOutputWrap.style.display = "block";
+        } catch (err) {
+          const loc = locateErrorPosition(text, err.message);
+          const locStr = loc ? (" (line " + loc.line + ", column " + loc.col + ")") : "";
+          valResult.innerHTML = '<span style="color:#ff6b6b; font-family:var(--mono); font-size:.85rem;">❌ Invalid JSON' + escapeHtml(locStr) + '<br>' + escapeHtml(err.message) + '</span>';
+          valOutputWrap.style.display = "none";
+        }
+      });
+      $("jsonval-clear").addEventListener("click", () => {
+        valInput.value = ""; valResult.innerHTML = ""; valOutputWrap.style.display = "none";
+      });
+    })();
+
+    /* =======================================================================
+       PART 5 — CODE MINIFIER (HTML / CSS / JavaScript)
+    ======================================================================= */
+    (function initCodeMinifier() {
+      const panel = $("panel-codeminifier");
+      if (!panel) return;
+      initScopedSubtabs("panel-codeminifier");
+
+      function minifyCss(src) {
+        let out = src.replace(/\/\*[\s\S]*?\*\//g, "");
+        out = out.replace(/\s+/g, " ");
+        out = out.replace(/\s*([{}:;,>~+])\s*/g, "$1");
+        out = out.replace(/;}/g, "}");
+        return out.trim();
+      }
+
+      function minifyHtml(src) {
+        const preserved = [];
+        let masked = src.replace(/<(script|style|pre|textarea)[\s\S]*?<\/\1>/gi, (m) => {
+          preserved.push(m);
+          return "\u0001" + (preserved.length - 1) + "\u0002";
+        });
+        masked = masked.replace(/<!--[\s\S]*?-->/g, "");
+        masked = masked.replace(/>\s+</g, "><");
+        masked = masked.replace(/[ \t]+\n/g, "\n").replace(/\n\s*\n/g, "\n");
+        masked = masked.replace(/^\s+|\s+$/gm, "");
+        masked = masked.replace(/\n/g, "");
+        masked = masked.replace(/\u0001(\d+)\u0002/g, (m, idx) => preserved[parseInt(idx, 10)]);
+        return masked.trim();
+      }
+
+      /* Comment/whitespace-only JS minifier: strips // and /* *\/ comments while
+         respecting string and template-literal boundaries, then removes blank
+         lines and leading indentation. Deliberately conservative (keeps line
+         breaks) to avoid ASI-related breakage from naive line-joining. */
+      function minifyJs(src) {
+        let out = "";
+        let i = 0;
+        const n = src.length;
+        while (i < n) {
+          const ch = src[i], next = src[i + 1];
+          if (ch === "/" && next === "/") {
+            while (i < n && src[i] !== "\n") i++;
+            continue;
+          }
+          if (ch === "/" && next === "*") {
+            i += 2;
+            while (i < n && !(src[i] === "*" && src[i + 1] === "/")) i++;
+            i += 2;
+            continue;
+          }
+          if (ch === '"' || ch === "'" || ch === "`") {
+            const quote = ch;
+            out += ch; i++;
+            while (i < n && src[i] !== quote) {
+              if (src[i] === "\\") { out += src[i] + (src[i + 1] || ""); i += 2; continue; }
+              out += src[i]; i++;
+            }
+            out += src[i] || ""; i++;
+            continue;
+          }
+          out += ch; i++;
+        }
+        out = out.split("\n").map(l => l.trim()).filter(l => l.length > 0).join("\n");
+        return out.trim();
+      }
+
+      function wireMinifier(prefix, minifyFn, fileExt) {
+        const srcEl = $("min-" + prefix + "-src");
+        const outEl = $("min-" + prefix + "-out");
+        const outWrap = $("min-" + prefix + "-out-wrap");
+        const statsEl = $("min-" + prefix + "-stats");
+        const downloadEl = $("min-" + prefix + "-download");
+
+        setupGenericDropzone("min-" + prefix + "-dropzone", "min-" + prefix + "-input", async (files) => {
+          const file = files[0];
+          if (!file) return;
+          srcEl.value = await readFileAsText(file);
+        });
+
+        $("min-" + prefix + "-run").addEventListener("click", () => {
+          const src = srcEl.value || "";
+          if (!src.trim()) return;
+          const minified = minifyFn(src);
+          outEl.value = minified;
+          outWrap.style.display = "block";
+          const before = new Blob([src]).size;
+          const after = new Blob([minified]).size;
+          const savedPct = before > 0 ? Math.round((1 - after / before) * 100) : 0;
+          statsEl.textContent = before + " B → " + after + " B (" + savedPct + "% smaller)";
+          const blob = new Blob([minified], { type: "text/plain" });
+          downloadEl.href = URL.createObjectURL(blob);
+          downloadEl.download = "minified." + fileExt;
+          downloadEl.style.display = "inline-flex";
+        });
+
+        $("min-" + prefix + "-copy").addEventListener("click", (e) => copyTextToClipboard(outEl.value, e.currentTarget));
+      }
+
+      wireMinifier("html", minifyHtml, "html");
+      wireMinifier("css", minifyCss, "css");
+      wireMinifier("js", minifyJs, "js");
+    })();
+
+    /* =======================================================================
+       PART 6 — OCR IMAGE TO TEXT
+    ======================================================================= */
+    (function initOcrTool() {
+      const panel = $("panel-ocr");
+      if (!panel) return;
+
+      setupGenericDropzone("ocr-dropzone", "ocr-input", async (files) => {
+        const file = files[0];
+        if (!file) return;
+        const progressWrap = $("ocr-progress");
+        const progressLabel = $("ocr-progress-label");
+        const progressBar = $("ocr-progress-bar");
+        const outWrap = $("ocr-out-wrap");
+        const output = $("ocr-output");
+        const copyBtn = $("ocr-copy");
+        const downloadBtn = $("ocr-download");
+
+        if (!window.Tesseract) {
+          alert("OCR engine is still loading — please try again in a moment.");
+          return;
+        }
+
+        progressWrap.style.display = "block";
+        outWrap.style.display = "none";
+        copyBtn.style.display = "none";
+        downloadBtn.style.display = "none";
+        progressBar.style.width = "0%";
+        progressLabel.textContent = "Recognizing… 0%";
+
+        try {
+          const result = await window.Tesseract.recognize(file, "eng", {
+            logger: (m) => {
+              if (m.status === "recognizing text" && typeof m.progress === "number") {
+                const pct = Math.round(m.progress * 100);
+                progressBar.style.width = pct + "%";
+                progressLabel.textContent = "Recognizing… " + pct + "%";
+              }
+            }
+          });
+          const text = (result && result.data && result.data.text) ? result.data.text.trim() : "";
+          output.value = text || "(No text detected in this image.)";
+          outWrap.style.display = "block";
+          copyBtn.style.display = "inline-flex";
+          const blob = new Blob([text], { type: "text/plain" });
+          downloadBtn.href = URL.createObjectURL(blob);
+          downloadBtn.style.display = "inline-flex";
+        } catch (err) {
+          output.value = "OCR failed: " + (err && err.message ? err.message : "unknown error");
+          outWrap.style.display = "block";
+        } finally {
+          progressWrap.style.display = "none";
+        }
+      });
+
+      $("ocr-copy").addEventListener("click", (e) => copyTextToClipboard($("ocr-output").value, e.currentTarget));
+    })();
+
+    /* =======================================================================
+       PART 7 — QR CODE GENERATOR
+    ======================================================================= */
+    (function initQrGenerator() {
+      const panel = $("panel-qrgen");
+      if (!panel) return;
+
+      const sizeInput = $("qrgen-size");
+      const sizeLbl = $("qrgen-size-lbl");
+      sizeInput.addEventListener("input", () => { sizeLbl.textContent = sizeInput.value + "px"; });
+
+      $("qrgen-run").addEventListener("click", () => {
+        const text = $("qrgen-text").value.trim();
+        const outputEl = $("qrgen-output");
+        const downloadBtn = $("qrgen-download");
+        if (!text) { $("qrgen-text").focus(); return; }
+        if (!window.QRCode) {
+          alert("QR code library is still loading — please try again in a moment.");
+          return;
+        }
+        outputEl.innerHTML = "";
+        const size = parseInt(sizeInput.value, 10) || 256;
+        new window.QRCode(outputEl, {
+          text: text,
+          width: size,
+          height: size,
+          colorDark: "#0a0a0a",
+          colorLight: "#ffffff",
+          correctLevel: window.QRCode.CorrectLevel.M
+        });
+        setTimeout(() => {
+          const canvas = outputEl.querySelector("canvas");
+          if (canvas) {
+            downloadBtn.href = canvas.toDataURL("image/png");
+            downloadBtn.style.display = "inline-flex";
+          }
+        }, 60);
+      });
+    })();
+
+    /* =======================================================================
+       PART 8 — PASSWORD GENERATOR
+    ======================================================================= */
+    (function initPasswordGenerator() {
+      const panel = $("panel-pwgen");
+      if (!panel) return;
+
+      const lengthInput = $("pwgen-length");
+      const lengthLbl = $("pwgen-length-lbl");
+      lengthInput.addEventListener("input", () => { lengthLbl.textContent = lengthInput.value; });
+
+      const CHARSETS = {
+        upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        lower: "abcdefghijklmnopqrstuvwxyz",
+        numbers: "0123456789",
+        symbols: "!@#$%^&*()-_=+[]{};:,.<>?"
+      };
+
+      function generatePassword() {
+        let pool = "";
+        if ($("pwgen-upper").checked) pool += CHARSETS.upper;
+        if ($("pwgen-lower").checked) pool += CHARSETS.lower;
+        if ($("pwgen-numbers").checked) pool += CHARSETS.numbers;
+        if ($("pwgen-symbols").checked) pool += CHARSETS.symbols;
+        if (!pool) { alert("Select at least one character set."); return null; }
+        const length = parseInt(lengthInput.value, 10) || 16;
+        const bytes = new Uint32Array(length);
+        window.crypto.getRandomValues(bytes);
+        let pw = "";
+        for (let i = 0; i < length; i++) pw += pool[bytes[i] % pool.length];
+        return pw;
+      }
+
+      function strengthLabel(pw) {
+        if (!pw) return "";
+        const varietyCount = ["upper", "lower", "numbers", "symbols"].filter(k => $("pwgen-" + k).checked).length;
+        const score = pw.length * varietyCount;
+        if (score >= 80) return { text: "Strong", color: "var(--accent)" };
+        if (score >= 40) return { text: "Medium", color: "#e6c34d" };
+        return { text: "Weak", color: "#ff6b6b" };
+      }
+
+      $("pwgen-run").addEventListener("click", () => {
+        const pw = generatePassword();
+        if (!pw) return;
+        $("pwgen-output").value = pw;
+        $("pwgen-out-wrap").style.display = "block";
+        $("pwgen-copy").style.display = "inline-flex";
+        const s = strengthLabel(pw);
+        const strengthEl = $("pwgen-strength");
+        strengthEl.textContent = "— " + s.text;
+        strengthEl.style.color = s.color;
+      });
+
+      $("pwgen-copy").addEventListener("click", (e) => copyTextToClipboard($("pwgen-output").value, e.currentTarget));
+    })();
+
+    /* =======================================================================
+       PART 9 — URL ENCODER / DECODER
+    ======================================================================= */
+    (function initUrlCodec() {
+      const panel = $("panel-urlcodec");
+      if (!panel) return;
+
+      const input = $("urlcodec-input");
+      const output = $("urlcodec-output");
+      const outWrap = $("urlcodec-out-wrap");
+      const errorEl = $("urlcodec-error");
+
+      function showResult(text) {
+        errorEl.style.display = "none";
+        output.value = text;
+        outWrap.style.display = "block";
+      }
+      function showError(msg) {
+        errorEl.textContent = msg;
+        errorEl.style.display = "block";
+        outWrap.style.display = "none";
+      }
+
+      $("urlcodec-encode").addEventListener("click", () => {
+        try { showResult(encodeURIComponent(input.value)); }
+        catch (err) { showError("Could not encode: " + err.message); }
+      });
+      $("urlcodec-decode").addEventListener("click", () => {
+        try { showResult(decodeURIComponent(input.value)); }
+        catch (err) { showError("Could not decode — the text is not validly encoded."); }
+      });
+      $("urlcodec-copy").addEventListener("click", (e) => copyTextToClipboard(output.value || input.value, e.currentTarget));
+      $("urlcodec-clear").addEventListener("click", () => {
+        input.value = ""; output.value = "";
+        outWrap.style.display = "none"; errorEl.style.display = "none";
+      });
     })();
 
   });
