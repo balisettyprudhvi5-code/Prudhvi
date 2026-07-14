@@ -330,11 +330,12 @@
     .tool-tab-btn {
       background: var(--surface);
       border: 1px solid var(--border);
-      color: var(--muted);
+      color: #ffffff;
+      font-weight: 600;
+      text-shadow: 0 0 6px rgba(255,255,255,.15);
       padding: .9rem 1rem;
       border-radius: var(--radius-sm);
       cursor: pointer;
-      font-weight: 600;
       font-size: .88rem;
       text-align: left;
       display: flex;
@@ -349,7 +350,8 @@
 
     .tool-tab-btn:hover {
       border-color: var(--muted);
-      color: var(--text);
+      color: #ffffff;
+      text-shadow: 0 0 6px rgba(255,255,255,.15);
       background: var(--surface2);
     }
 
@@ -357,6 +359,7 @@
       background: rgba(127,255,110,0.06);
       border-color: var(--accent);
       color: var(--accent);
+      text-shadow: none;
     }
     .tool-tab-btn.active svg { stroke: var(--accent); }
 
@@ -5774,6 +5777,7 @@
           });
 
           const outName = file.name.replace(/\.docx$/i, "") + ".pdf";
+          if (window.__monetagOpenDirectLink) window.__monetagOpenDirectLink();
           doc.save(outName);
           resultEl.textContent = "Done — \"" + outName + "\" downloaded.";
         } catch (err) {
@@ -5830,6 +5834,7 @@
           const outDoc = new Document({ sections: [{ properties: {}, children: paragraphs }] });
           const blob = await Packer.toBlob(outDoc);
           const outName = file.name.replace(/\.pdf$/i, "") + ".docx";
+          if (window.__monetagOpenDirectLink) window.__monetagOpenDirectLink();
           downloadBlob(blob, outName);
           resultEl.textContent = "Done — \"" + outName + "\" downloaded.";
         } catch (err) {
@@ -6221,6 +6226,81 @@
     })();
 
   });
+  </script>
+
+  <script>
+    /* =======================================================================
+       MONETAG DIRECT LINK SMARTLINK INTEGRATION
+       - Opens the Monetag Direct Link in a new tab exactly once per genuine
+         download/export action, then lets the original download continue
+         completely unmodified.
+       - Does not touch layout, styling, or any existing app logic.
+    ======================================================================= */
+    (function () {
+      "use strict";
+
+      /* Single configurable constant for the SmartLink URL */
+      var MONETAG_DIRECT_LINK_URL = "https://omg10.com/4/11282597";
+
+      /* Short cooldown so rapid repeat clicks on the same action can't spawn
+         multiple tabs, while still allowing the next distinct download to
+         open its own tab normally. */
+      var MONETAG_COOLDOWN_MS = 1200;
+      var monetagCooldownActive = false;
+
+      function openMonetagDirectLink() {
+        if (monetagCooldownActive) return;
+        monetagCooldownActive = true;
+        try {
+          var win = window.open(MONETAG_DIRECT_LINK_URL, "_blank", "noopener,noreferrer");
+          if (win) {
+            try { win.opener = null; } catch (e) { /* ignore */ }
+          }
+        } catch (e) {
+          /* Monetization must never break a download — fail silently */
+        } finally {
+          setTimeout(function () { monetagCooldownActive = false; }, MONETAG_COOLDOWN_MS);
+        }
+      }
+
+      /* Expose for the few download flows that fire programmatically
+         (e.g. auto-download after a conversion finishes) rather than via a
+         direct click on an <a download>. */
+      window.__monetagOpenDirectLink = openMonetagDirectLink;
+
+      function init() {
+        /* Delegated click listener (capture phase) catches every real
+           download/export trigger, including ones created dynamically after
+           processing (per-image / per-page download links), without ever
+           needing to bind to elements individually. Using capture ensures
+           the SmartLink opens before the element's own click handler runs,
+           without altering or blocking that handler. */
+        document.addEventListener("click", function (evt) {
+          var target = evt.target.closest(
+            'a[download], #dl-all-compressor, #dl-all-pdf2img, #dl-split-zip, #pdftk-split-dl'
+          );
+          if (!target) return;
+          if (target.hasAttribute("disabled")) return;
+          openMonetagDirectLink();
+        }, true);
+
+        /* Smart Document Editor "Export As…" select triggers an export as
+           soon as a format is chosen — treat that choice as the download
+           action. */
+        var exportSelect = document.getElementById("dted-export-select");
+        if (exportSelect) {
+          exportSelect.addEventListener("change", function () {
+            if (exportSelect.value) openMonetagDirectLink();
+          }, true);
+        }
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+    })();
   </script>
 </body>
 </html>
