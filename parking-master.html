@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Parking Master 3D — Smart Compress Mini Games</title>
+<style>
+  :root{ --accent:#7fff6e; --accent2:#3dffd0; --text:#e8e8f0; --muted:#6b6b7e; --border:#2a2a33; }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;overflow:hidden;background:#0d0d0f;color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;touch-action:none;}
+  #wrap{position:relative;width:100%;height:100%;display:flex;flex-direction:column;}
+  #hud{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(180deg,rgba(15,15,18,.9),rgba(15,15,18,.5));z-index:5;flex-shrink:0;}
+  .hud-group{display:flex;align-items:center;gap:8px;}
+  .hud-pill{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:999px;padding:5px 10px;font-size:.75rem;font-family:'Space Mono',monospace;}
+  .hud-pill b{color:var(--accent);}
+  .icon-btn{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;}
+  .icon-btn:active{transform:scale(.9);}
+  #stage{position:relative;flex:1;min-height:0;}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  #controls{position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:space-between;padding:0 14px;z-index:6;pointer-events:none;}
+  .ctl-btn{pointer-events:auto;width:58px;height:58px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--border);backdrop-filter:blur(6px);color:var(--text);font-size:1.4rem;display:flex;align-items:center;justify-content:center;user-select:none;}
+  .ctl-btn:active{background:rgba(127,255,110,.25);border-color:var(--accent);}
+  .steer-group{display:flex;gap:8px;pointer-events:auto;}
+  .pedal-group{display:flex;flex-direction:column;gap:8px;pointer-events:auto;}
+  #cam-btn, #gear-btn{position:absolute;top:8px;z-index:6;}
+  #minimap{position:absolute;top:10px;right:10px;width:74px;height:74px;border:1px solid var(--border);border-radius:10px;background:rgba(10,10,12,.7);z-index:6;}
+  #overlay-screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(6,6,8,.86);backdrop-filter:blur(8px);z-index:20;text-align:center;padding:24px;}
+  #overlay-screen.hidden{display:none;}
+  #overlay-screen h1{font-size:1.6rem;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  #overlay-screen p{color:var(--muted);font-size:.85rem;max-width:290px;line-height:1.5;}
+  .row-opts{display:flex;gap:8px;margin-top:2px;flex-wrap:wrap;justify-content:center;}
+  .opt-btn{padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);font-size:.78rem;cursor:pointer;}
+  .opt-btn.active{border-color:var(--accent);color:var(--accent);}
+  .big-btn{padding:13px 34px;border-radius:14px;border:1px solid var(--border);background:linear-gradient(90deg,var(--accent),var(--accent2));color:#08110a;font-weight:800;font-size:.95rem;cursor:pointer;box-shadow:0 8px 24px -8px rgba(127,255,110,.5);}
+  .big-btn:active{transform:scale(.96);}
+  #timer-bar{position:absolute;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:6;transition:width .3s linear;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud">
+    <div class="hud-group">
+      <div class="hud-pill">Level <b id="hud-level">1</b></div>
+      <div class="hud-pill">🏆 <b id="hud-best">0</b></div>
+    </div>
+    <div class="hud-group">
+      <button class="icon-btn" id="btn-weather">☀️</button>
+      <button class="icon-btn" id="btn-camera">📷</button>
+      <button class="icon-btn" id="btn-sound">🔊</button>
+      <button class="icon-btn" id="btn-fullscreen">⛶</button>
+      <button class="icon-btn" id="btn-pause">⏸</button>
+    </div>
+  </div>
+  <div id="stage">
+    <canvas id="game"></canvas>
+    <div id="timer-bar" style="width:100%;"></div>
+    <canvas id="minimap"></canvas>
+    <div id="controls">
+      <div class="steer-group">
+        <div class="ctl-btn" id="btn-left">◀</div>
+        <div class="ctl-btn" id="btn-right">▶</div>
+      </div>
+      <div class="pedal-group">
+        <div class="ctl-btn" id="btn-gas">▲</div>
+        <div class="ctl-btn" id="btn-brake">▼</div>
+      </div>
+    </div>
+    <div id="overlay-screen">
+      <h1 id="ov-title">Parking Master 3D</h1>
+      <p id="ov-text">Steer with ◀ ▶ or arrow keys, accelerate/brake with ▲ ▼ or W/S. Ease into the glowing bay without hitting obstacles — watch your damage meter!</p>
+      <div class="row-opts" id="mode-opts">
+        <button class="opt-btn active" data-mode="day">☀️ Day</button>
+        <button class="opt-btn" data-mode="night">🌙 Night</button>
+        <button class="opt-btn" data-mode="rain">🌧️ Rain</button>
+      </div>
+      <button class="big-btn" id="ov-primary">▶ Start Level 1</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+"use strict";
+var LS_BEST="mg_parking-master_best", LS_LEVEL="mg_parking-master_level", LS_SOUND="mg_parking-master_sound";
+function ls(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:v; }catch(e){ return d; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+
+var canvas=document.getElementById("game"), ctx=canvas.getContext("2d"), stage=document.getElementById("stage");
+var minimap=document.getElementById("minimap"), mctx=minimap.getContext("2d");
+var DPR=Math.min(window.devicePixelRatio||1,2.5);
+var W,H;
+function resize(){
+  W=stage.clientWidth; H=stage.clientHeight;
+  canvas.width=W*DPR; canvas.height=H*DPR; canvas.style.width=W+"px"; canvas.style.height=H+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  minimap.width=74*DPR; minimap.height=74*DPR; mctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener("resize",resize);
+
+var state={
+  level: parseInt(ls(LS_LEVEL,"1"),10)||1,
+  best: parseInt(ls(LS_BEST,"0"),10)||0,
+  soundOn: ls(LS_SOUND,"1")==="1",
+  paused:false, running:false, weather:"day", camMode:0, timeLeft:90, damage:0
+};
+document.getElementById("hud-level").textContent=state.level;
+document.getElementById("hud-best").textContent=state.best;
+
+var actx=null;
+function actxGet(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return actx; }
+function beep(freq,dur,type,vol,slide){
+  if(!state.soundOn) return;
+  var a=actxGet(); if(!a) return;
+  var o=a.createOscillator(), g=a.createGain();
+  o.type=type||"sine"; o.frequency.value=freq;
+  if(slide) o.frequency.exponentialRampToValueAtTime(slide,a.currentTime+dur);
+  g.gain.value=vol||.15; g.gain.exponentialRampToValueAtTime(.001,a.currentTime+dur);
+  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+dur);
+}
+function sfxCollide(){ beep(140,0.25,"sawtooth",0.18,60); }
+function sfxWin(){ [0,140,280].forEach(function(t,i){ setTimeout(function(){ beep(500+i*180,0.25,"triangle",0.15); },t); }); }
+function sfxLose(){ beep(200,0.4,"sawtooth",0.15,80); }
+function vibrate(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
+
+/* ===== Procedural level generation ===== */
+var WORLD_W=900, WORLD_H=650;
+var car, obstacles, targetBay, rainDrops=[];
+
+function seededRandom(seed){
+  var s = seed % 2147483647; if(s<=0) s+=2147483646;
+  return function(){ s = s*16807 % 2147483647; return (s-1)/2147483646; };
+}
+function buildLevel(lvl){
+  var rng = seededRandom(lvl*7919+13);
+  var difficulty = Math.min(lvl,60);
+  car = { x: WORLD_W/2, y: WORLD_H-70, angle:-Math.PI/2, speed:0, wheelAngle:0, w:22, h:42 };
+  obstacles = [];
+  var obsCount = 4 + Math.floor(difficulty/3);
+  for(var i=0;i<obsCount;i++){
+    var ox = 60+rng()*(WORLD_W-120), oy = 60+rng()*(WORLD_H-260);
+    var w = 34+rng()*40, h=34+rng()*70;
+    if(Math.hypot(ox-car.x,oy-car.y) < 100) continue;
+    obstacles.push({x:ox,y:oy,w:w,h:h, color: rng()>0.5?"#3a3a42":"#4a4a54"});
+  }
+  var bx = 80+rng()*(WORLD_W-160), by = 60+rng()*(WORLD_H-320);
+  targetBay = {x:bx, y:by, w:46, h:76, angle: Math.floor(rng()*4)*(Math.PI/2)};
+  state.timeLeft = Math.max(45,90-Math.floor(difficulty/2));
+  state.damage = 0;
+}
+
+/* ===== Input ===== */
+var input = {left:false,right:false,gas:false,brake:false};
+function bindBtn(id,key){
+  var el=document.getElementById(id);
+  el.addEventListener("mousedown",function(e){ e.preventDefault(); input[key]=true; });
+  el.addEventListener("mouseup",function(){ input[key]=false; });
+  el.addEventListener("mouseleave",function(){ input[key]=false; });
+  el.addEventListener("touchstart",function(e){ e.preventDefault(); input[key]=true; },{passive:false});
+  el.addEventListener("touchend",function(e){ e.preventDefault(); input[key]=false; },{passive:false});
+}
+bindBtn("btn-left","left"); bindBtn("btn-right","right"); bindBtn("btn-gas","gas"); bindBtn("btn-brake","brake");
+document.addEventListener("keydown",function(e){
+  if(e.key==="ArrowLeft"||e.key==="a") input.left=true;
+  if(e.key==="ArrowRight"||e.key==="d") input.right=true;
+  if(e.key==="ArrowUp"||e.key==="w") input.gas=true;
+  if(e.key==="ArrowDown"||e.key==="s") input.brake=true;
+  if(e.key==="p"||e.key==="P") togglePause();
+});
+document.addEventListener("keyup",function(e){
+  if(e.key==="ArrowLeft"||e.key==="a") input.left=false;
+  if(e.key==="ArrowRight"||e.key==="d") input.right=false;
+  if(e.key==="ArrowUp"||e.key==="w") input.gas=false;
+  if(e.key==="ArrowDown"||e.key==="s") input.brake=false;
+});
+
+/* ===== Physics ===== */
+function update(){
+  if(!state.running||state.paused) return;
+  var maxSpeed = 3.2, accel=0.09, friction=0.03, brakePow=0.14, turnRate=0.04;
+
+  if(input.gas) car.speed = Math.min(maxSpeed, car.speed+accel);
+  else if(input.brake) car.speed = Math.max(-maxSpeed*0.6, car.speed-brakePow);
+  else {
+    if(car.speed>0) car.speed=Math.max(0,car.speed-friction);
+    else if(car.speed<0) car.speed=Math.min(0,car.speed+friction);
+  }
+  var turnDir = (car.speed>=0?1:-1);
+  if(input.left) car.angle -= turnRate*Math.min(1,Math.abs(car.speed)/1.5)*turnDir;
+  if(input.right) car.angle += turnRate*Math.min(1,Math.abs(car.speed)/1.5)*turnDir;
+
+  var wetFactor = state.weather==="rain" ? 1.35 : 1;
+  var nx = car.x + Math.cos(car.angle)*car.speed*wetFactor;
+  var ny = car.y + Math.sin(car.angle)*car.speed*wetFactor;
+  nx = Math.max(20,Math.min(WORLD_W-20,nx));
+  ny = Math.max(20,Math.min(WORLD_H-20,ny));
+
+  var collided = false;
+  for(var i=0;i<obstacles.length;i++){
+    var o=obstacles[i];
+    if(nx > o.x-o.w/2-14 && nx < o.x+o.w/2+14 && ny > o.y-o.h/2-14 && ny < o.y+o.h/2+14){
+      collided=true; break;
+    }
+  }
+  if(collided){
+    car.speed *= -0.35;
+    state.damage = Math.min(100, state.damage + 8);
+    sfxCollide(); vibrate(40);
+    if(state.damage>=100){ loseLevel("Too much damage!"); return; }
+  } else {
+    car.x = nx; car.y = ny;
+  }
+
+  if(state.weather==="rain" && Math.random()<0.6){
+    rainDrops.push({x:Math.random()*WORLD_W,y:-5,l:8+Math.random()*10});
+  }
+  for(var r=rainDrops.length-1;r>=0;r--){ rainDrops[r].y+=14; if(rainDrops[r].y>WORLD_H) rainDrops.splice(r,1); }
+
+  checkParked();
+}
+
+function angleDiff(a,b){
+  var d = Math.abs(a-b) % (Math.PI*2);
+  return Math.min(d, Math.PI*2-d);
+}
+function checkParked(){
+  var dx = car.x-targetBay.x, dy=car.y-targetBay.y;
+  var dist = Math.hypot(dx,dy);
+  var aDiff = angleDiff(car.angle, targetBay.angle);
+  var aDiff2 = angleDiff(car.angle, targetBay.angle+Math.PI);
+  var bestAngleDiff = Math.min(aDiff,aDiff2);
+  if(dist < 26 && bestAngleDiff < 0.35 && Math.abs(car.speed) < 0.4){
+    winLevel();
+  }
+}
+
+/* ===== Timer ===== */
+var lastTick=Date.now();
+function tick(){
+  if(state.running && !state.paused){
+    var now=Date.now();
+    if(now-lastTick>1000){
+      state.timeLeft--; lastTick=now;
+      document.getElementById("timer-bar").style.width = Math.max(0,(state.timeLeft/(state.timeLeft>0?state.timeLeft:1)))+"%";
+      var pct = Math.max(0, state.timeLeft/90*100);
+      document.getElementById("timer-bar").style.width = pct+"%";
+      if(state.timeLeft<=0) loseLevel("Out of time!");
+    }
+  }
+  setTimeout(tick,250);
+}
+tick();
+
+/* ===== Render ===== */
+function worldToScreen(x,y,camAngle,camScale){
+  return {x: (x)*camScale, y:(y)*camScale};
+}
+function render(){
+  var isNight = state.weather==="night";
+  var g = ctx.createLinearGradient(0,0,0,H);
+  if(isNight){ g.addColorStop(0,"#0a0e14"); g.addColorStop(1,"#050608"); }
+  else { g.addColorStop(0,"#182018"); g.addColorStop(1,"#0d0d0f"); }
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+  var scale = Math.min(W/WORLD_W, H/WORLD_H) * (state.camMode===1?1.6:1);
+  var camX = state.camMode===1 ? car.x : WORLD_W/2;
+  var camY = state.camMode===1 ? car.y : WORLD_H/2;
+  ctx.save();
+  ctx.translate(W/2 - camX*scale, H/2 - camY*scale);
+  ctx.scale(scale,scale);
+
+  // ground
+  ctx.fillStyle = isNight ? "#15181c" : "#232a24";
+  ctx.fillRect(0,0,WORLD_W,WORLD_H);
+  ctx.strokeStyle="rgba(255,255,255,.05)"; ctx.lineWidth=2;
+  for(var gx=0; gx<WORLD_W; gx+=60){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,WORLD_H); ctx.stroke(); }
+  for(var gy=0; gy<WORLD_H; gy+=60){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(WORLD_W,gy); ctx.stroke(); }
+
+  // target bay glow
+  ctx.save();
+  ctx.translate(targetBay.x,targetBay.y); ctx.rotate(targetBay.angle);
+  ctx.shadowColor="#7fff6e"; ctx.shadowBlur=20;
+  ctx.strokeStyle="#7fff6e"; ctx.lineWidth=3; ctx.setLineDash([8,6]);
+  ctx.strokeRect(-targetBay.w/2,-targetBay.h/2,targetBay.w,targetBay.h);
+  ctx.shadowBlur=0;
+  ctx.fillStyle="rgba(127,255,110,.08)";
+  ctx.fillRect(-targetBay.w/2,-targetBay.h/2,targetBay.w,targetBay.h);
+  ctx.restore();
+
+  // obstacles
+  obstacles.forEach(function(o){
+    var og = ctx.createLinearGradient(o.x-o.w/2,o.y-o.h/2,o.x+o.w/2,o.y+o.h/2);
+    og.addColorStop(0, shade(o.color,25)); og.addColorStop(1, shade(o.color,-25));
+    ctx.fillStyle=og;
+    ctx.fillRect(o.x-o.w/2,o.y-o.h/2,o.w,o.h);
+    ctx.strokeStyle="rgba(0,0,0,.4)"; ctx.lineWidth=1;
+    ctx.strokeRect(o.x-o.w/2,o.y-o.h/2,o.w,o.h);
+  });
+
+  // car
+  ctx.save();
+  ctx.translate(car.x,car.y); ctx.rotate(car.angle+Math.PI/2);
+  var cg = ctx.createLinearGradient(-car.w/2,0,car.w/2,0);
+  cg.addColorStop(0,"#3dffd0"); cg.addColorStop(0.5,"#7fff6e"); cg.addColorStop(1,"#2fbf9d");
+  ctx.fillStyle="rgba(0,0,0,.35)";
+  ctx.beginPath(); ctx.ellipse(2,4,car.w*0.6,car.h*0.55,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath();
+  var cw=car.w, ch=car.h;
+  ctx.moveTo(-cw/2,-ch/2+6);
+  ctx.quadraticCurveTo(0,-ch/2-4,cw/2,-ch/2+6);
+  ctx.lineTo(cw/2,ch/2-6);
+  ctx.quadraticCurveTo(0,ch/2+4,-cw/2,ch/2-6);
+  ctx.closePath();
+  ctx.fillStyle=cg; ctx.fill();
+  ctx.fillStyle="rgba(20,30,28,.85)";
+  ctx.fillRect(-cw/2+4,-ch/2+12,cw-8,ch*0.4);
+  // headlights
+  ctx.fillStyle = isNight? "#fff7c9":"#fff";
+  ctx.fillRect(-cw/2+2,-ch/2+2,5,4);
+  ctx.fillRect(cw/2-7,-ch/2+2,5,4);
+  if(isNight){
+    ctx.save();
+    ctx.globalAlpha=.25;
+    var lg = ctx.createRadialGradient(0,-ch/2,2,0,-ch,60);
+    lg.addColorStop(0,"#fff7c9"); lg.addColorStop(1,"transparent");
+    ctx.fillStyle=lg;
+    ctx.beginPath(); ctx.moveTo(-cw/2,-ch/2); ctx.lineTo(-cw*2,-ch*2.5); ctx.lineTo(cw*2,-ch*2.5); ctx.lineTo(cw/2,-ch/2); ctx.fill();
+    ctx.restore();
+  }
+  ctx.restore();
+
+  // rain
+  if(state.weather==="rain"){
+    ctx.strokeStyle="rgba(180,220,255,.4)"; ctx.lineWidth=1.4;
+    rainDrops.forEach(function(d){ ctx.beginPath(); ctx.moveTo(d.x,d.y); ctx.lineTo(d.x-3,d.y+d.l); ctx.stroke(); });
+  }
+
+  ctx.restore();
+
+  // damage bar
+  ctx.save();
+  var barW=90;
+  ctx.fillStyle="rgba(0,0,0,.4)"; ctx.fillRect(W/2-barW/2,10,barW,7);
+  ctx.fillStyle = state.damage>70?"#ff5c5c":"#7fff6e";
+  ctx.fillRect(W/2-barW/2,10,barW*(state.damage/100),7);
+  ctx.restore();
+
+  // minimap
+  mctx.clearRect(0,0,74,74);
+  mctx.fillStyle="#0d1210"; mctx.fillRect(0,0,74,74);
+  var ms = 70/Math.max(WORLD_W,WORLD_H);
+  mctx.fillStyle="#7fff6e";
+  mctx.fillRect(targetBay.x*ms,targetBay.y*ms,4,4);
+  mctx.fillStyle="#3dffd0";
+  mctx.beginPath(); mctx.arc(car.x*ms,car.y*ms,2.5,0,Math.PI*2); mctx.fill();
+  obstacles.forEach(function(o){ mctx.fillStyle="rgba(255,255,255,.25)"; mctx.fillRect(o.x*ms-2,o.y*ms-2,4,4); });
+}
+function shade(hex,pct){
+  var num=parseInt(hex.slice(1),16);
+  var r=Math.max(0,Math.min(255,(num>>16)+pct)), g=Math.max(0,Math.min(255,((num>>8)&0xff)+pct)), b=Math.max(0,Math.min(255,(num&0xff)+pct));
+  return "rgb("+r+","+g+","+b+")";
+}
+
+function loop(){ update(); render(); requestAnimationFrame(loop); }
+
+function winLevel(){
+  state.running=false;
+  sfxWin(); vibrate([30,30,60]);
+  state.level++;
+  lsSet(LS_LEVEL, state.level);
+  var scoreEquiv = Math.max(10, 100 - state.damage) + state.timeLeft;
+  if(scoreEquiv > state.best){ state.best=scoreEquiv; lsSet(LS_BEST,state.best); }
+  document.getElementById("hud-level").textContent=state.level;
+  document.getElementById("hud-best").textContent=state.best;
+  showOverlay("Parked Perfectly! 🅿️", "Damage: "+state.damage+"% · Time left: "+state.timeLeft+"s. On to level "+state.level+"!", "▶ Next Level");
+}
+function loseLevel(reason){
+  state.running=false;
+  sfxLose(); vibrate(200);
+  showOverlay("Parking Failed", reason+" Give this layout another shot.", "↻ Retry Level");
+}
+
+var overlayEl=document.getElementById("overlay-screen");
+function showOverlay(title,text,label){
+  document.getElementById("ov-title").textContent=title;
+  document.getElementById("ov-text").textContent=text;
+  document.getElementById("ov-primary").textContent=label;
+  document.getElementById("mode-opts").style.display = (label.indexOf("Start")>=0) ? "flex":"none";
+  overlayEl.classList.remove("hidden");
+}
+function hideOverlay(){ overlayEl.classList.add("hidden"); }
+
+document.querySelectorAll("#mode-opts .opt-btn").forEach(function(btn){
+  btn.addEventListener("click",function(){
+    document.querySelectorAll("#mode-opts .opt-btn").forEach(function(b){ b.classList.remove("active"); });
+    btn.classList.add("active");
+    state.weather = btn.getAttribute("data-mode");
+    document.getElementById("btn-weather").textContent = state.weather==="rain"?"🌧️":state.weather==="night"?"🌙":"☀️";
+  });
+});
+
+document.getElementById("ov-primary").addEventListener("click",function(){
+  hideOverlay();
+  buildLevel(state.level);
+  document.getElementById("hud-level").textContent=state.level;
+  state.running=true; state.paused=false; lastTick=Date.now();
+});
+
+function togglePause(){
+  if(!state.running) return;
+  state.paused=!state.paused;
+  document.getElementById("btn-pause").textContent=state.paused?"▶":"⏸";
+  if(state.paused){ showOverlay("Paused","Level "+state.level+" — Damage "+state.damage+"%","▶ Resume"); }
+  else { hideOverlay(); lastTick=Date.now(); }
+}
+document.getElementById("btn-pause").addEventListener("click",togglePause);
+document.getElementById("btn-sound").addEventListener("click",function(){
+  state.soundOn=!state.soundOn; lsSet(LS_SOUND,state.soundOn?"1":"0");
+  this.textContent=state.soundOn?"🔊":"🔇";
+});
+if(!state.soundOn) document.getElementById("btn-sound").textContent="🔇";
+document.getElementById("btn-camera").addEventListener("click",function(){
+  state.camMode = (state.camMode+1)%2;
+  this.textContent = state.camMode===1 ? "🚘" : "📷";
+});
+document.getElementById("btn-weather").addEventListener("click",function(){
+  var order=["day","night","rain"];
+  var idx=(order.indexOf(state.weather)+1)%3;
+  state.weather=order[idx];
+  this.textContent = state.weather==="rain"?"🌧️":state.weather==="night"?"🌙":"☀️";
+});
+document.getElementById("btn-fullscreen").addEventListener("click",function(){
+  var el=document.documentElement;
+  if(!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen||function(){}).call(el); }
+  else { (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document); }
+});
+
+resize();
+buildLevel(state.level);
+showOverlay("Parking Master 3D", "Steer with ◀ ▶ or arrow keys, accelerate/brake with ▲ ▼ or W/S. Ease into the glowing bay without hitting obstacles — watch your damage meter!", state.level>1?"▶ Continue Level "+state.level:"▶ Start Level 1");
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

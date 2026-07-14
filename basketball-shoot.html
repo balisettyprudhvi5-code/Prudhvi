@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Basketball Shoot 3D — Smart Compress Mini Games</title>
+<style>
+  :root{ --bg:#0d0d0f; --accent:#7fff6e; --accent2:#3dffd0; --text:#e8e8f0; --muted:#6b6b7e; --border:#2a2a33; --surface2:#1f1f25; }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;overflow:hidden;background:#0d0d0f;color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;touch-action:none;}
+  #wrap{position:relative;width:100%;height:100%;display:flex;flex-direction:column;}
+  #hud{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(180deg,rgba(15,15,18,.9),rgba(15,15,18,.5));z-index:5;flex-shrink:0;}
+  .hud-group{display:flex;align-items:center;gap:10px;}
+  .hud-pill{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:999px;padding:5px 11px;font-size:.78rem;font-family:'Space Mono',monospace;}
+  .hud-pill b{color:var(--accent);}
+  .icon-btn{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;}
+  .icon-btn:active{transform:scale(.9);}
+  #stage{position:relative;flex:1;min-height:0;}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  #combo-label{position:absolute;top:16%;left:50%;transform:translateX(-50%);font-size:1.4rem;font-weight:800;color:var(--accent);text-shadow:0 0 16px rgba(127,255,110,.8);opacity:0;pointer-events:none;font-family:'Space Mono',monospace;}
+  #combo-label.show{animation:pop .7s ease forwards;}
+  @keyframes pop{0%{opacity:0;transform:translateX(-50%) scale(.7);}25%{opacity:1;transform:translateX(-50%) scale(1.15);}75%{opacity:1;}100%{opacity:0;transform:translateX(-50%) translateY(-20px);}}
+  #overlay-screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(6,6,8,.86);backdrop-filter:blur(8px);z-index:20;text-align:center;padding:24px;}
+  #overlay-screen.hidden{display:none;}
+  #overlay-screen h1{font-size:1.6rem;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  #overlay-screen p{color:var(--muted);font-size:.85rem;max-width:280px;line-height:1.5;}
+  .row-opts{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;justify-content:center;}
+  .opt-btn{padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);font-size:.78rem;cursor:pointer;}
+  .opt-btn.active{border-color:var(--accent);color:var(--accent);}
+  .big-btn{padding:13px 34px;border-radius:14px;border:1px solid var(--border);background:linear-gradient(90deg,var(--accent),var(--accent2));color:#08110a;font-weight:800;font-size:.95rem;cursor:pointer;box-shadow:0 8px 24px -8px rgba(127,255,110,.5);}
+  .big-btn:active{transform:scale(.96);}
+  #wind-indicator{position:absolute;top:56px;right:12px;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted);text-align:right;z-index:4;}
+  #wind-indicator b{color:var(--accent2);}
+  #skin-row{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:6;}
+  .skin-dot{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;box-shadow:inset 0 -3px 6px rgba(0,0,0,.4), inset 0 2px 3px rgba(255,255,255,.4);}
+  .skin-dot.active{border-color:var(--accent);}
+  .skin-dot.locked{opacity:.35;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud">
+    <div class="hud-group">
+      <div class="hud-pill">Score <b id="hud-score">0</b></div>
+      <div class="hud-pill">🪙 <b id="hud-coins">0</b></div>
+      <div class="hud-pill">🏆 <b id="hud-best">0</b></div>
+    </div>
+    <div class="hud-group">
+      <button class="icon-btn" id="btn-theme">🌙</button>
+      <button class="icon-btn" id="btn-sound">🔊</button>
+      <button class="icon-btn" id="btn-fullscreen">⛶</button>
+      <button class="icon-btn" id="btn-pause">⏸</button>
+    </div>
+  </div>
+  <div id="stage">
+    <canvas id="game"></canvas>
+    <div id="wind-indicator">WIND<br><b id="wind-val">0.0</b></div>
+    <div id="combo-label"></div>
+    <div id="skin-row"></div>
+    <div id="overlay-screen">
+      <h1 id="ov-title">Basketball Shoot 3D</h1>
+      <p id="ov-text">Swipe (or click-drag) upward on the ball to shoot. Line up the arc, watch the wind, and chain makes for combo multipliers. 60 seconds on the clock!</p>
+      <div class="row-opts" id="court-opts">
+        <button class="opt-btn active" data-court="street">🏙️ Street</button>
+        <button class="opt-btn" data-court="arena">🏟️ Arena</button>
+        <button class="opt-btn" data-court="sunset">🌅 Rooftop</button>
+      </div>
+      <button class="big-btn" id="ov-primary">▶ Start Game</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+"use strict";
+var LS_BEST="mg_basketball-shoot_best", LS_COINS="mg_basketball-shoot_coins", LS_SOUND="mg_basketball-shoot_sound", LS_SKIN="mg_basketball-shoot_skin";
+function ls(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:v; }catch(e){ return d; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+
+var canvas=document.getElementById("game"), ctx=canvas.getContext("2d"), stage=document.getElementById("stage");
+var DPR=Math.min(window.devicePixelRatio||1,2.5);
+
+var state={
+  score:0, coins:parseInt(ls(LS_COINS,"0"),10)||0, best:parseInt(ls(LS_BEST,"0"),10)||0,
+  soundOn: ls(LS_SOUND,"1")==="1", paused:false, running:false, timeLeft:60,
+  combo:0, court:"street", isNight:false, skin: parseInt(ls(LS_SKIN,"0"),10)||0
+};
+document.getElementById("hud-coins").textContent=state.coins;
+document.getElementById("hud-best").textContent=state.best;
+
+var actx=null;
+function actxGet(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return actx; }
+function beep(freq,dur,type,vol,slide){
+  if(!state.soundOn) return;
+  var a=actxGet(); if(!a) return;
+  var o=a.createOscillator(), g=a.createGain();
+  o.type=type||"sine"; o.frequency.value=freq;
+  if(slide) o.frequency.exponentialRampToValueAtTime(slide,a.currentTime+dur);
+  g.gain.value=vol||.15; g.gain.exponentialRampToValueAtTime(.001,a.currentTime+dur);
+  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+dur);
+}
+function sfxSwoosh(){ beep(600,0.15,"sine",0.08,300); }
+function sfxScore(combo){ beep(500+combo*80,0.25,"triangle",0.18,1000+combo*100); }
+function sfxMiss(){ beep(160,0.3,"sawtooth",0.12,80); }
+function sfxRim(){ beep(300,0.1,"square",0.08); }
+function vibrate(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
+
+var SKINS=["#ff8a3d","#7fff6e","#3dffd0","#ff5c9d"];
+var skinRow=document.getElementById("skin-row");
+SKINS.forEach(function(color,i){
+  var d=document.createElement("div");
+  d.className="skin-dot"+(i===state.skin?" active":"")+(i>state.coins/50 && i>0 ? " locked":"");
+  d.style.background="radial-gradient(circle at 30% 30%,"+color+",#1a1a1a)";
+  d.addEventListener("click",function(){
+    if(i>0 && state.coins < i*50){ sfxMiss(); return; }
+    state.skin=i; lsSet(LS_SKIN,i);
+    document.querySelectorAll(".skin-dot").forEach(function(el,idx){ el.classList.toggle("active",idx===i); });
+  });
+  skinRow.appendChild(d);
+});
+
+var W,H;
+function resize(){
+  W=stage.clientWidth; H=stage.clientHeight;
+  canvas.width=W*DPR; canvas.height=H*DPR;
+  canvas.style.width=W+"px"; canvas.style.height=H+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  hoop.baseX = W*0.72;
+}
+window.addEventListener("resize",resize);
+
+var COURT_THEMES={
+  street:{sky1:"#1a2b1e",sky2:"#0d0d0f",floor:"#2b2320"},
+  arena:{sky1:"#141b26",sky2:"#0a0d12",floor:"#1c1c22"},
+  sunset:{sky1:"#3a2440",sky2:"#150c1a",floor:"#241a1e"}
+};
+document.querySelectorAll("#court-opts .opt-btn").forEach(function(btn){
+  btn.addEventListener("click",function(){
+    document.querySelectorAll("#court-opts .opt-btn").forEach(function(b){ b.classList.remove("active"); });
+    btn.classList.add("active");
+    state.court = btn.getAttribute("data-court");
+  });
+});
+
+var hoop = {baseX:0, y:0, sway:0, dir:1, width:70};
+var ball = {x:0,y:0,vx:0,vy:0,r:20,inFlight:false,rotation:0,trail:[]};
+var particles=[];
+var wind=0;
+
+function resetBall(){
+  ball.x = W*0.22; ball.y = H*0.72; ball.vx=0; ball.vy=0; ball.inFlight=false; ball.rotation=0; ball.trail=[];
+}
+
+var dragStart=null, dragCurrent=null;
+function getPos(e){
+  var rect=canvas.getBoundingClientRect();
+  var cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY;
+  return {x:cx-rect.left,y:cy-rect.top};
+}
+stage.addEventListener("mousedown",function(e){ if(ball.inFlight||!state.running||state.paused) return; dragStart=getPos(e); dragCurrent=dragStart; });
+stage.addEventListener("mousemove",function(e){ if(dragStart) dragCurrent=getPos(e); });
+stage.addEventListener("mouseup",function(e){ if(dragStart){ dragCurrent=getPos(e); doShoot(); dragStart=null; } });
+stage.addEventListener("touchstart",function(e){ e.preventDefault(); if(ball.inFlight||!state.running||state.paused) return; dragStart=getPos(e); dragCurrent=dragStart; },{passive:false});
+stage.addEventListener("touchmove",function(e){ e.preventDefault(); if(dragStart) dragCurrent=getPos(e); },{passive:false});
+stage.addEventListener("touchend",function(e){ e.preventDefault(); if(dragStart){ doShoot(); dragStart=null; } },{passive:false});
+
+function doShoot(){
+  if(!dragStart||!dragCurrent) return;
+  var dx=dragStart.x-dragCurrent.x, dy=dragStart.y-dragCurrent.y;
+  var dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist<25) return;
+  var power=Math.min(dist/9, 26);
+  var angle=Math.atan2(dy,dx);
+  ball.vx = Math.cos(angle)*power*0.55 + wind*0.3;
+  ball.vy = Math.sin(angle)*power*0.62;
+  ball.inFlight=true;
+  sfxSwoosh(); vibrate(10);
+}
+
+function spawnConfetti(x,y){
+  for(var i=0;i<22;i++){
+    var ang=Math.random()*Math.PI*2, spd=2+Math.random()*4;
+    particles.push({x:x,y:y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd-2,life:1,color:SKINS[Math.floor(Math.random()*SKINS.length)]});
+  }
+}
+
+var GRAVITY=0.55;
+function update(){
+  if(!state.running||state.paused) return;
+  hoop.sway += 0.01*hoop.dir;
+  if(Math.abs(hoop.sway) > 1) hoop.dir*=-1;
+  hoop.y = H*0.32 + Math.sin(hoop.sway*3)*0*0; // subtle
+  var hoopX = hoop.baseX + Math.sin(hoop.sway*3)* (state.score>150?40:0);
+
+  if(ball.inFlight){
+    ball.vy += GRAVITY;
+    ball.x += ball.vx; ball.y += ball.vy;
+    ball.rotation += ball.vx*0.05;
+    ball.trail.push({x:ball.x,y:ball.y});
+    if(ball.trail.length>10) ball.trail.shift();
+
+    var hx = hoopX, hy = H*0.34;
+    var distToHoop = Math.hypot(ball.x-hx, ball.y-hy);
+    if(distToHoop < 26 && ball.vy>0 && Math.abs(ball.x-hx) < 20){
+      // score!
+      state.combo++;
+      var gained = 10*state.combo;
+      state.score += gained;
+      state.coins += 5*state.combo;
+      lsSet(LS_COINS,state.coins);
+      document.getElementById("hud-coins").textContent=state.coins;
+      document.getElementById("hud-score").textContent=state.score;
+      sfxScore(state.combo); vibrate([15,15,15]);
+      spawnConfetti(hx,hy);
+      showCombo(state.combo>1 ? state.combo+"x COMBO! +"+gained : "SWISH! +"+gained);
+      resetBall();
+      wind = (Math.random()-0.5)*6;
+      document.getElementById("wind-val").textContent = wind.toFixed(1);
+    } else if(ball.y > H+40 || ball.x < -40 || ball.x > W+40){
+      state.combo=0;
+      sfxMiss();
+      resetBall();
+      wind=(Math.random()-0.5)*6;
+      document.getElementById("wind-val").textContent=wind.toFixed(1);
+    } else if(Math.abs(ball.x-hx)<34 && Math.abs(ball.y-hy)<10 && ball.vy>0){
+      sfxRim(); ball.vx*=-0.3;
+    }
+  }
+
+  for(var i=particles.length-1;i>=0;i--){
+    var p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.15; p.life-=0.02;
+    if(p.life<=0) particles.splice(i,1);
+  }
+}
+
+function showCombo(text){
+  var el=document.getElementById("combo-label");
+  el.textContent=text; el.classList.remove("show"); void el.offsetWidth; el.classList.add("show");
+}
+
+function drawCourt(){
+  var theme=COURT_THEMES[state.court];
+  var g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,theme.sky1); g.addColorStop(1,theme.sky2);
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+  // ambient glow
+  ctx.save(); ctx.globalAlpha=0.15;
+  var rg=ctx.createRadialGradient(hoop.baseX,H*0.34,10,hoop.baseX,H*0.34,180);
+  rg.addColorStop(0,"#7fff6e"); rg.addColorStop(1,"transparent");
+  ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+  ctx.restore();
+
+  // floor
+  ctx.fillStyle=theme.floor;
+  ctx.fillRect(0,H*0.82,W,H*0.18);
+  ctx.strokeStyle="rgba(255,255,255,.06)"; ctx.lineWidth=2;
+  for(var i=0;i<6;i++){ ctx.beginPath(); ctx.moveTo(i*W/6,H*0.82); ctx.lineTo(i*W/5.6,H); ctx.stroke(); }
+
+  // hoop structure
+  var hoopX = hoop.baseX + Math.sin(hoop.sway*3)*(state.score>150?40:0);
+  var hoopY = H*0.34;
+  ctx.save();
+  // pole + backboard
+  ctx.fillStyle="rgba(255,255,255,.08)";
+  ctx.fillRect(hoopX+28,hoopY-46,6,H*0.5);
+  ctx.fillStyle="rgba(255,255,255,.85)";
+  ctx.fillRect(hoopX+2,hoopY-46,4,46);
+  ctx.strokeStyle="#ff5c5c"; ctx.lineWidth=3;
+  ctx.strokeRect(hoopX-16,hoopY-40,36,26);
+  // rim
+  ctx.beginPath();
+  ctx.ellipse(hoopX,hoopY,26,7,0,0,Math.PI*2);
+  ctx.strokeStyle="#ff6a3d"; ctx.lineWidth=4;
+  ctx.stroke();
+  // net
+  ctx.strokeStyle="rgba(255,255,255,.5)"; ctx.lineWidth=1;
+  for(var n=-2;n<=2;n++){
+    ctx.beginPath(); ctx.moveTo(hoopX+n*10, hoopY+2); ctx.lineTo(hoopX+n*5, hoopY+24); ctx.stroke();
+  }
+  ctx.restore();
+
+  // trail
+  ball.trail.forEach(function(t,i){
+    ctx.globalAlpha = (i/ball.trail.length)*0.35;
+    ctx.beginPath(); ctx.arc(t.x,t.y,ball.r*0.6,0,Math.PI*2);
+    ctx.fillStyle=SKINS[state.skin]; ctx.fill();
+  });
+  ctx.globalAlpha=1;
+
+  // ball
+  ctx.save();
+  ctx.translate(ball.x,ball.y); ctx.rotate(ball.rotation);
+  var bg=ctx.createRadialGradient(-6,-6,3,0,0,ball.r);
+  bg.addColorStop(0, shade(SKINS[state.skin],80));
+  bg.addColorStop(0.5, SKINS[state.skin]);
+  bg.addColorStop(1, shade(SKINS[state.skin],-60));
+  ctx.beginPath(); ctx.arc(0,0,ball.r,0,Math.PI*2); ctx.fillStyle=bg; ctx.fill();
+  ctx.strokeStyle="rgba(0,0,0,.5)"; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(-ball.r,0); ctx.lineTo(ball.r,0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,-ball.r); ctx.lineTo(0,ball.r); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,0,ball.r,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  // aim line
+  if(dragStart && dragCurrent){
+    ctx.save();
+    ctx.strokeStyle="rgba(127,255,110,.6)"; ctx.lineWidth=3; ctx.setLineDash([6,6]);
+    ctx.beginPath(); ctx.moveTo(ball.x,ball.y);
+    var dx=dragStart.x-dragCurrent.x, dy=dragStart.y-dragCurrent.y;
+    ctx.lineTo(ball.x+dx*1.3, ball.y+dy*1.3);
+    ctx.stroke(); ctx.restore();
+  }
+
+  particles.forEach(function(p){
+    ctx.globalAlpha=Math.max(0,p.life);
+    ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fillStyle=p.color; ctx.fill();
+  });
+  ctx.globalAlpha=1;
+}
+function shade(hex,pct){
+  var num=parseInt(hex.slice(1),16);
+  var r=Math.max(0,Math.min(255,(num>>16)+pct)), g=Math.max(0,Math.min(255,((num>>8)&0xff)+pct)), b=Math.max(0,Math.min(255,(num&0xff)+pct));
+  return "rgb("+r+","+g+","+b+")";
+}
+
+var lastTick=Date.now();
+function loop(){
+  var now=Date.now();
+  if(state.running && !state.paused && now-lastTick>1000){
+    state.timeLeft--;
+    document.getElementById("hud-score").textContent=state.score;
+    lastTick=now;
+    if(state.timeLeft<=0) endGame();
+  }
+  update();
+  drawCourt();
+  requestAnimationFrame(loop);
+}
+
+function endGame(){
+  state.running=false;
+  if(state.score>state.best){ state.best=state.score; lsSet(LS_BEST,state.best); }
+  document.getElementById("hud-best").textContent=state.best;
+  showOverlay("Time's Up! ⏱️", "Final score: "+state.score+" — Coins earned this run: "+state.coins, "▶ Play Again");
+}
+
+var overlayEl=document.getElementById("overlay-screen");
+function showOverlay(title,text,btnLabel){
+  document.getElementById("ov-title").textContent=title;
+  document.getElementById("ov-text").textContent=text;
+  document.getElementById("ov-primary").textContent=btnLabel;
+  document.getElementById("court-opts").style.display = state.running===false && state.timeLeft===60 ? "flex":"none";
+  overlayEl.classList.remove("hidden");
+}
+function hideOverlay(){ overlayEl.classList.add("hidden"); }
+
+document.getElementById("ov-primary").addEventListener("click",function(){
+  hideOverlay();
+  state.score=0; state.combo=0; state.timeLeft=60;
+  document.getElementById("hud-score").textContent=0;
+  resetBall();
+  wind=(Math.random()-0.5)*6;
+  document.getElementById("wind-val").textContent=wind.toFixed(1);
+  state.running=true; state.paused=false; lastTick=Date.now();
+});
+
+function togglePause(){
+  if(!state.running) return;
+  state.paused=!state.paused;
+  document.getElementById("btn-pause").textContent = state.paused?"▶":"⏸";
+  if(state.paused){ showOverlay("Paused","Score: "+state.score+" — Time left: "+state.timeLeft+"s","▶ Resume"); document.getElementById("court-opts").style.display="none"; }
+  else { hideOverlay(); lastTick=Date.now(); }
+}
+document.getElementById("btn-pause").addEventListener("click",togglePause);
+
+document.getElementById("btn-sound").addEventListener("click",function(){
+  state.soundOn=!state.soundOn; lsSet(LS_SOUND,state.soundOn?"1":"0");
+  this.textContent=state.soundOn?"🔊":"🔇";
+});
+if(!state.soundOn) document.getElementById("btn-sound").textContent="🔇";
+
+document.getElementById("btn-theme").addEventListener("click",function(){
+  state.isNight=!state.isNight;
+  this.textContent = state.isNight?"☀️":"🌙";
+});
+
+document.getElementById("btn-fullscreen").addEventListener("click",function(){
+  var el=document.documentElement;
+  if(!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen||function(){}).call(el); }
+  else { (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document); }
+});
+
+resize();
+resetBall();
+document.getElementById("hud-score").textContent=0;
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

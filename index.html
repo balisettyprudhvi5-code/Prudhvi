@@ -183,8 +183,9 @@
       display: block;
       padding: .4rem .75rem;
       font-size: .88rem;
-      font-weight: 500;
-      color: var(--muted);
+      font-weight: 600;
+      color: #ffffff;
+      text-shadow: 0 0 6px rgba(255,255,255,.15);
       text-decoration: none;
       border-radius: var(--radius-sm);
       transition: color .15s, background .15s;
@@ -192,12 +193,13 @@
     }
 
     .nav-links a:hover, .nav-links a:focus {
-      color: var(--text);
+      color: var(--accent);
+      text-shadow: none;
       background: var(--surface2);
       outline: none;
     }
 
-    .nav-links a.active { color: var(--accent); }
+    .nav-links a.active { color: var(--accent); text-shadow: none; }
 
     .nav-toggle {
       display: none;
@@ -1161,6 +1163,9 @@
         </button>
         <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-urlcodec" id="tab-urlcodec">
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> 21. URL Encoder / Decoder
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-minigames" id="tab-minigames">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M6 10v4M4 12h4"/><circle cx="15" cy="10.5" r="1"/><circle cx="18" cy="13.5" r="1"/></svg> 22. Mini Games
         </button>
       </div>
 
@@ -2335,6 +2340,126 @@
           <span id="urlcodec-error" style="display:none; color:#ff6b6b; font-family:var(--mono); font-size:.82rem; margin-top:.6rem;"></span>
         </div>
 
+        <div class="tool-workspace" id="panel-minigames" role="tabpanel" aria-labelledby="tab-minigames">
+          <style>
+            #panel-minigames .mg-title-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:1.4rem;}
+            #panel-minigames .mg-title-row h2{font-size:1.3rem;}
+            #panel-minigames .mg-title-row h2 span{display:block;color:var(--muted);font-weight:400;font-size:.82rem;margin-top:.25rem;font-family:var(--sans);}
+            #panel-minigames .mg-badge{font-family:var(--mono);font-size:.72rem;color:var(--bg);background:var(--accent);padding:.3rem .7rem;border-radius:999px;font-weight:700;letter-spacing:.03em;white-space:nowrap;}
+            .mg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.1rem;}
+            .mg-card{position:relative;border-radius:var(--radius);padding:1.3rem 1.2rem 1.1rem;overflow:hidden;
+              background:linear-gradient(155deg, rgba(255,255,255,.055), rgba(255,255,255,.015) 40%, rgba(0,0,0,.15));
+              border:1px solid var(--border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+              transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s, box-shadow .3s;}
+            .mg-card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+              background:linear-gradient(140deg, rgba(127,255,110,.35), transparent 35%, transparent 65%, rgba(61,255,208,.25));
+              -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
+            .mg-card:hover{transform:translateY(-4px);border-color:rgba(127,255,110,.5);box-shadow:0 18px 40px -18px rgba(127,255,110,.35), 0 0 0 1px rgba(127,255,110,.08) inset;}
+            .mg-card-glow{position:absolute;top:-40%;right:-30%;width:65%;height:65%;border-radius:50%;filter:blur(38px);opacity:.35;pointer-events:none;}
+            .mg-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:.85rem;
+              background:radial-gradient(circle at 30% 25%, rgba(255,255,255,.18), rgba(255,255,255,.02) 70%), var(--surface2);
+              border:1px solid var(--border);box-shadow:0 4px 14px -6px rgba(0,0,0,.6), inset 0 0 12px rgba(127,255,110,.08);}
+            .mg-card h3{font-size:1.05rem;margin-bottom:.35rem;letter-spacing:.01em;}
+            .mg-card p{color:var(--muted);font-size:.82rem;line-height:1.5;margin-bottom:.9rem;min-height:2.7em;}
+            .mg-stats{display:flex;gap:1rem;font-family:var(--mono);font-size:.72rem;color:var(--accent2);margin-bottom:1rem;}
+            .mg-stats span b{color:var(--text);font-weight:600;}
+            .mg-play-btn{width:100%;padding:.7rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--border);
+              background:linear-gradient(90deg, var(--accent), var(--accent2));color:#08110a;font-weight:700;font-size:.85rem;
+              cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;letter-spacing:.02em;
+              transition:filter .2s, transform .15s;}
+            .mg-play-btn:hover{filter:brightness(1.08);}
+            .mg-play-btn:active{transform:scale(.97);}
+            .mg-play-btn svg{width:15px;height:15px;}
+            .mg-footnote{margin-top:1.2rem;color:var(--muted);font-size:.78rem;font-family:var(--mono);text-align:center;}
+            .mg-overlay{position:fixed;inset:0;background:#050506;z-index:9999;display:none;flex-direction:column;}
+            .mg-overlay.open{display:flex;animation:mgFadeIn .25s ease;}
+            @keyframes mgFadeIn{from{opacity:0;}to{opacity:1;}}
+            .mg-overlay-bar{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1rem;
+              background:linear-gradient(180deg, rgba(20,20,24,.95), rgba(13,13,15,.95));border-bottom:1px solid var(--border);flex-shrink:0;}
+            .mg-overlay-bar span{font-family:var(--mono);font-size:.8rem;color:var(--accent);letter-spacing:.02em;}
+            .mg-close-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:34px;height:34px;
+              border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:border-color .2s,color .2s;}
+            .mg-close-btn:hover{border-color:var(--danger);color:var(--danger);}
+            .mg-overlay-body{position:relative;flex:1;background:#000;}
+            .mg-overlay-body iframe{width:100%;height:100%;border:0;display:block;}
+            .mg-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;color:var(--muted);font-family:var(--mono);font-size:.8rem;background:#050506;}
+            .mg-spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:mgSpin .8s linear infinite;}
+            @keyframes mgSpin{to{transform:rotate(360deg);}}
+            @media (max-width:520px){ .mg-grid{grid-template-columns:1fr;} }
+          </style>
+
+          <div class="mg-title-row">
+            <h2>Mini Games Hub <span>Premium original browser games — 100% offline, zero installs</span></h2>
+            <span class="mg-badge">🎮 NEW</span>
+          </div>
+
+          <div class="mg-grid" id="mg-grid">
+            <div class="mg-card" data-game="bubble-shooter" data-title="Bubble Shooter 3D">
+              <div class="mg-card-glow" style="background:var(--accent);"></div>
+              <div class="mg-icon">🔮</div>
+              <h3>Bubble Shooter 3D</h3>
+              <p>Glossy physics-based bubbles, combo chains, bombs, rainbow &amp; lightning power-ups across 250+ procedurally generated levels.</p>
+              <div class="mg-stats">
+                <span>Best: <b id="mg-stat-bubble-shooter">—</b></span>
+                <span>Level: <b id="mg-lvl-bubble-shooter">1</b></span>
+              </div>
+              <button class="mg-play-btn" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play Now</button>
+            </div>
+
+            <div class="mg-card" data-game="basketball-shoot" data-title="Basketball Shoot 3D">
+              <div class="mg-card-glow" style="background:var(--accent2);"></div>
+              <div class="mg-icon">🏀</div>
+              <h3>Basketball Shoot 3D</h3>
+              <p>Swipe to shoot with real arc physics, wind drift, a moving hoop, combo multipliers and unlockable ball skins.</p>
+              <div class="mg-stats">
+                <span>Best: <b id="mg-stat-basketball-shoot">—</b></span>
+                <span>Coins: <b id="mg-coins-basketball-shoot">0</b></span>
+              </div>
+              <button class="mg-play-btn" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play Now</button>
+            </div>
+
+            <div class="mg-card" data-game="bowling" data-title="Bowling 3D">
+              <div class="mg-card-glow" style="background:var(--accent);"></div>
+              <div class="mg-icon">🎳</div>
+              <h3>Bowling 3D</h3>
+              <p>Curve-controlled throws down a glossy reflective lane, strike slow-motion replays, and a full 10-frame tournament mode.</p>
+              <div class="mg-stats">
+                <span>Best: <b id="mg-stat-bowling">—</b></span>
+                <span>Frame: <b id="mg-frame-bowling">1</b></span>
+              </div>
+              <button class="mg-play-btn" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play Now</button>
+            </div>
+
+            <div class="mg-card" data-game="parking-master" data-title="Parking Master 3D">
+              <div class="mg-card-glow" style="background:var(--accent2);"></div>
+              <div class="mg-icon">🚗</div>
+              <h3>Parking Master 3D</h3>
+              <p>Steering-wheel style driving physics, 100+ generated city layouts, day/night &amp; rain modes, and multiple camera angles.</p>
+              <div class="mg-stats">
+                <span>Best: <b id="mg-stat-parking-master">—</b></span>
+                <span>Level: <b id="mg-lvl-parking-master">1</b></span>
+              </div>
+              <button class="mg-play-btn" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play Now</button>
+            </div>
+          </div>
+
+          <p class="mg-footnote">All games save progress locally in your browser — nothing is ever uploaded.</p>
+        </div>
+
+        <div class="mg-overlay" id="mg-overlay" role="dialog" aria-modal="true" aria-label="Mini game player">
+          <div class="mg-overlay-bar">
+            <span id="mg-overlay-title">Loading…</span>
+            <button class="mg-close-btn" id="mg-close-btn" type="button" aria-label="Close game">✕</button>
+          </div>
+          <div class="mg-overlay-body">
+            <div class="mg-loading" id="mg-loading">
+              <div class="mg-spinner"></div>
+              <span>Loading game…</span>
+            </div>
+            <iframe id="mg-iframe" title="Mini game" allow="autoplay; fullscreen" loading="lazy"></iframe>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -2935,6 +3060,73 @@
           document.getElementById(targetedPanelId).classList.add("active");
         });
       });
+
+      /* ================= Mini Games Hub (additive) ================= */
+      (function () {
+        var overlay = document.getElementById("mg-overlay");
+        var iframe = document.getElementById("mg-iframe");
+        var loading = document.getElementById("mg-loading");
+        var titleEl = document.getElementById("mg-overlay-title");
+        var closeBtn = document.getElementById("mg-close-btn");
+        var grid = document.getElementById("mg-grid");
+        if (!overlay || !grid) return;
+
+        function readStat(key) {
+          try { return localStorage.getItem(key); } catch (e) { return null; }
+        }
+
+        function refreshStats() {
+          var games = ["bubble-shooter", "basketball-shoot", "bowling", "parking-master"];
+          games.forEach(function (g) {
+            var best = readStat("mg_" + g + "_best");
+            var bestEl = document.getElementById("mg-stat-" + g);
+            if (bestEl) bestEl.textContent = best ? Number(best).toLocaleString() : "—";
+            var lvl = readStat("mg_" + g + "_level");
+            var lvlEl = document.getElementById("mg-lvl-" + g);
+            if (lvlEl && lvl) lvlEl.textContent = lvl;
+            var frame = readStat("mg_" + g + "_frame");
+            var frameEl = document.getElementById("mg-frame-" + g);
+            if (frameEl && frame) frameEl.textContent = frame;
+            var coins = readStat("mg_" + g + "_coins");
+            var coinsEl = document.getElementById("mg-coins-" + g);
+            if (coinsEl && coins) coinsEl.textContent = Number(coins).toLocaleString();
+          });
+        }
+        refreshStats();
+
+        function openGame(gameId, title) {
+          titleEl.textContent = title;
+          loading.style.display = "flex";
+          iframe.style.opacity = "0";
+          iframe.src = "mini-games/" + gameId + ".html";
+          overlay.classList.add("open");
+          document.body.style.overflow = "hidden";
+        }
+
+        function closeGame() {
+          overlay.classList.remove("open");
+          document.body.style.overflow = "";
+          iframe.src = "about:blank";
+          refreshStats();
+        }
+
+        iframe.addEventListener("load", function () {
+          loading.style.display = "none";
+          iframe.style.opacity = "1";
+        });
+
+        grid.querySelectorAll(".mg-card").forEach(function (card) {
+          var launch = function () {
+            openGame(card.getAttribute("data-game"), card.getAttribute("data-title"));
+          };
+          card.querySelector(".mg-play-btn").addEventListener("click", launch);
+        });
+
+        closeBtn.addEventListener("click", closeGame);
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && overlay.classList.contains("open")) closeGame();
+        });
+      })();
 
       /* Simulated Ticket Submission Form */
       const ticketForm = document.getElementById("help-ticket-form");
