@@ -227,6 +227,50 @@
       padding: 5rem 1.5rem 3rem;
       max-width: 800px;
       margin: 0 auto;
+      position: relative;
+      isolation: isolate;
+    }
+
+    /* ================= Hero Background Ambience (additive, hero only) ================= */
+    .hero-bg-fx {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      overflow: hidden;
+      contain: layout paint;
+    }
+    .hero-bg-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 70%;
+      height: 70%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(127,255,110,.09), rgba(61,255,208,.05) 45%, transparent 70%);
+      opacity: .8;
+    }
+    .hero-particle {
+      position: absolute;
+      top: var(--y);
+      left: var(--x);
+      width: var(--sz);
+      height: var(--sz);
+      border-radius: 50%;
+      background: #baffd9;
+      box-shadow: 0 0 6px 1px rgba(127,255,110,.45);
+      opacity: 0;
+      animation: heroParticleDrift var(--d) ease-in-out infinite;
+    }
+    @keyframes heroParticleDrift {
+      0%   { opacity: 0; transform: translate(0,0); }
+      15%  { opacity: .55; }
+      50%  { opacity: .8; transform: translate(6px,-16px); }
+      85%  { opacity: .35; }
+      100% { opacity: 0; transform: translate(-4px,-30px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-particle { animation: none; opacity: .25; }
     }
 
     .hero-eyebrow {
@@ -246,7 +290,436 @@
       margin-bottom: 1.2rem;
     }
 
-    .hero h1 span { color: var(--accent); }
+
+    /* ================= Premium Hero Title (stable, Apple/OpenAI-style) ================= */
+    #hero-title {
+      position: relative;
+      z-index: 1;
+      font-size: clamp(2.5rem, 6.2vw, 4.6rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -.035em;
+    }
+
+    #hero-title .ht-w {
+      display: inline-block;
+      color: var(--text);
+      opacity: 0;
+      transform: translateY(42px) scale(.94);
+      animation: htWordIn 1s cubic-bezier(.16,1,.3,1) forwards;
+      animation-delay: calc(var(--i) * .17s);
+    }
+
+    #hero-title .ht-accent {
+      color: var(--accent);
+      text-shadow: 0 0 14px rgba(127,255,110,.5), 0 0 28px rgba(127,255,110,.22);
+      animation:
+        htWordIn 1s cubic-bezier(.16,1,.3,1) forwards,
+        htAccentPulse 4s ease-in-out 1.9s infinite;
+    }
+
+    @keyframes htWordIn {
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes htAccentPulse {
+      0%, 80%, 100% {
+        text-shadow: 0 0 14px rgba(127,255,110,.5), 0 0 28px rgba(127,255,110,.22);
+        transform: scale(1);
+      }
+      90% {
+        text-shadow: 0 0 30px rgba(127,255,110,.95), 0 0 60px rgba(127,255,110,.55), 0 0 90px rgba(127,255,110,.25);
+        transform: scale(1.045);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #hero-title .ht-w, #hero-title .ht-accent {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* ================= Premium Hero Title Energy FX (additive, title only) =================
+       Scoped entirely to .hero-title-stage / #hero-title — no other section is touched. */
+    .hero-title-stage {
+      position: relative;
+      z-index: 0;
+    }
+
+    .ht-fx {
+      position: absolute;
+      inset: -22px -16px;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+      contain: layout paint style;
+      border-radius: 999px;
+      --pmx: 0px;
+      --pmy: 0px;
+    }
+
+    /* -- 3D depth layers: back (slow/blurred) → mid (rings/orbit) → front (sparks/orbs) -- */
+    .ht-depth-back, .ht-depth-mid, .ht-depth-front {
+      position: absolute;
+      inset: 0;
+    }
+    .ht-depth-back {
+      z-index: 0;
+      filter: blur(.4px);
+      transform: translate3d(calc(var(--pmx) * .2), calc(var(--pmy) * .2), 0);
+      transition: transform .4s ease-out;
+    }
+    .ht-depth-mid {
+      z-index: 1;
+      transform: translate3d(calc(var(--pmx) * .5), calc(var(--pmy) * .5), 0);
+      transition: transform .32s ease-out;
+    }
+    .ht-depth-front {
+      z-index: 2;
+      transform: translate3d(var(--pmx), var(--pmy), 0);
+      transition: transform .24s ease-out;
+    }
+
+    /* -- Energy orbit: faint rotating ring behind the title -- */
+    .ht-orbit {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 76%;
+      height: 62%;
+      border: 1px solid rgba(61, 255, 208, .16);
+      border-radius: 50%;
+      box-shadow: 0 0 18px rgba(61, 255, 208, .06) inset;
+      transform: translate(-50%, -50%) rotate(0deg);
+      opacity: .55;
+      animation: htOrbitSpin 30s linear infinite;
+      will-change: transform;
+    }
+    @keyframes htOrbitSpin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* -- Floating glowing particles -- */
+    .ht-particle {
+      position: absolute;
+      top: var(--y); left: var(--x);
+      width: var(--sz); height: var(--sz);
+      border-radius: 50%;
+      opacity: 0;
+      animation: htParticleDrift var(--d) ease-in-out infinite;
+      animation-delay: var(--dl, 0s);
+    }
+    .ht-particle.c-cyan   { background: #7bf6ff; box-shadow: 0 0 6px 1px rgba(61, 255, 208, .55); }
+    .ht-particle.c-green  { background: #baffd9; box-shadow: 0 0 6px 1px rgba(127, 255, 110, .5); }
+    .ht-particle.c-white  { background: #ffffff; box-shadow: 0 0 5px 1px rgba(255, 255, 255, .4); }
+    .ht-particle.c-radium { background: #d4ff4d; box-shadow: 0 0 7px 1px rgba(196, 255, 64, .6), 0 0 16px 4px rgba(196, 255, 64, .22); }
+    @keyframes htParticleDrift {
+      0%   { opacity: 0; transform: translate(0, 0); }
+      20%  { opacity: .8; }
+      50%  { opacity: .9; transform: translate(var(--mx, 6px), var(--my, -14px)); }
+      80%  { opacity: .3; }
+      100% { opacity: 0; transform: translate(calc(var(--mx, 6px) * -1), calc(var(--my, -14px) * 1.5)); }
+    }
+
+    /* -- Energy bubbles: glassmorphism, rise upward, gentle wobble -- */
+    .ht-bubble {
+      position: absolute;
+      bottom: -8px;
+      left: var(--bx, 50%);
+      width: var(--bsz, 12px); height: var(--bsz, 12px);
+      border-radius: 50%;
+      background: radial-gradient(circle at 32% 30%, rgba(255, 255, 255, .22), rgba(127, 255, 110, .05) 55%, transparent 75%);
+      border: 1px solid rgba(255, 255, 255, .12);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+      opacity: 0;
+      animation: htBubbleRise var(--bd, 8s) ease-in-out infinite;
+      animation-delay: var(--bdl, 0s);
+    }
+    @keyframes htBubbleRise {
+      0%   { opacity: 0; transform: translate(0, 0); }
+      15%  { opacity: .5; }
+      50%  { opacity: .6; transform: translate(var(--bwob, 8px), -46px); }
+      85%  { opacity: .18; }
+      100% { opacity: 0; transform: translate(calc(var(--bwob, 8px) * -1), -92px); }
+    }
+
+    /* -- Digital spark particles: brief, soft flashes -- */
+    .ht-spark {
+      position: absolute;
+      top: var(--sy); left: var(--sx);
+      width: var(--ssz, 2px); height: var(--ssz, 2px);
+      border-radius: 50%;
+      background: #eafff4;
+      box-shadow: 0 0 5px 1px rgba(200, 255, 230, .8);
+      opacity: 0;
+      animation: htSparkFlash var(--sdur, 4.5s) ease-out infinite;
+      animation-delay: var(--sdl, 0s);
+    }
+    .ht-spark.c-radium {
+      background: #e9ffab;
+      box-shadow: 0 0 6px 1px rgba(196, 255, 64, .9);
+    }
+    @keyframes htSparkFlash {
+      0%, 95%, 100% { opacity: 0; transform: scale(.6); }
+      96.5%         { opacity: var(--sb, .85); transform: scale(1.15); }
+      99%           { opacity: 0; transform: scale(.8); }
+    }
+
+    /* -- Light dust: subtle depth particles -- */
+    .ht-dust {
+      position: absolute;
+      top: var(--dy); left: var(--dx);
+      width: var(--dsz, 1.5px); height: var(--dsz, 1.5px);
+      border-radius: 50%;
+      background: rgba(230, 240, 255, .5);
+      opacity: 0;
+      animation: htDustFloat var(--ddur, 11s) ease-in-out infinite;
+      animation-delay: var(--ddl, 0s);
+    }
+    .ht-dust.c-radium {
+      background: rgba(212, 255, 77, .55);
+    }
+    @keyframes htDustFloat {
+      0%   { opacity: 0; transform: translate(0, 0); }
+      25%  { opacity: .3; }
+      50%  { opacity: .4; transform: translate(var(--dmx, 8px), var(--dmy, -10px)); }
+      75%  { opacity: .18; }
+      100% { opacity: 0; transform: translate(calc(var(--dmx, 8px) * -.6), calc(var(--dmy, -10px) * 1.4)); }
+    }
+
+    /* -- Fireflies: irregular flight path with a soft fading trail -- */
+    .ht-firefly {
+      position: absolute;
+      top: var(--fy); left: var(--fx);
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: #d8ffb0;
+      box-shadow: 0 0 6px 2px rgba(180, 255, 140, .7);
+      opacity: 0;
+      animation: htFireflyPath var(--fdur, 12s) ease-in-out infinite;
+      animation-delay: var(--fdl, 0s);
+    }
+    .ht-firefly::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: inherit;
+      filter: blur(3px);
+      opacity: .5;
+      transform: translate(-3px, 3px) scale(1.8);
+    }
+    @keyframes htFireflyPath {
+      0%   { opacity: 0;   transform: translate(0, 0); }
+      10%  { opacity: .7; }
+      30%  { transform: translate(10px, -7px); }
+      50%  { opacity: .8;  transform: translate(3px, -18px); }
+      70%  { opacity: .35; transform: translate(-10px, -11px); }
+      90%  { opacity: .12; transform: translate(-4px, -24px); }
+      100% { opacity: 0;   transform: translate(0, -28px); }
+    }
+
+    /* -- Green energy mist breathing behind "Seconds" -- */
+    #hero-title .ht-accent { position: relative; }
+    #hero-title .ht-accent::before {
+      content: "";
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 210%; height: 300%;
+      transform: translate(-50%, -50%) scale(1);
+      background: radial-gradient(circle, rgba(127, 255, 110, .16), rgba(61, 255, 208, .06) 45%, transparent 72%);
+      filter: blur(6px);
+      z-index: -1;
+      opacity: .4;
+      animation: htMistBreathe 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes htMistBreathe {
+      0%, 100% { opacity: .32; transform: translate(-50%, -50%) scale(.94); }
+      50%      { opacity: .65; transform: translate(-50%, -50%) scale(1.06); }
+    }
+
+    /* -- Glass aurora: soft dark green/cyan breathing cloud, back layer -- */
+    .ht-aurora {
+      position: absolute;
+      width: 58%;
+      height: 68%;
+      border-radius: 45% 55% 60% 40% / 55% 45% 55% 45%;
+      filter: blur(16px);
+      opacity: .14;
+      animation: htAuroraBreathe var(--adur, 9s) ease-in-out infinite;
+      animation-delay: var(--adl, 0s);
+    }
+    .ht-aurora.aurora-green  { top: 6%;  left: -6%;  background: radial-gradient(circle, rgba(30,110,70,.55), transparent 72%); }
+    .ht-aurora.aurora-cyan   { bottom: 2%; right: -6%; background: radial-gradient(circle, rgba(20,95,105,.5), transparent 72%); }
+    .ht-aurora.aurora-radium { top: 34%; left: 30%; width: 44%; height: 44%; background: radial-gradient(circle, rgba(150,180,30,.4), transparent 72%); }
+    @keyframes htAuroraBreathe {
+      0%, 100% { opacity: .1;  transform: scale(.92) translate(0, 0); }
+      50%      { opacity: .22; transform: scale(1.08) translate(3%, -2%); }
+    }
+
+    /* -- Energy waves: soft neon ring expanding from the title every 8–10s -- */
+    .ht-wave {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 38%; height: 38%;
+      border-radius: 50%;
+      border: 1px solid rgba(127, 255, 110, .2);
+      transform: translate(-50%, -50%) scale(.4);
+      opacity: 0;
+      animation: htWaveExpand var(--wdur, 9s) ease-out infinite;
+      animation-delay: var(--wdl, 0s);
+    }
+    @keyframes htWaveExpand {
+      0%   { opacity: 0;   transform: translate(-50%, -50%) scale(.4); }
+      8%   { opacity: .22; }
+      42%  { opacity: .1; }
+      75%  { opacity: 0;   transform: translate(-50%, -50%) scale(1.7); }
+      100% { opacity: 0;   transform: translate(-50%, -50%) scale(1.7); }
+    }
+
+    /* -- Cyber lines: thin curved data lines that draw in, hold, fade, reappear elsewhere -- */
+    .ht-cline {
+      position: absolute;
+      top: var(--cy); left: var(--cx);
+      width: var(--cw, 60px);
+      height: 1px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, transparent, rgba(61, 255, 208, .55), transparent);
+      transform-origin: left center;
+      transform: rotate(var(--cr, 0deg)) scaleX(0);
+      opacity: 0;
+      animation: htLineDraw var(--cdur, 14s) ease-in-out infinite;
+      animation-delay: var(--cdl, 0s);
+    }
+    @keyframes htLineDraw {
+      0%, 58%  { opacity: 0;   transform: rotate(var(--cr, 0deg)) scaleX(0); }
+      63%      { opacity: .55; }
+      70%      { opacity: .45; transform: rotate(var(--cr, 0deg)) scaleX(1); }
+      84%      { opacity: 0;   transform: rotate(var(--cr, 0deg)) scaleX(1); }
+      100%     { opacity: 0;   transform: rotate(var(--cr, 0deg)) scaleX(0); }
+    }
+
+    /* -- Floating energy orbs: pulse / float / orbit variants -- */
+    .ht-orb {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0;
+      background: var(--ocolor, #9dffe0);
+      box-shadow: 0 0 6px 1px var(--oglow, rgba(127, 255, 110, .5));
+    }
+    .ht-orb.orb-pulse {
+      top: var(--oy); left: var(--ox);
+      width: var(--osz, 4px); height: var(--osz, 4px);
+      animation: htOrbPulse var(--odur, 5s) ease-in-out infinite;
+      animation-delay: var(--odl, 0s);
+    }
+    @keyframes htOrbPulse {
+      0%, 100% { opacity: .18; transform: scale(.75); }
+      50%      { opacity: .65; transform: scale(1.25); }
+    }
+    .ht-orb.orb-float {
+      top: var(--oy); left: var(--ox);
+      width: var(--osz, 4px); height: var(--osz, 4px);
+      animation: htOrbFloat var(--odur, 10s) ease-in-out infinite;
+      animation-delay: var(--odl, 0s);
+    }
+    @keyframes htOrbFloat {
+      0%   { opacity: 0;   transform: translate(0, 0); }
+      25%  { opacity: .5; }
+      50%  { opacity: .68; transform: translate(var(--omx, 8px), var(--omy, -12px)); }
+      75%  { opacity: .25; }
+      100% { opacity: 0;   transform: translate(calc(var(--omx, 8px) * -1), calc(var(--omy, -12px) * 1.4)); }
+    }
+    .ht-orb-pivot {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      transform: translate(-50%, -50%) rotate(0deg);
+      animation: htOrbitPivot var(--opdur, 20s) linear infinite;
+    }
+    @keyframes htOrbitPivot {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    .ht-orb.orb-satellite {
+      top: 0; left: 0;
+      width: var(--osz, 3px); height: var(--osz, 3px);
+      transform: translate(var(--orad, 46px), 0);
+      animation: htOrbTwinkle var(--odur, 4s) ease-in-out infinite;
+      animation-delay: var(--odl, 0s);
+    }
+    @keyframes htOrbTwinkle {
+      0%, 100% { opacity: .2; }
+      50%      { opacity: .7; }
+    }
+
+    /* -- Particle trails: comet-like dots leaving a soft fading trail -- */
+    .ht-trail {
+      position: absolute;
+      top: var(--ty); left: var(--tx);
+      width: var(--tsz, 2.5px); height: var(--tsz, 2.5px);
+      border-radius: 50%;
+      background: #eafff9;
+      box-shadow: 0 0 6px 1px rgba(200, 255, 235, .7);
+      opacity: 0;
+      animation: htTrailMove var(--tdur, 6s) ease-in-out infinite;
+      animation-delay: var(--tdl, 0s);
+    }
+    .ht-trail::before, .ht-trail::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: inherit;
+      animation: htTrailMove var(--tdur, 6s) ease-in-out infinite;
+    }
+    .ht-trail::before { opacity: .35; filter: blur(1px); animation-delay: calc(var(--tdl, 0s) + .12s); }
+    .ht-trail::after  { opacity: .15; filter: blur(2px); animation-delay: calc(var(--tdl, 0s) + .22s); }
+    @keyframes htTrailMove {
+      0%   { opacity: 0;   transform: translate(0, 0); }
+      15%  { opacity: .9; }
+      55%  { opacity: .45; transform: translate(var(--tmx, 22px), var(--tmy, -16px)); }
+      100% { opacity: 0;   transform: translate(calc(var(--tmx, 22px) * 1.4), calc(var(--tmy, -16px) * 1.4)); }
+    }
+
+    /* -- Title light sweep: soft glass-like sheen crossing the title every 6s -- */
+    .ht-sheen {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      overflow: hidden;
+      pointer-events: none;
+      border-radius: 8px;
+    }
+    .ht-sheen::before {
+      content: "";
+      position: absolute;
+      top: -50%; left: -20%;
+      width: 16%; height: 220%;
+      background: linear-gradient(100deg, transparent, rgba(255,255,255,.3) 45%, rgba(200,255,230,.42) 50%, rgba(255,255,255,.3) 55%, transparent);
+      transform: translateX(-160%) rotate(10deg);
+      animation: htTitleSweep 6s ease-in-out infinite;
+      mix-blend-mode: overlay;
+    }
+    @keyframes htTitleSweep {
+      0%, 14% { opacity: 0;   transform: translateX(-160%) rotate(10deg); }
+      18%     { opacity: .85; }
+      32%     { opacity: 0;   transform: translateX(650%) rotate(10deg); }
+      100%    { opacity: 0;   transform: translateX(650%) rotate(10deg); }
+    }
+
+    @media (max-width: 640px) {
+      .ht-opt { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ht-fx { display: none; }
+      .ht-sheen { display: none; }
+      #hero-title .ht-accent::before { animation: none; opacity: .3; }
+    }
 
     .hero p {
       color: var(--muted);
@@ -261,6 +734,118 @@
       justify-content: center;
       gap: 1rem;
       flex-wrap: wrap;
+    }
+
+    /* ================= Smart Compress Mascot (additive, hero corner only) ================= */
+    #sc-mascot {
+      position: absolute;
+      top: .35rem;
+      left: .35rem;
+      width: 156px;
+      height: 156px;
+      pointer-events: none;
+      z-index: 1;
+      contain: layout paint;
+      filter: drop-shadow(0 0 16px rgba(127,255,110,.28)) drop-shadow(0 0 30px rgba(61,255,208,.14));
+    }
+    #sc-mascot .sc-m-float {
+      width: 100%;
+      height: 100%;
+      animation: scMascotFloat 3.6s ease-in-out infinite;
+      will-change: transform;
+    }
+    #sc-mascot svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    @keyframes scMascotFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    #sc-mascot .sc-m-eye {
+      transform-origin: center;
+      transform-box: fill-box;
+      animation: scMascotBlink 4.6s ease-in-out infinite;
+    }
+    #sc-mascot .sc-m-eye.sc-m-eye-r { animation-delay: .03s; }
+    @keyframes scMascotBlink {
+      0%, 92%, 100% { transform: scaleY(1); }
+      95% { transform: scaleY(.08); }
+    }
+    #sc-mascot .sc-m-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px 1px var(--accent);
+      opacity: 0;
+      animation: scMascotParticle 3.2s ease-in-out infinite;
+    }
+    #sc-mascot .sc-m-particle:nth-child(1) { top: 18%; left: 4%; animation-delay: 0s; background: #00ff66; box-shadow: 0 0 6px 1px #00ff66; }
+    #sc-mascot .sc-m-particle:nth-child(2) { top: 62%; left: 88%; animation-delay: 1.05s; background: #00ffaa; box-shadow: 0 0 6px 1px #00ffaa; }
+    #sc-mascot .sc-m-particle:nth-child(3) { top: 82%; left: 10%; animation-delay: 2.1s; background: #00e5ff; box-shadow: 0 0 6px 1px #00e5ff; }
+    #sc-mascot .sc-m-particle:nth-child(4) { top: 8%; left: 70%; animation-delay: 1.6s; background: #00e5ff; box-shadow: 0 0 6px 1px #00e5ff; }
+    @keyframes scMascotParticle {
+      0% { opacity: 0; transform: translate(0, 0) scale(.6); }
+      20% { opacity: .9; }
+      50% { transform: translate(6px, -14px) scale(1); }
+      80% { opacity: .5; }
+      100% { opacity: 0; transform: translate(-4px, -26px) scale(.5); }
+    }
+    #sc-mascot .sc-m-icon {
+      position: absolute;
+      top: 38%;
+      left: 8%;
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #00ffaa, #00e5ff);
+      box-shadow: 0 0 8px 1px rgba(0,255,170,.7);
+      opacity: 0;
+    }
+    #sc-mascot .sc-m-icon.sc-m-icon-run {
+      animation: scMascotIconRun 6s linear infinite;
+    }
+    @keyframes scMascotIconRun {
+      0%   { opacity: 0; transform: translate(0,0) scale(1); }
+      3%   { opacity: 1; transform: translate(0,0) scale(1); }
+      45%  { opacity: 1; transform: translate(0,0) scale(1); }
+      58%  { opacity: 1; transform: translate(0,0) scale(.35); }
+      66%  { opacity: 0; transform: translate(0,0) scale(0); }
+      100% { opacity: 0; transform: translate(0,0) scale(0); }
+    }
+    #sc-mascot .sc-m-laser {
+      position: absolute;
+      top: 44%;
+      left: 34%;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #00ff66, #00e5ff);
+      box-shadow: 0 0 6px 1px #00ff66;
+      opacity: 0;
+      transform-origin: left center;
+    }
+    #sc-mascot .sc-m-laser.sc-m-laser-run {
+      animation: scMascotLaserRun 6s linear infinite;
+    }
+    @keyframes scMascotLaserRun {
+      0%   { opacity: 0; width: 0; }
+      48%  { opacity: 0; width: 0; }
+      52%  { opacity: 1; width: 14px; }
+      62%  { opacity: 1; width: 14px; }
+      68%  { opacity: 0; width: 14px; }
+      100% { opacity: 0; width: 0; }
+    }
+    #sc-mascot.sc-m-paused * { animation-play-state: paused !important; }
+    @media (max-width: 640px) {
+      #sc-mascot { width: 94px; height: 94px; top: .2rem; left: .2rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #sc-mascot .sc-m-float,
+      #sc-mascot .sc-m-eye,
+      #sc-mascot .sc-m-particle,
+      #sc-mascot .sc-m-icon.sc-m-icon-run,
+      #sc-mascot .sc-m-laser.sc-m-laser-run {
+        animation: none;
+      }
     }
 
     .btn-primary, .btn-secondary {
@@ -1080,8 +1665,145 @@
   <div id="app-wallpaper-layer" data-preset="none" aria-hidden="true"></div>
 
   <section class="hero" id="home" aria-labelledby="hero-title">
+    <div class="hero-bg-fx" aria-hidden="true">
+      <span class="hero-bg-glow"></span>
+      <span class="hero-particle" style="--x:6%; --y:22%; --sz:3px; --d:8.5s; animation-delay:0s"></span>
+      <span class="hero-particle" style="--x:14%; --y:58%; --sz:2px; --d:10s; animation-delay:1.2s"></span>
+      <span class="hero-particle" style="--x:26%; --y:80%; --sz:3px; --d:9.5s; animation-delay:2.4s"></span>
+      <span class="hero-particle" style="--x:48%; --y:12%; --sz:2px; --d:11s; animation-delay:.6s"></span>
+      <span class="hero-particle" style="--x:62%; --y:76%; --sz:3px; --d:9s; animation-delay:3.1s"></span>
+      <span class="hero-particle" style="--x:78%; --y:34%; --sz:2px; --d:10.5s; animation-delay:1.8s"></span>
+      <span class="hero-particle" style="--x:88%; --y:64%; --sz:3px; --d:8.8s; animation-delay:2.9s"></span>
+      <span class="hero-particle" style="--x:36%; --y:90%; --sz:2px; --d:9.8s; animation-delay:.3s"></span>
+    </div>
+    <div id="sc-mascot" aria-hidden="true">
+      <div class="sc-m-float">
+        <svg viewBox="0 0 120 120" focusable="false">
+          <defs>
+            <linearGradient id="scMBody" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#1f1f25"/>
+              <stop offset="100%" stop-color="#17171b"/>
+            </linearGradient>
+            <linearGradient id="scMVisor" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#00ff66"/>
+              <stop offset="100%" stop-color="#00e5ff"/>
+            </linearGradient>
+          </defs>
+          <line x1="60" y1="18" x2="60" y2="6" stroke="#00ffaa" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="60" cy="5" r="4" fill="#00ff66">
+            <animate attributeName="opacity" values="1;.35;1" dur="2.4s" repeatCount="indefinite"/>
+          </circle>
+          <rect x="24" y="20" width="72" height="60" rx="22" fill="url(#scMBody)" stroke="#00ffaa" stroke-opacity=".5" stroke-width="1.5"/>
+          <rect x="34" y="38" width="52" height="26" rx="13" fill="#0d0d0f" stroke="url(#scMVisor)" stroke-width="1.5"/>
+          <ellipse class="sc-m-eye sc-m-eye-l" cx="49" cy="51" rx="5" ry="7" fill="#00ffaa"/>
+          <ellipse class="sc-m-eye sc-m-eye-r" cx="71" cy="51" rx="5" ry="7" fill="#00ffaa"/>
+          <rect x="40" y="84" width="40" height="20" rx="8" fill="url(#scMBody)" stroke="#00e5ff" stroke-opacity=".4" stroke-width="1.2"/>
+          <circle cx="27" cy="94" r="3" fill="#00e5ff"/>
+          <circle cx="93" cy="94" r="3" fill="#00e5ff"/>
+        </svg>
+      </div>
+      <span class="sc-m-particle"></span>
+      <span class="sc-m-particle"></span>
+      <span class="sc-m-particle"></span>
+      <span class="sc-m-particle"></span>
+      <span class="sc-m-icon sc-m-icon-run"></span>
+      <span class="sc-m-laser sc-m-laser-run"></span>
+    </div>
     <p class="hero-eyebrow">100% Client-Side · Private · Blazing Fast</p>
-    <h1 id="hero-title">Compress Images in <span>Seconds</span></h1>
+    <div class="hero-title-stage">
+      <div class="ht-fx" aria-hidden="true">
+        <div class="ht-depth-back">
+          <span class="ht-aurora aurora-green" style="--adur:9.5s; --adl:0s;"></span>
+          <span class="ht-aurora aurora-cyan"  style="--adur:10.5s; --adl:1.8s;"></span>
+          <span class="ht-aurora aurora-radium ht-opt" style="--adur:11.5s; --adl:3.2s;"></span>
+
+          <span class="ht-dust" style="--dx:4%;  --dy:40%; --dsz:1.5px; --ddur:11s;   --ddl:0s;   --dmx:9px;  --dmy:-8px;"></span>
+          <span class="ht-dust" style="--dx:20%; --dy:88%; --dsz:1px;   --ddur:12.5s; --ddl:1.3s; --dmx:-7px; --dmy:-9px;"></span>
+          <span class="ht-dust" style="--dx:38%; --dy:8%;  --dsz:1.5px; --ddur:10.5s; --ddl:2.5s; --dmx:8px;  --dmy:-7px;"></span>
+          <span class="ht-dust" style="--dx:60%; --dy:90%; --dsz:1px;   --ddur:13s;   --ddl:.7s;  --dmx:-6px; --dmy:-8px;"></span>
+          <span class="ht-dust" style="--dx:74%; --dy:14%; --dsz:1.5px; --ddur:11.8s; --ddl:1.9s; --dmx:7px;  --dmy:-9px;"></span>
+          <span class="ht-dust" style="--dx:96%; --dy:52%; --dsz:1px;   --ddur:12.2s; --ddl:3.1s; --dmx:-8px; --dmy:-7px;"></span>
+          <span class="ht-dust ht-opt" style="--dx:46%; --dy:66%; --dsz:1.5px; --ddur:10.8s; --ddl:2.2s; --dmx:6px; --dmy:-8px;"></span>
+          <span class="ht-dust ht-opt" style="--dx:84%; --dy:78%; --dsz:1px;   --ddur:13.4s; --ddl:.4s;  --dmx:-7px; --dmy:-9px;"></span>
+          <span class="ht-dust c-radium" style="--dx:30%; --dy:24%; --dsz:1.5px; --ddur:11.4s; --ddl:1.6s; --dmx:6px;  --dmy:-9px;"></span>
+          <span class="ht-dust c-radium ht-opt" style="--dx:66%; --dy:60%; --dsz:1px;   --ddur:12.8s; --ddl:3.4s; --dmx:-6px; --dmy:-7px;"></span>
+        </div>
+
+        <div class="ht-depth-mid">
+          <span class="ht-orbit"></span>
+
+          <span class="ht-wave" style="--wdur:9s;  --wdl:0s;"></span>
+          <span class="ht-wave ht-opt" style="--wdur:10s; --wdl:4.5s;"></span>
+
+          <span class="ht-cline"        style="--cx:10%; --cy:20%; --cw:64px; --cr:18deg;  --cdur:15s;   --cdl:0s;"></span>
+          <span class="ht-cline"        style="--cx:60%; --cy:78%; --cw:52px; --cr:-12deg; --cdur:16.5s; --cdl:5.2s;"></span>
+          <span class="ht-cline ht-opt" style="--cx:30%; --cy:6%;  --cw:44px; --cr:8deg;   --cdur:17s;   --cdl:10.4s;"></span>
+          <span class="ht-cline ht-opt" style="--cx:78%; --cy:38%; --cw:56px; --cr:-20deg; --cdur:18s;   --cdl:2.6s;"></span>
+
+          <span class="ht-bubble"          style="--bx:10%; --bsz:11px; --bd:8s;   --bdl:0s;  --bwob:9px;"></span>
+          <span class="ht-bubble"          style="--bx:30%; --bsz:8px;  --bd:9.5s; --bdl:1.5s;--bwob:-7px;"></span>
+          <span class="ht-bubble"          style="--bx:52%; --bsz:13px; --bd:7.5s; --bdl:.8s; --bwob:8px;"></span>
+          <span class="ht-bubble ht-opt"   style="--bx:72%; --bsz:9px;  --bd:8.8s; --bdl:2.2s;--bwob:-8px;"></span>
+          <span class="ht-bubble ht-opt"   style="--bx:90%; --bsz:10px; --bd:9s;   --bdl:1.1s;--bwob:6px;"></span>
+        </div>
+
+        <div class="ht-depth-front">
+          <span class="ht-particle c-cyan"  style="--x:6%;  --y:20%; --sz:3px; --d:8.5s;  --dl:0s;   --mx:7px;  --my:-16px;"></span>
+          <span class="ht-particle c-green" style="--x:16%; --y:72%; --sz:4px; --d:9.5s;  --dl:1.1s; --mx:-6px; --my:-14px;"></span>
+          <span class="ht-particle c-white" style="--x:28%; --y:12%; --sz:2px; --d:10s;   --dl:2.3s; --mx:5px;  --my:-18px;"></span>
+          <span class="ht-particle c-cyan"  style="--x:40%; --y:82%; --sz:3px; --d:9s;    --dl:.6s;  --mx:-8px; --my:-15px;"></span>
+          <span class="ht-particle c-green" style="--x:55%; --y:18%; --sz:5px; --d:11s;   --dl:3s;   --mx:6px;  --my:-17px;"></span>
+          <span class="ht-particle c-white" style="--x:68%; --y:76%; --sz:2px; --d:8.8s;  --dl:1.7s; --mx:-5px; --my:-13px;"></span>
+          <span class="ht-particle c-cyan"  style="--x:80%; --y:24%; --sz:4px; --d:10.5s; --dl:.3s;  --mx:7px;  --my:-16px;"></span>
+          <span class="ht-particle c-green" style="--x:92%; --y:62%; --sz:3px; --d:9.2s;  --dl:2.6s; --mx:-6px; --my:-14px;"></span>
+          <span class="ht-particle c-white ht-opt" style="--x:48%; --y:48%; --sz:2px; --d:12s; --dl:1.4s; --mx:5px; --my:-12px;"></span>
+          <span class="ht-particle c-cyan ht-opt"  style="--x:8%;  --y:50%; --sz:3px; --d:10.8s;--dl:3.4s; --mx:-7px; --my:-16px;"></span>
+          <span class="ht-particle c-radium" style="--x:34%; --y:8%;  --sz:3px; --d:9.8s;  --dl:.9s;  --mx:6px;  --my:-15px;"></span>
+          <span class="ht-particle c-radium" style="--x:64%; --y:86%; --sz:4px; --d:10.6s; --dl:2.7s; --mx:-6px; --my:-14px;"></span>
+          <span class="ht-particle c-radium ht-opt" style="--x:88%; --y:52%; --sz:2px; --d:11.2s; --dl:4.1s; --mx:5px; --my:-13px;"></span>
+
+          <span class="ht-spark" style="--sx:14%; --sy:30%; --ssz:2px; --sdur:4.2s; --sdl:0s;   --sb:.8;"></span>
+          <span class="ht-spark" style="--sx:34%; --sy:60%; --ssz:2px; --sdur:5s;   --sdl:1.6s; --sb:.9;"></span>
+          <span class="ht-spark" style="--sx:58%; --sy:22%; --ssz:1.5px; --sdur:4.6s; --sdl:2.8s; --sb:.7;"></span>
+          <span class="ht-spark" style="--sx:76%; --sy:66%; --ssz:2px; --sdur:5.4s; --sdl:.9s;  --sb:.85;"></span>
+          <span class="ht-spark ht-opt" style="--sx:86%; --sy:38%; --ssz:1.5px; --sdur:4.8s; --sdl:2.1s; --sb:.75;"></span>
+          <span class="ht-spark ht-opt" style="--sx:22%; --sy:80%; --ssz:2px; --sdur:5.2s; --sdl:3.5s; --sb:.8;"></span>
+          <span class="ht-spark c-radium" style="--sx:46%; --sy:44%; --ssz:2px; --sdur:5.1s; --sdl:1.3s; --sb:.85;"></span>
+
+          <span class="ht-firefly"        style="--fx:18%; --fy:34%; --fdur:12s;   --fdl:0s;"></span>
+          <span class="ht-firefly"        style="--fx:50%; --fy:70%; --fdur:13.5s; --fdl:2.1s;"></span>
+          <span class="ht-firefly ht-opt" style="--fx:82%; --fy:44%; --fdur:12.8s; --fdl:4s;"></span>
+
+          <span class="ht-orb orb-pulse" style="--ox:12%; --oy:26%; --osz:4px; --ocolor:#baffd9; --oglow:rgba(127,255,110,.5); --odur:4.6s; --odl:0s;"></span>
+          <span class="ht-orb orb-pulse" style="--ox:44%; --oy:14%; --osz:3px; --ocolor:#7bf6ff; --oglow:rgba(61,255,208,.5);  --odur:5.4s; --odl:1.2s;"></span>
+          <span class="ht-orb orb-pulse" style="--ox:70%; --oy:80%; --osz:5px; --ocolor:#baffd9; --oglow:rgba(127,255,110,.5); --odur:5s;   --odl:2.4s;"></span>
+          <span class="ht-orb orb-pulse ht-opt" style="--ox:90%; --oy:30%; --osz:3px; --ocolor:#ffffff; --oglow:rgba(255,255,255,.4); --odur:4.8s; --odl:.6s;"></span>
+          <span class="ht-orb orb-pulse" style="--ox:56%; --oy:52%; --osz:4px; --ocolor:#d4ff4d; --oglow:rgba(196,255,64,.55); --odur:5.2s; --odl:1.8s;"></span>
+
+          <span class="ht-orb orb-float" style="--ox:24%; --oy:60%; --osz:3px; --ocolor:#7bf6ff; --oglow:rgba(61,255,208,.5);  --odur:9.5s;  --odl:0s;   --omx:9px;  --omy:-13px;"></span>
+          <span class="ht-orb orb-float" style="--ox:62%; --oy:38%; --osz:4px; --ocolor:#baffd9; --oglow:rgba(127,255,110,.5); --odur:10.5s; --odl:2.6s; --omx:-8px; --omy:-11px;"></span>
+          <span class="ht-orb orb-float ht-opt" style="--ox:36%; --oy:88%; --osz:3px; --ocolor:#ffffff; --oglow:rgba(255,255,255,.4); --odur:11s; --odl:1.4s; --omx:7px; --omy:-12px;"></span>
+
+          <span class="ht-orb-pivot" style="--opdur:19s;">
+            <span class="ht-orb orb-satellite" style="--osz:3px; --orad:44px; --ocolor:#7bf6ff; --oglow:rgba(61,255,208,.55); --odur:3.6s; --odl:0s;"></span>
+          </span>
+          <span class="ht-orb-pivot" style="--opdur:24s; animation-direction:reverse;">
+            <span class="ht-orb orb-satellite" style="--osz:2.5px; --orad:34px; --ocolor:#baffd9; --oglow:rgba(127,255,110,.5); --odur:4.2s; --odl:1.1s;"></span>
+          </span>
+          <span class="ht-orb-pivot ht-opt" style="--opdur:21s;">
+            <span class="ht-orb orb-satellite" style="--osz:2.5px; --orad:52px; --ocolor:#ffffff; --oglow:rgba(255,255,255,.4); --odur:5s; --odl:2s;"></span>
+          </span>
+          <span class="ht-orb-pivot" style="--opdur:17s;">
+            <span class="ht-orb orb-satellite" style="--osz:2.5px; --orad:38px; --ocolor:#d4ff4d; --oglow:rgba(196,255,64,.6); --odur:3.9s; --odl:.5s;"></span>
+          </span>
+
+          <span class="ht-trail" style="--tx:10%; --ty:50%; --tsz:2.5px; --tdur:6.5s; --tdl:0s;   --tmx:26px;  --tmy:-10px;"></span>
+          <span class="ht-trail" style="--tx:66%; --ty:20%; --tsz:2px;   --tdur:7.2s; --tdl:2.4s; --tmx:-22px; --tmy:14px;"></span>
+          <span class="ht-trail ht-opt" style="--tx:40%; --ty:82%; --tsz:2px; --tdur:6.8s; --tdl:4.1s; --tmx:20px; --tmy:-16px;"></span>
+        </div>
+      </div>
+      <h1 id="hero-title"><span class="ht-sheen" aria-hidden="true"></span><span class="ht-w" style="--i:0">Compress</span> <span class="ht-w" style="--i:1">Images</span> <span class="ht-w" style="--i:2">in</span> <span class="ht-w ht-accent" style="--i:3">Seconds</span></h1>
+    </div>
     <p>Free Online Image Compressor for JPG, PNG & WebP. Optimize sizes instantly right inside your local browser memory without server uploads.</p>
     <div class="hero-buttons">
       <a href="#tools-suite" class="btn-primary" role="button">Compress Now</a>
@@ -1163,9 +1885,6 @@
         </button>
         <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-urlcodec" id="tab-urlcodec">
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> 21. URL Encoder / Decoder
-        </button>
-        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-minigames" id="tab-minigames">
-          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M6 10v4M4 12h4"/><circle cx="15" cy="10.5" r="1"/><circle cx="18" cy="13.5" r="1"/></svg> 22. Mini Games
         </button>
       </div>
 
@@ -2340,126 +3059,6 @@
           <span id="urlcodec-error" style="display:none; color:#ff6b6b; font-family:var(--mono); font-size:.82rem; margin-top:.6rem;"></span>
         </div>
 
-        <div class="tool-workspace" id="panel-minigames" role="tabpanel" aria-labelledby="tab-minigames">
-          <style>
-            #panel-minigames .mg-title-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:1.4rem;}
-            #panel-minigames .mg-title-row h2{font-size:1.3rem;}
-            #panel-minigames .mg-title-row h2 span{display:block;color:var(--muted);font-weight:400;font-size:.82rem;margin-top:.25rem;font-family:var(--sans);}
-            #panel-minigames .mg-badge{font-family:var(--mono);font-size:.72rem;color:var(--bg);background:var(--accent);padding:.3rem .7rem;border-radius:999px;font-weight:700;letter-spacing:.03em;white-space:nowrap;}
-            .mg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.1rem;}
-            .mg-card{position:relative;border-radius:var(--radius);padding:1.3rem 1.2rem 1.1rem;overflow:hidden;
-              background:linear-gradient(155deg, rgba(255,255,255,.055), rgba(255,255,255,.015) 40%, rgba(0,0,0,.15));
-              border:1px solid var(--border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-              transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s, box-shadow .3s;}
-            .mg-card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
-              background:linear-gradient(140deg, rgba(127,255,110,.35), transparent 35%, transparent 65%, rgba(61,255,208,.25));
-              -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
-            .mg-card:hover{transform:translateY(-4px);border-color:rgba(127,255,110,.5);box-shadow:0 18px 40px -18px rgba(127,255,110,.35), 0 0 0 1px rgba(127,255,110,.08) inset;}
-            .mg-card-glow{position:absolute;top:-40%;right:-30%;width:65%;height:65%;border-radius:50%;filter:blur(38px);opacity:.35;pointer-events:none;}
-            .mg-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:.85rem;
-              background:radial-gradient(circle at 30% 25%, rgba(255,255,255,.18), rgba(255,255,255,.02) 70%), var(--surface2);
-              border:1px solid var(--border);box-shadow:0 4px 14px -6px rgba(0,0,0,.6), inset 0 0 12px rgba(127,255,110,.08);}
-            .mg-card h3{font-size:1.05rem;margin-bottom:.35rem;letter-spacing:.01em;}
-            .mg-card p{color:var(--muted);font-size:.82rem;line-height:1.5;margin-bottom:.9rem;min-height:2.7em;}
-            .mg-stats{display:flex;gap:1rem;font-family:var(--mono);font-size:.72rem;color:var(--accent2);margin-bottom:1rem;}
-            .mg-stats span b{color:var(--text);font-weight:600;}
-            .mg-play-btn{width:100%;padding:.7rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--border);
-              background:linear-gradient(90deg, var(--accent), var(--accent2));color:#08110a;font-weight:700;font-size:.85rem;
-              cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;letter-spacing:.02em;
-              transition:filter .2s, transform .15s;}
-            .mg-play-btn:hover{filter:brightness(1.08);}
-            .mg-play-btn:active{transform:scale(.97);}
-            .mg-play-btn svg{width:15px;height:15px;}
-            .mg-footnote{margin-top:1.2rem;color:var(--muted);font-size:.78rem;font-family:var(--mono);text-align:center;}
-            .mg-overlay{position:fixed;inset:0;background:#050506;z-index:9999;display:none;flex-direction:column;}
-            .mg-overlay.open{display:flex;animation:mgFadeIn .25s ease;}
-            @keyframes mgFadeIn{from{opacity:0;}to{opacity:1;}}
-            .mg-overlay-bar{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1rem;
-              background:linear-gradient(180deg, rgba(20,20,24,.95), rgba(13,13,15,.95));border-bottom:1px solid var(--border);flex-shrink:0;}
-            .mg-overlay-bar span{font-family:var(--mono);font-size:.8rem;color:var(--accent);letter-spacing:.02em;}
-            .mg-close-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:34px;height:34px;
-              border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:border-color .2s,color .2s;}
-            .mg-close-btn:hover{border-color:var(--danger);color:var(--danger);}
-            .mg-overlay-body{position:relative;flex:1;background:#000;}
-            .mg-overlay-body iframe{width:100%;height:100%;border:0;display:block;}
-            .mg-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;color:var(--muted);font-family:var(--mono);font-size:.8rem;background:#050506;}
-            .mg-spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:mgSpin .8s linear infinite;}
-            @keyframes mgSpin{to{transform:rotate(360deg);}}
-            @media (max-width:520px){ .mg-grid{grid-template-columns:1fr;} }
-          </style>
-
-          <div class="mg-title-row">
-            <h2>Mini Games Hub <span>Premium original browser games — 100% offline, zero installs</span></h2>
-            <span class="mg-badge">🎮 NEW</span>
-          </div>
-
-          <div class="mg-grid" id="mg-grid">
-            <div class="mg-card" data-game="bubble-shooter" data-title="Bubble Shooter 3D">
-              <div class="mg-card-glow" style="background:var(--accent);"></div>
-              <div class="mg-icon">🔮</div>
-              <h3>Bubble Shooter 3D</h3>
-              <p>Glossy physics-based bubbles, combo chains, bombs, rainbow &amp; lightning power-ups across 250+ procedurally generated levels.</p>
-              <div class="mg-stats">
-                <span>Best: <b id="mg-stat-bubble-shooter">—</b></span>
-                <span>Level: <b id="mg-lvl-bubble-shooter">1</b></span>
-              </div>
-              <button class="mg-play-btn" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play Now</button>
-            </div>
-
-            <div class="mg-card" data-game="basketball-shoot" data-title="Basketball Shoot 3D">
-              <div class="mg-card-glow" style="background:var(--accent2);"></div>
-              <div class="mg-icon">🏀</div>
-              <h3>Basketball Shoot 3D</h3>
-              <p>Swipe to shoot with real arc physics, wind drift, a moving hoop, combo multipliers and unlockable ball skins.</p>
-              <div class="mg-stats">
-                <span>Best: <b id="mg-stat-basketball-shoot">—</b></span>
-                <span>Coins: <b id="mg-coins-basketball-shoot">0</b></span>
-              </div>
-              <button class="mg-play-btn" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play Now</button>
-            </div>
-
-            <div class="mg-card" data-game="bowling" data-title="Bowling 3D">
-              <div class="mg-card-glow" style="background:var(--accent);"></div>
-              <div class="mg-icon">🎳</div>
-              <h3>Bowling 3D</h3>
-              <p>Curve-controlled throws down a glossy reflective lane, strike slow-motion replays, and a full 10-frame tournament mode.</p>
-              <div class="mg-stats">
-                <span>Best: <b id="mg-stat-bowling">—</b></span>
-                <span>Frame: <b id="mg-frame-bowling">1</b></span>
-              </div>
-              <button class="mg-play-btn" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play Now</button>
-            </div>
-
-            <div class="mg-card" data-game="parking-master" data-title="Parking Master 3D">
-              <div class="mg-card-glow" style="background:var(--accent2);"></div>
-              <div class="mg-icon">🚗</div>
-              <h3>Parking Master 3D</h3>
-              <p>Steering-wheel style driving physics, 100+ generated city layouts, day/night &amp; rain modes, and multiple camera angles.</p>
-              <div class="mg-stats">
-                <span>Best: <b id="mg-stat-parking-master">—</b></span>
-                <span>Level: <b id="mg-lvl-parking-master">1</b></span>
-              </div>
-              <button class="mg-play-btn" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play Now</button>
-            </div>
-          </div>
-
-          <p class="mg-footnote">All games save progress locally in your browser — nothing is ever uploaded.</p>
-        </div>
-
-        <div class="mg-overlay" id="mg-overlay" role="dialog" aria-modal="true" aria-label="Mini game player">
-          <div class="mg-overlay-bar">
-            <span id="mg-overlay-title">Loading…</span>
-            <button class="mg-close-btn" id="mg-close-btn" type="button" aria-label="Close game">✕</button>
-          </div>
-          <div class="mg-overlay-body">
-            <div class="mg-loading" id="mg-loading">
-              <div class="mg-spinner"></div>
-              <span>Loading game…</span>
-            </div>
-            <iframe id="mg-iframe" title="Mini game" allow="autoplay; fullscreen" loading="lazy"></iframe>
-          </div>
-        </div>
-
       </div>
     </div>
   </section>
@@ -3060,73 +3659,6 @@
           document.getElementById(targetedPanelId).classList.add("active");
         });
       });
-
-      /* ================= Mini Games Hub (additive) ================= */
-      (function () {
-        var overlay = document.getElementById("mg-overlay");
-        var iframe = document.getElementById("mg-iframe");
-        var loading = document.getElementById("mg-loading");
-        var titleEl = document.getElementById("mg-overlay-title");
-        var closeBtn = document.getElementById("mg-close-btn");
-        var grid = document.getElementById("mg-grid");
-        if (!overlay || !grid) return;
-
-        function readStat(key) {
-          try { return localStorage.getItem(key); } catch (e) { return null; }
-        }
-
-        function refreshStats() {
-          var games = ["bubble-shooter", "basketball-shoot", "bowling", "parking-master"];
-          games.forEach(function (g) {
-            var best = readStat("mg_" + g + "_best");
-            var bestEl = document.getElementById("mg-stat-" + g);
-            if (bestEl) bestEl.textContent = best ? Number(best).toLocaleString() : "—";
-            var lvl = readStat("mg_" + g + "_level");
-            var lvlEl = document.getElementById("mg-lvl-" + g);
-            if (lvlEl && lvl) lvlEl.textContent = lvl;
-            var frame = readStat("mg_" + g + "_frame");
-            var frameEl = document.getElementById("mg-frame-" + g);
-            if (frameEl && frame) frameEl.textContent = frame;
-            var coins = readStat("mg_" + g + "_coins");
-            var coinsEl = document.getElementById("mg-coins-" + g);
-            if (coinsEl && coins) coinsEl.textContent = Number(coins).toLocaleString();
-          });
-        }
-        refreshStats();
-
-        function openGame(gameId, title) {
-          titleEl.textContent = title;
-          loading.style.display = "flex";
-          iframe.style.opacity = "0";
-          iframe.src = "mini-games/" + gameId + ".html";
-          overlay.classList.add("open");
-          document.body.style.overflow = "hidden";
-        }
-
-        function closeGame() {
-          overlay.classList.remove("open");
-          document.body.style.overflow = "";
-          iframe.src = "about:blank";
-          refreshStats();
-        }
-
-        iframe.addEventListener("load", function () {
-          loading.style.display = "none";
-          iframe.style.opacity = "1";
-        });
-
-        grid.querySelectorAll(".mg-card").forEach(function (card) {
-          var launch = function () {
-            openGame(card.getAttribute("data-game"), card.getAttribute("data-title"));
-          };
-          card.querySelector(".mg-play-btn").addEventListener("click", launch);
-        });
-
-        closeBtn.addEventListener("click", closeGame);
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "Escape" && overlay.classList.contains("open")) closeGame();
-        });
-      })();
 
       /* Simulated Ticket Submission Form */
       const ticketForm = document.getElementById("help-ticket-form");
@@ -6421,6 +6953,62 @@
   </script>
 
   <script>
+    /* ================= Smart Compress Mascot — pause when tab hidden (additive) ================= */
+    (function () {
+      var mascot = document.getElementById("sc-mascot");
+      if (!mascot) return;
+      function syncPauseState() {
+        mascot.classList.toggle("sc-m-paused", document.hidden);
+      }
+      document.addEventListener("visibilitychange", syncPauseState);
+      syncPauseState();
+    })();
+  </script>
+
+  <script>
+    /* ================= Hero Title Energy FX — desktop mouse parallax (additive) =================
+       Desktop/precise-pointer only; mobile keeps the automatic layered motion untouched. */
+    (function () {
+      "use strict";
+      var stage = document.querySelector(".hero-title-stage");
+      var fx = stage ? stage.querySelector(".ht-fx") : null;
+      if (!stage || !fx) return;
+
+      var canHover = window.matchMedia &&
+        window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+      if (!canHover) return;
+
+      var raf = null, targetX = 0, targetY = 0;
+      var MAX_X = 8, MAX_Y = 6;
+
+      function apply() {
+        fx.style.setProperty("--pmx", targetX.toFixed(2) + "px");
+        fx.style.setProperty("--pmy", targetY.toFixed(2) + "px");
+        raf = null;
+      }
+
+      function onMove(e) {
+        var r = stage.getBoundingClientRect();
+        if (!r.width || !r.height) return;
+        var relX = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+        var relY = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+        targetX = Math.max(-1, Math.min(1, relX)) * MAX_X;
+        targetY = Math.max(-1, Math.min(1, relY)) * MAX_Y;
+        if (!raf) raf = requestAnimationFrame(apply);
+      }
+
+      function onLeave() {
+        targetX = 0; targetY = 0;
+        if (!raf) raf = requestAnimationFrame(apply);
+      }
+
+      stage.addEventListener("mousemove", onMove, { passive: true });
+      stage.addEventListener("mouseleave", onLeave, { passive: true });
+    })();
+  </script>
+
+  <script>
+
     /* =======================================================================
        MONETAG DIRECT LINK SMARTLINK INTEGRATION
        - Opens the Monetag Direct Link in a new tab exactly once per genuine
