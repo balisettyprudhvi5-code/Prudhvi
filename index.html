@@ -1616,6 +1616,163 @@
       .doceditor-content { padding: 1.5rem 1.1rem; }
       .pdf-thumb-card { width: 130px; }
     }
+
+    /* =====================================================================
+       PREMIUM FEATURE 1: PDF Security (Image -> PDF upgrade)
+       ===================================================================== */
+    .pdf-security-box {
+      margin-top: 1.2rem; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1rem 1.2rem; animation: fadeUp .25s ease both;
+    }
+    .pdf-toggle-row { display: flex; align-items: center; gap: .6rem; cursor: pointer; font-weight: 600; user-select: none; }
+    .pdf-toggle-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+    #pdf-security-fields { margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+    .pw-input-wrap { position: relative; display: flex; }
+    .pw-input-wrap input {
+      width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text); padding: .6rem 2.4rem .6rem .8rem; font-family: var(--mono); font-size: .85rem;
+    }
+    .pw-input-wrap input:focus { border-color: var(--accent2); outline: none; }
+    .pw-toggle-eye {
+      position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; font-size: .95rem; padding: .3rem .5rem; opacity: .75;
+    }
+    .pw-toggle-eye:hover { opacity: 1; }
+    .pw-strength-meter { height: 5px; border-radius: 4px; background: var(--border); margin-top: .5rem; overflow: hidden; }
+    .pw-strength-fill { height: 100%; width: 0%; border-radius: 4px; transition: width .25s ease, background .25s ease; }
+    .pw-strength-label { font-size: .72rem; font-family: var(--mono); color: var(--muted); margin-top: .3rem; display: inline-block; }
+    .pw-match-msg { font-size: .72rem; font-family: var(--mono); margin-top: .4rem; display: inline-block; }
+    .pdf-radio-row, .pdf-perm-row { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .pdf-radio-row label, .pdf-perm-row label { display: flex; align-items: center; gap: .4rem; font-size: .85rem; cursor: pointer; }
+    .pdf-radio-row input, .pdf-perm-row input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+    .pdf-security-error { color: var(--danger); font-family: var(--mono); font-size: .78rem; display: block; margin-top: .7rem; }
+
+    /* =====================================================================
+       PREMIUM FEATURE 2: AI Image Editor
+       ===================================================================== */
+    #panel-ai-editor .tool-drop-zone { margin-bottom: 1rem; }
+    .aied-layout { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+    .aied-canvas-col { flex: 1 1 520px; min-width: 300px; }
+    .aied-controls-col { flex: 1 1 300px; min-width: 260px; max-height: 720px; overflow-y: auto; padding-right: .3rem; }
+    .aied-stage-wrap {
+      position: relative; background: repeating-conic-gradient(#2a2a33 0% 25%, #1a1a1e 0% 50%) 50% / 20px 20px;
+      border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;
+      display: flex; align-items: center; justify-content: center; min-height: 320px; touch-action: none;
+    }
+    .aied-stage-inner { position: relative; }
+    #aied-canvas, #aied-canvas-before { display: block; max-width: 100%; }
+    #aied-canvas-before {
+      position: absolute; top: 0; left: 0; pointer-events: none;
+    }
+    .aied-slider-handle {
+      position: absolute; top: 0; bottom: 0; width: 3px; background: var(--accent);
+      box-shadow: 0 0 10px var(--accent); cursor: ew-resize; display: none; z-index: 5;
+    }
+    .aied-slider-handle::after {
+      content: '⇔'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 34px; height: 34px; background: var(--accent); color: #0a0a0c; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: .95rem; font-weight: 700;
+    }
+    .aied-toolbar { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; }
+    .aied-toolbar button {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      border-radius: var(--radius-sm); padding: .45rem .7rem; font-size: .78rem; cursor: pointer;
+      display: flex; align-items: center; gap: .3rem; transition: all .15s ease;
+    }
+    .aied-toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+    .aied-toolbar button.active { background: var(--accent); color: #0a0a0c; border-color: var(--accent); }
+    .aied-group { margin-bottom: 1.1rem; }
+    .aied-group h4 {
+      font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+      margin-bottom: .6rem; font-family: var(--mono);
+    }
+    .aied-slider-row { margin-bottom: .7rem; }
+    .aied-slider-row .row-label {
+      display: flex; justify-content: space-between; font-size: .78rem; margin-bottom: .3rem; color: var(--text);
+    }
+    .aied-slider-row .row-label span:last-child { color: var(--accent2); font-family: var(--mono); }
+    .aied-slider-row input[type="range"] { width: 100%; }
+    .aied-filter-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+    .aied-filter-grid button {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text); font-size: .72rem; padding: .5rem .2rem; cursor: pointer; transition: all .15s ease;
+    }
+    .aied-filter-grid button:hover, .aied-filter-grid button.active { border-color: var(--accent); color: var(--accent); }
+    .aied-export-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .5rem; }
+    .aied-export-row select {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text); padding: .5rem .6rem; font-family: var(--mono); font-size: .8rem;
+    }
+    .aied-text-input-row { display: flex; gap: .5rem; margin-bottom: .7rem; }
+    .aied-text-input-row input[type="text"] {
+      flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text); padding: .5rem .7rem; font-size: .85rem;
+    }
+    .aied-emoji-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .3rem; margin-bottom: .5rem; }
+    .aied-emoji-grid button { font-size: 1.2rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: .3rem 0; cursor: pointer; }
+    .aied-emoji-grid button:hover { border-color: var(--accent); }
+    input[type="color"].aied-color-swatch { width: 40px; height: 32px; border: 1px solid var(--border); border-radius: 6px; background: none; cursor: pointer; padding: 2px; }
+
+    @media (max-width: 900px) {
+      .aied-controls-col { max-height: none; }
+    }
+
+    /* =====================================================================
+       PREMIUM FEATURE 3: Mesh Gradient Generator
+       ===================================================================== */
+    .mesh-layout { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+    .mesh-preview-col { flex: 2 1 420px; min-width: 280px; }
+    .mesh-controls-col { flex: 1 1 300px; min-width: 260px; }
+    .mesh-canvas-wrap {
+      position: relative; border: 1px solid var(--border); overflow: hidden;
+      background: repeating-conic-gradient(#2a2a33 0% 25%, #1a1a1e 0% 50%) 50% / 20px 20px;
+    }
+    .mesh-canvas-wrap.rounded { border-radius: 22px; }
+    #mesh-canvas { display: block; width: 100%; height: auto; }
+    .mesh-glass-overlay {
+      position: absolute; inset: 8%; border-radius: 18px; pointer-events: none; display: none;
+      background: linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.02) 60%);
+      border: 1px solid rgba(255,255,255,.25); backdrop-filter: blur(6px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 8px 32px rgba(0,0,0,.35);
+    }
+    .mesh-glass-overlay.on { display: block; }
+    .mesh-color-list { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .7rem; }
+    .mesh-color-chip { position: relative; }
+    .mesh-color-chip input[type="color"] { width: 42px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: none; cursor: pointer; padding: 2px; }
+    .mesh-color-chip button.mesh-remove-color {
+      position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; border-radius: 50%;
+      background: var(--danger); color: #fff; border: none; font-size: .6rem; line-height: 1; cursor: pointer;
+    }
+    .mesh-toggle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem .8rem; margin-bottom: 1rem; }
+    .mesh-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; font-size: .8rem; }
+    .mesh-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .mesh-switch input { opacity: 0; width: 0; height: 0; }
+    .mesh-switch .slider-pill {
+      position: absolute; inset: 0; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 22px; cursor: pointer; transition: all .2s ease;
+    }
+    .mesh-switch .slider-pill::before {
+      content: ''; position: absolute; width: 16px; height: 16px; left: 2px; top: 2px; background: var(--muted);
+      border-radius: 50%; transition: all .2s ease;
+    }
+    .mesh-switch input:checked + .slider-pill { background: rgba(127,255,110,.25); border-color: var(--accent); }
+    .mesh-switch input:checked + .slider-pill::before { transform: translateX(18px); background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .mesh-preset-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; margin-bottom: 1rem; }
+    .mesh-preset-swatch {
+      height: 34px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; position: relative;
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .mesh-preset-swatch:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .mesh-preset-swatch span {
+      position: absolute; bottom: -1.15rem; left: 50%; transform: translateX(-50%);
+      font-size: .58rem; color: var(--muted); white-space: nowrap;
+    }
+    .mesh-css-output {
+      width: 100%; min-height: 90px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--accent2); padding: .7rem; font-family: var(--mono);
+      font-size: .75rem; resize: vertical; margin-top: .5rem;
+    }
+    @media (max-width: 900px) { .mesh-preset-grid { grid-template-columns: repeat(3, 1fr); } }
   </style>
 
   <!-- Google Analytics -->
@@ -1885,6 +2042,12 @@
         </button>
         <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-urlcodec" id="tab-urlcodec">
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> 21. URL Encoder / Decoder
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-ai-editor" id="tab-ai-editor">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg> 22. ✨ AI Image Editor
+        </button>
+        <button class="tool-tab-btn" role="tab" aria-selected="false" aria-controls="panel-meshgrad" id="tab-meshgrad">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="7" cy="8" r="4"/><circle cx="16" cy="8" r="3"/><circle cx="12" cy="17" r="5"/></svg> 23. 🎨 Mesh Gradient Generator
         </button>
       </div>
 
@@ -2226,6 +2389,55 @@
           </div>
 
           <div id="pdf-image-list" style="display:flex; flex-wrap:wrap; gap:.9rem; margin-top:1.2rem;"></div>
+
+          <div class="pdf-security-box" id="pdf-security-box">
+            <label class="pdf-toggle-row" for="pdf-protect-toggle">
+              <input type="checkbox" id="pdf-protect-toggle">
+              <span>🔒 PDF Security (Optional)</span>
+            </label>
+            <div id="pdf-security-fields" style="display:none;">
+              <div class="control-row" style="display:flex; flex-wrap:wrap; gap:1rem;">
+                <div class="control-group" style="flex:1; min-width:200px;">
+                  <label for="pdf-pw-user">Password</label>
+                  <div class="pw-input-wrap">
+                    <input type="password" id="pdf-pw-user" placeholder="Enter password" autocomplete="new-password">
+                    <button type="button" class="pw-toggle-eye" data-target="pdf-pw-user" aria-label="Show or hide password">👁</button>
+                  </div>
+                  <div class="pw-strength-meter"><div class="pw-strength-fill" id="pdf-pw-strength-fill"></div></div>
+                  <span class="pw-strength-label" id="pdf-pw-strength-label"></span>
+                </div>
+                <div class="control-group" style="flex:1; min-width:200px;">
+                  <label for="pdf-pw-confirm">Confirm Password</label>
+                  <div class="pw-input-wrap">
+                    <input type="password" id="pdf-pw-confirm" placeholder="Re-enter password" autocomplete="new-password">
+                    <button type="button" class="pw-toggle-eye" data-target="pdf-pw-confirm" aria-label="Show or hide password">👁</button>
+                  </div>
+                  <span class="pw-match-msg" id="pdf-pw-match-msg"></span>
+                </div>
+                <div class="control-group" style="align-self:flex-end;">
+                  <button type="button" class="btn-secondary" id="pdf-pw-generate">🎲 Generate Password</button>
+                </div>
+              </div>
+
+              <div class="control-group" style="margin-top:.3rem;">
+                <label>Encryption</label>
+                <div class="pdf-radio-row">
+                  <label><input type="radio" name="pdf-encryption" value="aes128" id="pdf-enc-128"> AES-128</label>
+                  <label><input type="radio" name="pdf-encryption" value="aes256" id="pdf-enc-256" checked> AES-256 (Recommended)</label>
+                </div>
+              </div>
+
+              <div class="control-group" style="margin-top:1rem;">
+                <label>Permissions</label>
+                <div class="pdf-perm-row">
+                  <label><input type="checkbox" id="pdf-perm-print" checked> Allow Printing</label>
+                  <label><input type="checkbox" id="pdf-perm-copy" checked> Allow Copy Text</label>
+                  <label><input type="checkbox" id="pdf-perm-edit" checked> Allow Editing</label>
+                </div>
+              </div>
+              <span id="pdf-security-error" class="pdf-security-error"></span>
+            </div>
+          </div>
 
           <div class="action-row" id="pdf-action-row">
             <button id="action-pdf" class="btn-primary" style="display: none;">Merge Into PDF</button>
@@ -3057,6 +3269,214 @@
             <textarea id="urlcodec-output" readonly style="width:100%;min-height:140px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent2);padding:.8rem;font-family:var(--mono);font-size:.85rem;resize:vertical;"></textarea>
           </div>
           <span id="urlcodec-error" style="display:none; color:#ff6b6b; font-family:var(--mono); font-size:.82rem; margin-top:.6rem;"></span>
+        </div>
+
+        <div class="tool-workspace" id="panel-ai-editor" role="tabpanel" aria-labelledby="tab-ai-editor">
+          <div class="tool-title-row">
+            <h2>✨ AI Image Editor <span>Full-Featured Client-Side Photo Editor — Works 100% Offline</span></h2>
+          </div>
+
+          <div class="tool-drop-zone" id="dropzone-ai-editor">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4m0 0L7 9m5-5l5 5M5 20h14"/></svg>
+            <p>Drop an image, <span>browse files</span>, or paste (Ctrl+V) — PNG, JPG, JPEG, WEBP</p>
+            <input type="file" id="file-ai-editor" class="file-input-hidden" accept="image/png, image/jpeg, image/webp" />
+          </div>
+
+          <div id="aied-workspace" style="display:none;">
+            <div class="aied-toolbar" id="aied-toolbar">
+              <button type="button" id="aied-tool-crop" data-tool="crop">✂ Crop</button>
+              <button type="button" id="aied-tool-draw" data-tool="draw">🖌 Draw</button>
+              <button type="button" id="aied-tool-erase" data-tool="erase">🧹 Erase</button>
+              <button type="button" id="aied-tool-text" data-tool="text">🔤 Add Text</button>
+              <button type="button" id="aied-tool-emoji" data-tool="emoji">😊 Emoji</button>
+              <button type="button" id="aied-flip-h">↔ Flip H</button>
+              <button type="button" id="aied-flip-v">↕ Flip V</button>
+              <button type="button" id="aied-rotate-l">⟲ Rotate</button>
+              <button type="button" id="aied-rotate-r">⟳ Rotate</button>
+              <button type="button" id="aied-undo">↩ Undo</button>
+              <button type="button" id="aied-redo">↪ Redo</button>
+              <button type="button" id="aied-zoom-out">🔍−</button>
+              <button type="button" id="aied-zoom-in">🔍+</button>
+              <button type="button" id="aied-toggle-preview">🔀 Before/After</button>
+              <button type="button" id="aied-reset">♻ Reset</button>
+            </div>
+
+            <div class="aied-layout">
+              <div class="aied-canvas-col">
+                <div class="aied-stage-wrap" id="aied-stage-wrap">
+                  <div class="aied-stage-inner" id="aied-stage-inner">
+                    <canvas id="aied-canvas"></canvas>
+                    <canvas id="aied-canvas-before"></canvas>
+                    <div class="aied-slider-handle" id="aied-slider-handle"></div>
+                  </div>
+                </div>
+
+                <div class="aied-text-input-row" id="aied-crop-controls" style="display:none; margin-top:.8rem;">
+                  <button type="button" class="btn-primary" id="aied-crop-apply" style="flex:1;">Apply Crop</button>
+                  <button type="button" class="btn-secondary" id="aied-crop-cancel" style="flex:1;">Cancel</button>
+                </div>
+
+                <div class="aied-export-row">
+                  <select id="aied-export-format">
+                    <option value="png">PNG</option>
+                    <option value="jpeg">JPG</option>
+                    <option value="webp">WEBP</option>
+                  </select>
+                  <div class="control-group" style="flex:1; min-width:140px;">
+                    <label for="aied-export-quality" style="font-size:.72rem;">Quality</label>
+                    <input type="range" id="aied-export-quality" min="10" max="100" value="92">
+                  </div>
+                  <a id="aied-download" class="btn-primary" href="#" download="edited-image.png">⬇ Download</a>
+                </div>
+              </div>
+
+              <div class="aied-controls-col">
+                <div class="aied-group" id="aied-resize-group">
+                  <h4>Resize</h4>
+                  <div style="display:flex; gap:.6rem; align-items:flex-end;">
+                    <div class="control-group" style="flex:1;"><label for="aied-resize-w">Width</label><input type="number" id="aied-resize-w"></div>
+                    <div class="control-group" style="flex:1;"><label for="aied-resize-h">Height</label><input type="number" id="aied-resize-h"></div>
+                  </div>
+                  <label style="display:flex; align-items:center; gap:.4rem; font-size:.78rem; margin:.5rem 0;">
+                    <input type="checkbox" id="aied-resize-lock" checked> Lock aspect ratio
+                  </label>
+                  <button type="button" class="btn-secondary" id="aied-resize-apply" style="width:100%;">Apply Resize</button>
+                </div>
+
+                <div class="aied-group">
+                  <h4>Adjustments</h4>
+                  <div class="aied-slider-row"><div class="row-label"><span>Brightness</span><span id="aied-v-brightness">100</span></div><input type="range" id="aied-brightness" min="0" max="200" value="100"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Contrast</span><span id="aied-v-contrast">100</span></div><input type="range" id="aied-contrast" min="0" max="200" value="100"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Saturation</span><span id="aied-v-saturation">100</span></div><input type="range" id="aied-saturation" min="0" max="200" value="100"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Exposure</span><span id="aied-v-exposure">0</span></div><input type="range" id="aied-exposure" min="-100" max="100" value="0"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Highlights</span><span id="aied-v-highlights">0</span></div><input type="range" id="aied-highlights" min="-100" max="100" value="0"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Shadows</span><span id="aied-v-shadows">0</span></div><input type="range" id="aied-shadows" min="-100" max="100" value="0"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Temperature</span><span id="aied-v-temperature">0</span></div><input type="range" id="aied-temperature" min="-100" max="100" value="0"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Tint</span><span id="aied-v-tint">0</span></div><input type="range" id="aied-tint" min="-100" max="100" value="0"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Hue</span><span id="aied-v-hue">0</span></div><input type="range" id="aied-hue" min="0" max="360" value="0"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Blur</span><span id="aied-v-blur">0</span></div><input type="range" id="aied-blur" min="0" max="20" value="0"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Sharpen</span><span id="aied-v-sharpen">0</span></div><input type="range" id="aied-sharpen" min="0" max="100" value="0"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Vignette</span><span id="aied-v-vignette">0</span></div><input type="range" id="aied-vignette" min="0" max="100" value="0"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Opacity</span><span id="aied-v-opacity">100</span></div><input type="range" id="aied-opacity" min="0" max="100" value="100"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Pixelate</span><span id="aied-v-pixelate">0</span></div><input type="range" id="aied-pixelate" min="0" max="50" value="0"></div>
+                </div>
+
+                <div class="aied-group">
+                  <h4>Filters</h4>
+                  <div class="aied-filter-grid">
+                    <button type="button" data-filter="none" class="active">None</button>
+                    <button type="button" data-filter="grayscale">Grayscale</button>
+                    <button type="button" data-filter="sepia">Sepia</button>
+                    <button type="button" data-filter="invert">Invert</button>
+                  </div>
+                </div>
+
+                <div class="aied-group" id="aied-text-group" style="display:none;">
+                  <h4>Add Text</h4>
+                  <div class="aied-text-input-row"><input type="text" id="aied-text-input" placeholder="Type text…"></div>
+                  <div style="display:flex; gap:.6rem; margin-bottom:.6rem;">
+                    <input type="color" class="aied-color-swatch" id="aied-text-color" value="#7fff6e">
+                    <input type="range" id="aied-text-size" min="12" max="160" value="42" style="flex:1;">
+                  </div>
+                  <button type="button" class="btn-secondary" id="aied-text-add" style="width:100%;">Place Text on Canvas</button>
+                </div>
+
+                <div class="aied-group" id="aied-emoji-group" style="display:none;">
+                  <h4>Add Emoji</h4>
+                  <div class="aied-emoji-grid">
+                    <button type="button">😀</button><button type="button">😍</button><button type="button">🔥</button>
+                    <button type="button">✨</button><button type="button">❤️</button><button type="button">👍</button>
+                    <button type="button">🎉</button><button type="button">😎</button><button type="button">🌟</button>
+                    <button type="button">💯</button><button type="button">😂</button><button type="button">🥳</button>
+                    <button type="button">👑</button><button type="button">🌈</button>
+                  </div>
+                </div>
+
+                <div class="aied-group" id="aied-brush-group" style="display:none;">
+                  <h4>Brush</h4>
+                  <div class="aied-slider-row"><div class="row-label"><span>Brush Size</span><span id="aied-v-brush-size">14</span></div><input type="range" id="aied-brush-size" min="2" max="80" value="14"></div>
+                  <input type="color" class="aied-color-swatch" id="aied-brush-color" value="#7fff6e">
+                </div>
+
+                <div class="aied-group">
+                  <h4>Frame &amp; Corners</h4>
+                  <div class="aied-slider-row"><div class="row-label"><span>Rounded Corners</span><span id="aied-v-radius">0</span></div><input type="range" id="aied-radius" min="0" max="100" value="0"></div>
+                  <div class="aied-slider-row"><div class="row-label"><span>Border Width</span><span id="aied-v-borderw">0</span></div><input type="range" id="aied-borderw" min="0" max="40" value="0"></div>
+                  <input type="color" class="aied-color-swatch" id="aied-border-color" value="#7fff6e">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-workspace" id="panel-meshgrad" role="tabpanel" aria-labelledby="tab-meshgrad">
+          <div class="tool-title-row">
+            <h2>🎨 Mesh Gradient Generator <span>Beautiful Animated Mesh Gradients — Export PNG, SVG or CSS</span></h2>
+          </div>
+
+          <div class="mesh-layout">
+            <div class="mesh-preview-col">
+              <div class="mesh-canvas-wrap" id="mesh-canvas-wrap">
+                <canvas id="mesh-canvas" width="900" height="560"></canvas>
+                <div class="mesh-glass-overlay" id="mesh-glass-overlay"></div>
+              </div>
+              <div class="aied-export-row" style="margin-top:1rem;">
+                <button type="button" class="btn-secondary" id="mesh-random-colors">🎲 Random Colors</button>
+                <button type="button" class="btn-secondary" id="mesh-random-layout">🔀 Random Layout</button>
+                <a id="mesh-download-png" class="btn-primary" href="#" download="mesh-gradient.png">⬇ PNG</a>
+                <a id="mesh-download-svg" class="btn-primary" href="#" download="mesh-gradient.svg">⬇ SVG</a>
+                <button type="button" class="btn-secondary" id="mesh-copy-css">📋 Copy CSS</button>
+              </div>
+              <textarea class="mesh-css-output" id="mesh-css-output" readonly></textarea>
+            </div>
+
+            <div class="mesh-controls-col">
+              <div class="aied-group">
+                <h4>Colors (2–8)</h4>
+                <div class="mesh-color-list" id="mesh-color-list"></div>
+                <button type="button" class="btn-secondary" id="mesh-add-color" style="width:100%;">+ Add Color</button>
+              </div>
+
+              <div class="aied-group">
+                <h4>Premium Presets</h4>
+                <div class="mesh-preset-grid" id="mesh-preset-grid"></div>
+              </div>
+
+              <div class="aied-group">
+                <h4>Toggles</h4>
+                <div class="mesh-toggle-grid">
+                  <div class="mesh-toggle-row">Animated
+                    <label class="mesh-switch"><input type="checkbox" id="mesh-toggle-animated"><span class="slider-pill"></span></label>
+                  </div>
+                  <div class="mesh-toggle-row">Noise
+                    <label class="mesh-switch"><input type="checkbox" id="mesh-toggle-noise"><span class="slider-pill"></span></label>
+                  </div>
+                  <div class="mesh-toggle-row">Glass Effect
+                    <label class="mesh-switch"><input type="checkbox" id="mesh-toggle-glass"><span class="slider-pill"></span></label>
+                  </div>
+                  <div class="mesh-toggle-row">Blob Shape
+                    <label class="mesh-switch"><input type="checkbox" id="mesh-toggle-blob" checked><span class="slider-pill"></span></label>
+                  </div>
+                  <div class="mesh-toggle-row">Glow
+                    <label class="mesh-switch"><input type="checkbox" id="mesh-toggle-glow"><span class="slider-pill"></span></label>
+                  </div>
+                  <div class="mesh-toggle-row">Rounded Canvas
+                    <label class="mesh-switch"><input type="checkbox" id="mesh-toggle-rounded"><span class="slider-pill"></span></label>
+                  </div>
+                  <div class="mesh-toggle-row">Transparent BG
+                    <label class="mesh-switch"><input type="checkbox" id="mesh-toggle-transparent"><span class="slider-pill"></span></label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="aied-group">
+                <h4>Fine-Tuning</h4>
+                <div class="aied-slider-row"><div class="row-label"><span>Mesh Density</span><span id="mesh-v-density">6</span></div><input type="range" id="mesh-density" min="2" max="14" value="6"></div>
+                <div class="aied-slider-row"><div class="row-label"><span>Animation Speed</span><span id="mesh-v-speed">50</span></div><input type="range" id="mesh-speed" min="1" max="100" value="50"></div>
+                <div class="aied-slider-row"><div class="row-label"><span>Gradient Size</span><span id="mesh-v-size">70</span></div><input type="range" id="mesh-size" min="20" max="150" value="70"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -7082,5 +7502,1680 @@
       }
     })();
   </script>
+  <script>
+    /* =====================================================================
+       SMART COMPRESS — PREMIUM FEATURES BUNDLE
+       (AI Image Editor, Mesh Gradient Generator, PDF Password Protection)
+       Pure client-side JS. No external dependencies beyond what is already
+       loaded on this page (jsPDF for Image->PDF). Self-contained IIFEs so
+       nothing here can collide with or alter any existing script.
+       ===================================================================== */
+
+    /* ---- PDF Standard Security Handler (AES-128 / AES-256) ---- */
+    window.SmartPdfCrypto = (function () {
+      "use strict";
+      /* ============================================================
+         Client-side PDF Standard Security Handler implementation.
+         Supports:
+           - AES-128 (V4 / R4, CFM = AESV2)  [key derivation: MD5 + RC4]
+           - AES-256 (V5 / R6, CFM = AESV3)  [key derivation: SHA-256/384/512]
+         Pure JS + WebCrypto (crypto.subtle). No external deps.
+         ============================================================ */
+      
+      const subtle = crypto.subtle;
+      
+      /* ---------- byte helpers ---------- */
+      function toBytes(str) { // latin1 string -> Uint8Array
+        const arr = new Uint8Array(str.length);
+        for (let i = 0; i < str.length; i++) arr[i] = str.charCodeAt(i) & 0xff;
+        return arr;
+      }
+      function toLatin1(bytes) {
+        let s = "";
+        const CHUNK = 0x8000;
+        for (let i = 0; i < bytes.length; i += CHUNK) {
+          s += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+        }
+        return s;
+      }
+      function concatBytes(...arrs) {
+        let len = 0;
+        for (const a of arrs) len += a.length;
+        const out = new Uint8Array(len);
+        let o = 0;
+        for (const a of arrs) { out.set(a, o); o += a.length; }
+        return out;
+      }
+      function utf8ToBytes(str) { return new TextEncoder().encode(str); }
+      function randomBytes(n) {
+        const b = new Uint8Array(n);
+        crypto.getRandomValues(b);
+        return b;
+      }
+      
+      /* ---------- MD5 (pure JS, standard implementation) ---------- */
+      function md5(bytes) {
+        function rotl(x, c) { return (x << c) | (x >>> (32 - c)); }
+        function toWords(data) {
+          const nWords = (((data.length + 8) >> 6) + 1) * 16;
+          const words = new Array(nWords).fill(0);
+          for (let i = 0; i < data.length; i++) {
+            words[i >> 2] |= data[i] << ((i % 4) * 8);
+          }
+          words[data.length >> 2] |= 0x80 << ((data.length % 4) * 8);
+          const bitLenLow = (data.length * 8) >>> 0;
+          words[nWords - 2] = bitLenLow;
+          return words;
+        }
+        const K = [];
+        for (let i = 0; i < 64; i++) K[i] = (Math.floor(Math.abs(Math.sin(i + 1)) * 4294967296)) | 0;
+        const S = [7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,
+                   5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,
+                   4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,
+                   6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+        let a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+        const words = toWords(bytes);
+        for (let chunk = 0; chunk < words.length; chunk += 16) {
+          let A = a0, B = b0, C = c0, D = d0;
+          for (let i = 0; i < 64; i++) {
+            let F, g;
+            if (i < 16) { F = (B & C) | (~B & D); g = i; }
+            else if (i < 32) { F = (D & B) | (~D & C); g = (5 * i + 1) % 16; }
+            else if (i < 48) { F = B ^ C ^ D; g = (3 * i + 5) % 16; }
+            else { F = C ^ (B | ~D); g = (7 * i) % 16; }
+            F = (F + A + K[i] + (words[chunk + g] | 0)) | 0;
+            A = D; D = C; C = B;
+            B = (B + rotl(F, S[i])) | 0;
+          }
+          a0 = (a0 + A) | 0; b0 = (b0 + B) | 0; c0 = (c0 + C) | 0; d0 = (d0 + D) | 0;
+        }
+        const out = new Uint8Array(16);
+        [a0, b0, c0, d0].forEach((v, idx) => {
+          out[idx * 4] = v & 0xff;
+          out[idx * 4 + 1] = (v >>> 8) & 0xff;
+          out[idx * 4 + 2] = (v >>> 16) & 0xff;
+          out[idx * 4 + 3] = (v >>> 24) & 0xff;
+        });
+        return out;
+      }
+      
+      /* ---------- RC4 (pure JS) ---------- */
+      function rc4(keyBytes, dataBytes) {
+        const S = new Uint8Array(256);
+        for (let i = 0; i < 256; i++) S[i] = i;
+        let j = 0;
+        const klen = keyBytes.length;
+        for (let i = 0; i < 256; i++) {
+          j = (j + S[i] + keyBytes[i % klen]) & 0xff;
+          [S[i], S[j]] = [S[j], S[i]];
+        }
+        const out = new Uint8Array(dataBytes.length);
+        let i = 0; j = 0;
+        for (let n = 0; n < dataBytes.length; n++) {
+          i = (i + 1) & 0xff;
+          j = (j + S[i]) & 0xff;
+          [S[i], S[j]] = [S[j], S[i]];
+          out[n] = dataBytes[n] ^ S[(S[i] + S[j]) & 0xff];
+        }
+        return out;
+      }
+      
+      /* ---------- WebCrypto helpers ---------- */
+      async function sha(bits, bytes) {
+        const algo = bits === 256 ? "SHA-256" : bits === 384 ? "SHA-384" : "SHA-512";
+        const digest = await subtle.digest(algo, bytes);
+        return new Uint8Array(digest);
+      }
+      async function importAesKey(keyBytes) {
+        return subtle.importKey("raw", keyBytes, { name: "AES-CBC" }, false, ["encrypt", "decrypt"]);
+      }
+      /* AES-CBC with NO padding — input length MUST be multiple of 16.
+         Trick: WebCrypto always PKCS7-pads on encrypt (adds one extra block);
+         we simply drop that extra block since CBC block N only depends on
+         blocks <= N, so truncation doesn't corrupt earlier ciphertext. */
+      async function aesCbcNoPad(keyBytes, ivBytes, dataBytes) {
+        const key = await importAesKey(keyBytes);
+        const full = new Uint8Array(await subtle.encrypt({ name: "AES-CBC", iv: ivBytes }, key, dataBytes));
+        return full.slice(0, dataBytes.length);
+      }
+      /* Standard padded AES-CBC encryption used for actual string/stream content.
+         Output = IV (16 bytes) followed by padded ciphertext. */
+      async function aesCbcEncrypt(keyBytes, dataBytes) {
+        const iv = randomBytes(16);
+        const key = await importAesKey(keyBytes);
+        const ct = new Uint8Array(await subtle.encrypt({ name: "AES-CBC", iv }, key, dataBytes));
+        return concatBytes(iv, ct);
+      }
+      
+      /* ---------- PDF standard padding string (Algorithm 2 step a) ---------- */
+      const PAD = new Uint8Array([
+        0x28,0xBF,0x4E,0x5E,0x4E,0x75,0x8A,0x41,0x64,0x00,0x4E,0x56,0xFF,0xFA,0x01,0x08,
+        0x2E,0x2E,0x00,0xB6,0xD0,0x68,0x3E,0x80,0x2F,0x0C,0xA9,0xFE,0x64,0x53,0x69,0x7A
+      ]);
+      function padPassword(pwBytes) {
+        if (pwBytes.length >= 32) return pwBytes.slice(0, 32);
+        return concatBytes(pwBytes, PAD.slice(0, 32 - pwBytes.length));
+      }
+      
+      /* =========================================================================
+         R4 / AES-128 (CFM = AESV2) key derivation
+         ========================================================================= */
+      function le32(n) {
+        return new Uint8Array([n & 0xff, (n >>> 8) & 0xff, (n >>> 16) & 0xff, (n >>> 24) & 0xff]);
+      }
+      
+      /* Algorithm 3: compute /O entry. keyLen in bytes (16 for 128-bit). */
+      function computeO_R3(ownerPwBytes, userPwBytes, keyLenBytes) {
+        const padded = padPassword(ownerPwBytes.length ? ownerPwBytes : userPwBytes);
+        let hash = md5(padded);
+        for (let i = 0; i < 50; i++) hash = md5(hash.slice(0, keyLenBytes));
+        const rc4Key = hash.slice(0, keyLenBytes);
+        let out = rc4(rc4Key, padPassword(userPwBytes));
+        for (let i = 1; i <= 19; i++) {
+          const xKey = new Uint8Array(keyLenBytes);
+          for (let k = 0; k < keyLenBytes; k++) xKey[k] = rc4Key[k] ^ i;
+          out = rc4(xKey, out);
+        }
+        return out; // 32 bytes
+      }
+      
+      /* Algorithm 2: compute the file encryption key. */
+      function computeFileKey_R4(userPwBytes, oEntry, permissions, idBytes, keyLenBytes, encryptMetadata) {
+        const padded = padPassword(userPwBytes);
+        const pBytes = le32(permissions >>> 0);
+        let material = concatBytes(padded, oEntry, pBytes, idBytes);
+        if (!encryptMetadata) material = concatBytes(material, new Uint8Array([0xff,0xff,0xff,0xff]));
+        let hash = md5(material);
+        for (let i = 0; i < 50; i++) hash = md5(hash.slice(0, keyLenBytes));
+        return hash.slice(0, keyLenBytes);
+      }
+      
+      /* Algorithm 5: compute /U entry (R3/R4). */
+      function computeU_R3(fileKey, idBytes, keyLenBytes) {
+        const h = md5(concatBytes(PAD, idBytes));
+        let out = rc4(fileKey, h);
+        for (let i = 1; i <= 19; i++) {
+          const xKey = new Uint8Array(keyLenBytes);
+          for (let k = 0; k < keyLenBytes; k++) xKey[k] = fileKey[k] ^ i;
+          out = rc4(xKey, out);
+        }
+        return concatBytes(out, randomBytes(16)); // 32 bytes total
+      }
+      
+      /* Per-object key for R4 AESV2 (Algorithm 1 + AESV2 salt). */
+      async function objectKeyR4(fileKey, objNum, objGen, keyLenBytes) {
+        const extra = new Uint8Array([
+          objNum & 0xff, (objNum >>> 8) & 0xff, (objNum >>> 16) & 0xff,
+          objGen & 0xff, (objGen >>> 8) & 0xff,
+          0x73, 0x41, 0x6c, 0x54 // "sAlT"
+        ]);
+        const material = concatBytes(fileKey, extra);
+        const hash = md5(material);
+        const n = Math.min(keyLenBytes + 5, 16);
+        return hash.slice(0, n);
+      }
+      
+      async function buildEncryptDict_AES128(userPassword, ownerPassword, permissions, idBytes) {
+        const keyLen = 16; // 128-bit
+        const userPw = utf8ToBytes(userPassword || "");
+        const ownerPw = utf8ToBytes(ownerPassword || "");
+        const O = computeO_R3(ownerPw, userPw, keyLen);
+        const fileKey = computeFileKey_R4(userPw, O, permissions, idBytes, keyLen, true);
+        const U = computeU_R3(fileKey, idBytes, keyLen);
+        return {
+          fileKey,
+          dictExtra: {
+            V: 4, R: 4, O, U, P: permissions, keyBits: 128, cfm: "AESV2"
+          },
+          perObjectKey: (num, gen) => objectKeyR4(fileKey, num, gen, keyLen)
+        };
+      }
+      
+      /* =========================================================================
+         R6 / AES-256 (CFM = AESV3) key derivation
+         ========================================================================= */
+      async function hash2B(passwordBytes, saltBytes, extraBytes) {
+        let K = await sha(256, concatBytes(passwordBytes, saltBytes, extraBytes || new Uint8Array(0)));
+        let round = 0;
+        while (true) {
+          const oneRound = concatBytes(passwordBytes, K, extraBytes || new Uint8Array(0));
+          // K1 = 64 repetitions
+          const K1 = new Uint8Array(oneRound.length * 64);
+          for (let i = 0; i < 64; i++) K1.set(oneRound, i * oneRound.length);
+          const aesKey = K.slice(0, 16);
+          const iv = K.slice(16, 32);
+          const E = await aesCbcNoPad(aesKey, iv, K1);
+          let sum = 0;
+          for (let i = 0; i < 16; i++) sum += E[i];
+          const mod = sum % 3;
+          K = mod === 0 ? await sha(256, E) : mod === 1 ? await sha(384, E) : await sha(512, E);
+          round++;
+          if (round >= 64 && E[E.length - 1] <= round - 32) break;
+        }
+        return K.slice(0, 32);
+      }
+      
+      async function buildEncryptDict_AES256(userPassword, ownerPassword, permissions) {
+        const userPw = utf8ToBytes(userPassword || "").slice(0, 127);
+        const ownerPw = utf8ToBytes(ownerPassword || userPassword || "").slice(0, 127);
+      
+        const fileKey = randomBytes(32);
+      
+        // ---- User entries ----
+        const userValidationSalt = randomBytes(8);
+        const userKeySalt = randomBytes(8);
+        const uHash = await hash2B(userPw, userValidationSalt, new Uint8Array(0));
+        const U = concatBytes(uHash, userValidationSalt, userKeySalt);
+        const uInterKey = await hash2B(userPw, userKeySalt, new Uint8Array(0));
+        const UE = await aesCbcNoPad(uInterKey, new Uint8Array(16), fileKey);
+      
+        // ---- Owner entries (validation/key hash also includes the 48-byte U string) ----
+        const ownerValidationSalt = randomBytes(8);
+        const ownerKeySalt = randomBytes(8);
+        const oHash = await hash2B(ownerPw, ownerValidationSalt, U);
+        const O = concatBytes(oHash, ownerValidationSalt, ownerKeySalt);
+        const oInterKey = await hash2B(ownerPw, ownerKeySalt, U);
+        const OE = await aesCbcNoPad(oInterKey, new Uint8Array(16), fileKey);
+      
+        // ---- Perms (encrypted permissions, Algorithm 8.1) ----
+        const permsPlain = new Uint8Array(16);
+        const p = permissions >>> 0;
+        permsPlain[0] = p & 0xff; permsPlain[1] = (p >>> 8) & 0xff;
+        permsPlain[2] = (p >>> 16) & 0xff; permsPlain[3] = (p >>> 24) & 0xff;
+        permsPlain[4] = 0xff; permsPlain[5] = 0xff; permsPlain[6] = 0xff; permsPlain[7] = 0xff;
+        permsPlain[8] = 0x54; // 'T' EncryptMetadata = true
+        permsPlain[9] = 0x61; permsPlain[10] = 0x64; permsPlain[11] = 0x62; // "adb"
+        const rnd4 = randomBytes(4);
+        permsPlain.set(rnd4, 12);
+        const Perms = await aesCbcNoPad(fileKey, new Uint8Array(16), permsPlain);
+      
+        return {
+          fileKey,
+          dictExtra: { V: 5, R: 6, O, U, OE, UE, Perms, P: permissions, keyBits: 256, cfm: "AESV3" },
+          perObjectKey: async () => fileKey // AESV3 uses the file key directly, no per-object mixing
+        };
+      }
+      
+      /* =========================================================================
+         Minimal PDF object model: parse -> encrypt strings/streams -> rebuild
+         ========================================================================= */
+      function parsePdfObjects(latin1Str) {
+        const objRe = /(\d+)\s+(\d+)\s+obj\b/g;
+        const starts = [];
+        let m;
+        while ((m = objRe.exec(latin1Str))) {
+          starts.push({ num: parseInt(m[1], 10), gen: parseInt(m[2], 10), headerEnd: objRe.lastIndex });
+        }
+        const objects = [];
+        for (let i = 0; i < starts.length; i++) {
+          const s = starts[i];
+          const nextHeaderHeaderStart = i + 1 < starts.length ? starts[i + 1].headerEnd : latin1Str.length;
+          const dictScanLimit = nextHeaderHeaderStart;
+      
+          /* Look for a "stream" keyword between this object's header and the next
+             object's header. If found, use the declared /Length to skip over the
+             (possibly binary) stream body exactly, so literal "endobj"/"endstream"
+             byte sequences inside binary image/font data can never truncate
+             parsing. */
+          const streamKwMatch = /stream\r?\n/.exec(latin1Str.substring(s.headerEnd, dictScanLimit));
+      
+          let body;
+          if (streamKwMatch) {
+            const dictPart = latin1Str.substring(s.headerEnd, s.headerEnd + streamKwMatch.index);
+            const lenMatch = dictPart.match(/\/Length\s+(\d+)/);
+            const streamDataStart = s.headerEnd + streamKwMatch.index + streamKwMatch[0].length;
+            let length = lenMatch ? parseInt(lenMatch[1], 10) : 0;
+            let streamDataEnd = streamDataStart + length;
+            const nearby = latin1Str.substring(streamDataEnd, streamDataEnd + 20);
+            if (!/^\s*endstream/.test(nearby)) {
+              const fallbackEnd = latin1Str.indexOf("endstream", streamDataStart);
+              if (fallbackEnd !== -1) streamDataEnd = fallbackEnd;
+            }
+            const afterStream = latin1Str.indexOf("endobj", streamDataEnd);
+            const endIdx = afterStream === -1 ? dictScanLimit : afterStream;
+            body = latin1Str.substring(s.headerEnd, endIdx);
+          } else {
+            const endIdx = latin1Str.indexOf("endobj", s.headerEnd);
+            body = latin1Str.substring(s.headerEnd, endIdx === -1 || endIdx > dictScanLimit ? dictScanLimit : endIdx);
+          }
+          objects.push({ num: s.num, gen: s.gen, body });
+        }
+        return objects;
+      }
+      
+      /* Tokenize a dict-only body (no stream) and encrypt literal/hex strings in place. */
+      async function encryptStringsInDict(body, encryptFn) {
+        let out = "";
+        let i = 0;
+        const n = body.length;
+        while (i < n) {
+          const c = body[i];
+          if (c === "(") {
+            // literal string — track balanced unescaped parens
+            let depth = 1;
+            let j = i + 1;
+            let raw = "";
+            while (j < n && depth > 0) {
+              const ch = body[j];
+              if (ch === "\\") {
+                raw += ch + (body[j + 1] || "");
+                j += 2;
+                continue;
+              }
+              if (ch === "(") depth++;
+              else if (ch === ")") { depth--; if (depth === 0) { j++; break; } }
+              raw += ch;
+              j++;
+            }
+            const decoded = decodeLiteralPdfString(raw);
+            const encBytes = await encryptFn(toBytes(decoded));
+            out += "<" + bytesToHex(encBytes) + ">"; // re-emit as hex string (always valid)
+            i = j;
+            continue;
+          }
+          if (c === "<" && body[i + 1] === "<") {
+            out += "<<";
+            i += 2;
+            continue;
+          }
+          if (c === ">" && body[i + 1] === ">") {
+            out += ">>";
+            i += 2;
+            continue;
+          }
+          if (c === "<") {
+            // hex string
+            let j = i + 1;
+            let hex = "";
+            while (j < n && body[j] !== ">") { hex += body[j]; j++; }
+            j++; // skip '>'
+            const clean = hex.replace(/\s+/g, "");
+            const bytes = new Uint8Array(clean.length / 2);
+            for (let k = 0; k < bytes.length; k++) bytes[k] = parseInt(clean.substr(k * 2, 2), 16);
+            const encBytes = await encryptFn(bytes);
+            out += "<" + bytesToHex(encBytes) + ">";
+            i = j;
+            continue;
+          }
+          out += c;
+          i++;
+        }
+        return out;
+      }
+      function decodeLiteralPdfString(raw) {
+        let out = [];
+        for (let i = 0; i < raw.length; i++) {
+          const c = raw[i];
+          if (c === "\\") {
+            const n = raw[i + 1];
+            if (n === "n") { out.push("\n"); i++; }
+            else if (n === "r") { out.push("\r"); i++; }
+            else if (n === "t") { out.push("\t"); i++; }
+            else if (n === "b") { out.push("\b"); i++; }
+            else if (n === "f") { out.push("\f"); i++; }
+            else if (n === "(" || n === ")" || n === "\\") { out.push(n); i++; }
+            else if (n >= "0" && n <= "7") {
+              let oct = n; let k = i + 2;
+              for (let cnt = 0; cnt < 2 && raw[k] >= "0" && raw[k] <= "7"; cnt++, k++) oct += raw[k];
+              out.push(String.fromCharCode(parseInt(oct, 8) & 0xff));
+              i = k - 1;
+            } else if (n === "\n") { i++; }
+            else { out.push(n); i++; }
+          } else out.push(c);
+        }
+        return out.join("");
+      }
+      function bytesToHex(bytes) {
+        let s = "";
+        for (let i = 0; i < bytes.length; i++) s += bytes[i].toString(16).padStart(2, "0");
+        return s;
+      }
+      
+      async function encryptPdfBytes(pdfBytes, opts) {
+        const {
+          userPassword = "",
+          ownerPassword = "",
+          algorithm = "aes256", // "aes128" | "aes256"
+          permissions = -4 // allow everything by default (bits set per spec, negative = high bits set)
+        } = opts;
+      
+        const latin1 = toLatin1(pdfBytes);
+        const idHex = md5(randomBytes(16)); // fresh document ID
+        const idBytes = idHex; // 16 raw bytes; will hex-encode when writing /ID
+      
+        const objects = parsePdfObjects(latin1);
+      
+        // locate trailer for /Root and /Info
+        const trailerMatch = latin1.match(/trailer\s*<<([\s\S]*?)>>/);
+        let rootRef = "1 0 R", infoRef = null;
+        if (trailerMatch) {
+          const rM = trailerMatch[1].match(/\/Root\s+(\d+\s+\d+\s+R)/);
+          const iM = trailerMatch[1].match(/\/Info\s+(\d+\s+\d+\s+R)/);
+          if (rM) rootRef = rM[1];
+          if (iM) infoRef = iM[1];
+        }
+      
+        const keyInfo = algorithm === "aes128"
+          ? await buildEncryptDict_AES128(userPassword, ownerPassword, permissions >>> 0, idBytes)
+          : await buildEncryptDict_AES256(userPassword, ownerPassword, permissions >>> 0);
+      
+        // Build encrypted object bodies
+        const newObjects = [];
+        for (const obj of objects) {
+          const perObjKey = await keyInfo.perObjectKey(obj.num, obj.gen);
+          const streamMatch = obj.body.match(/^([\s\S]*?)stream\r?\n/);
+          if (streamMatch) {
+            const dictPart = streamMatch[1];
+            const lenMatch = dictPart.match(/\/Length\s+(\d+)/);
+            const streamStart = streamMatch[0].length;
+            let length = lenMatch ? parseInt(lenMatch[1], 10) : (obj.body.indexOf("endstream") - streamStart);
+            const rawStreamStr = obj.body.substr(streamStart, length);
+            const rawStreamBytes = toBytes(rawStreamStr);
+            const encStream = await aesCbcEncrypt(perObjKey, rawStreamBytes);
+            const newDict = dictPart.replace(/\/Length\s+\d+/, "/Length " + encStream.length);
+            newObjects.push({ num: obj.num, gen: obj.gen, isStream: true, dict: newDict, streamBytes: encStream });
+          } else {
+            const encryptedDict = await encryptStringsInDict(obj.body, async (bytes) => aesCbcEncrypt(perObjKey, bytes));
+            newObjects.push({ num: obj.num, gen: obj.gen, isStream: false, dict: encryptedDict });
+          }
+        }
+      
+        // Determine next free object number for the Encrypt dict
+        let maxNum = 0;
+        for (const o of newObjects) if (o.num > maxNum) maxNum = o.num;
+        const encryptObjNum = maxNum + 1;
+      
+        // Build /Encrypt dictionary string
+        const d = keyInfo.dictExtra;
+        let encDictStr;
+        if (d.R === 4) {
+          encDictStr = `<< /Filter /Standard /V ${d.V} /R ${d.R} /Length 128 ` +
+            `/CF << /StdCF << /CFM /AESV2 /AuthEvent /DocOpen /Length 16 >> >> ` +
+            `/StmF /StdCF /StrF /StdCF ` +
+            `/O <${bytesToHex(d.O)}> /U <${bytesToHex(d.U)}> /P ${d.P} >>`;
+        } else {
+          encDictStr = `<< /Filter /Standard /V ${d.V} /R ${d.R} /Length 256 ` +
+            `/CF << /StdCF << /CFM /AESV3 /AuthEvent /DocOpen /Length 32 >> >> ` +
+            `/StmF /StdCF /StrF /StdCF ` +
+            `/O <${bytesToHex(d.O)}> /U <${bytesToHex(d.U)}> /OE <${bytesToHex(d.OE)}> /UE <${bytesToHex(d.UE)}> ` +
+            `/Perms <${bytesToHex(d.Perms)}> /P ${d.P} /EncryptMetadata true >>`;
+        }
+      
+        // ---- Serialize final PDF ----
+        let out = "%PDF-1.7\n%\xE2\xE3\xCF\xD3\n";
+        const offsets = {};
+        function appendObj(num, gen, content) {
+          offsets[num] = toBytes(out).length; // byte offset (safe: out so far is latin1-safe ascii+bytes)
+          out += `${num} ${gen} obj\n${content}\nendobj\n`;
+        }
+        const sortedObjs = newObjects.slice().sort((a, b) => a.num - b.num);
+        for (const o of sortedObjs) {
+          if (o.isStream) {
+            offsets[o.num] = toBytes(out).length;
+            out += `${o.num} ${o.gen} obj\n${o.dict}stream\n`;
+            out += toLatin1(o.streamBytes);
+            out += `\nendstream\nendobj\n`;
+          } else {
+            appendObj(o.num, o.gen, o.dict);
+          }
+        }
+        appendObj(encryptObjNum, 0, encDictStr);
+      
+        const idHexStr = bytesToHex(idBytes);
+        const xrefOffset = toBytes(out).length;
+        const totalSize = encryptObjNum + 1;
+        out += `xref\n0 ${totalSize}\n0000000000 65535 f \n`;
+        for (let n = 1; n < totalSize; n++) {
+          const off = offsets[n] !== undefined ? offsets[n] : 0;
+          out += String(off).padStart(10, "0") + " 00000 n \n";
+        }
+        out += `trailer\n<< /Size ${totalSize} /Root ${rootRef} ${infoRef ? "/Info " + infoRef + " " : ""}/Encrypt ${encryptObjNum} 0 R /ID [<${idHexStr}><${idHexStr}>] >>\n`;
+        out += `startxref\n${xrefOffset}\n%%EOF`;
+      
+        return toBytes(out);
+      }
+      return { encryptPdfBytes };
+    })();
+
+    /* =====================================================================
+       PREMIUM FEATURE: PDF Security for Image -> PDF tool
+       ===================================================================== */
+    (function () {
+      const protectToggle = document.getElementById("pdf-protect-toggle");
+      const fieldsBox = document.getElementById("pdf-security-fields");
+      const pwUser = document.getElementById("pdf-pw-user");
+      const pwConfirm = document.getElementById("pdf-pw-confirm");
+      const strengthFill = document.getElementById("pdf-pw-strength-fill");
+      const strengthLabel = document.getElementById("pdf-pw-strength-label");
+      const matchMsg = document.getElementById("pdf-pw-match-msg");
+      const generateBtn = document.getElementById("pdf-pw-generate");
+      const errorSpan = document.getElementById("pdf-security-error");
+      const actionBtn = document.getElementById("action-pdf");
+      const dlBtn = document.getElementById("dl-pdf");
+
+      if (!protectToggle || !actionBtn) return;
+
+      protectToggle.addEventListener("change", () => {
+        fieldsBox.style.display = protectToggle.checked ? "block" : "none";
+      });
+
+      document.querySelectorAll(".pw-toggle-eye").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const input = document.getElementById(btn.dataset.target);
+          if (!input) return;
+          input.type = input.type === "password" ? "text" : "password";
+        });
+      });
+
+      function scorePassword(pw) {
+        let score = 0;
+        if (pw.length >= 6) score++;
+        if (pw.length >= 10) score++;
+        if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+        if (/\d/.test(pw)) score++;
+        if (/[^A-Za-z0-9]/.test(pw)) score++;
+        return score; // 0-5
+      }
+      function renderStrength() {
+        const pw = pwUser.value;
+        if (!pw) { strengthFill.style.width = "0%"; strengthLabel.textContent = ""; return; }
+        const score = scorePassword(pw);
+        const pct = (score / 5) * 100;
+        strengthFill.style.width = pct + "%";
+        let label = "Weak", color = "#ff5c5c";
+        if (score >= 4) { label = "Strong"; color = "#7fff6e"; }
+        else if (score >= 3) { label = "Good"; color = "#3dffd0"; }
+        else if (score >= 2) { label = "Fair"; color = "#ffb347"; }
+        strengthFill.style.background = color;
+        strengthLabel.textContent = label + " password";
+        strengthLabel.style.color = color;
+      }
+      function renderMatch() {
+        if (!pwConfirm.value) { matchMsg.textContent = ""; return; }
+        if (pwConfirm.value === pwUser.value) {
+          matchMsg.textContent = "✓ Passwords match";
+          matchMsg.style.color = "#7fff6e";
+        } else {
+          matchMsg.textContent = "✕ Passwords do not match";
+          matchMsg.style.color = "#ff5c5c";
+        }
+      }
+      pwUser.addEventListener("input", () => { renderStrength(); renderMatch(); });
+      pwConfirm.addEventListener("input", renderMatch);
+
+      generateBtn.addEventListener("click", () => {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%^&*";
+        let pw = "";
+        const randArr = new Uint32Array(16);
+        crypto.getRandomValues(randArr);
+        for (let i = 0; i < 16; i++) pw += chars[randArr[i] % chars.length];
+        pwUser.value = pw;
+        pwConfirm.value = pw;
+        pwUser.type = "text";
+        pwConfirm.type = "text";
+        renderStrength();
+        renderMatch();
+      });
+
+      function buildPermissions() {
+        const allowPrint = document.getElementById("pdf-perm-print").checked;
+        const allowCopy = document.getElementById("pdf-perm-copy").checked;
+        const allowEdit = document.getElementById("pdf-perm-edit").checked;
+        let p = 0xfffff0c0 | 0; // reserved bits per spec baseline (bits 1,2,7,8 = 0; bits 13-32 = 1)
+        if (allowPrint) p |= (4 | 2048);
+        if (allowEdit) p |= (8 | 32 | 256 | 1024);
+        if (allowCopy) p |= (16 | 512);
+        return p | 0;
+      }
+
+      function readImageListFromDom() {
+        const imgs = Array.from(document.querySelectorAll("#pdf-image-list img"));
+        return imgs.map((img) => {
+          const t = img.style.transform || "";
+          const m = /rotate\((-?\d+(?:\.\d+)?)deg\)/.exec(t);
+          return { url: img.getAttribute("src"), rotation: m ? parseFloat(m[1]) : 0 };
+        });
+      }
+
+      async function buildPlainPdfBytes() {
+        const items = readImageListFromDom();
+        if (!items.length || !window.jspdf) return null;
+        const { jsPDF } = window.jspdf;
+        const pageSizeChoice = document.getElementById("pdf-page-size").value;
+        const orientationChoice = document.getElementById("pdf-orientation").value;
+        const marginMm = parseFloat(document.getElementById("pdf-margin").value) || 0;
+
+        const loadImage = (url) => new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.src = url;
+        });
+
+        let doc = null;
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          const img = await loadImage(item.url);
+          const canvas = document.createElement("canvas");
+          const rotated = item.rotation % 180 !== 0;
+          canvas.width = rotated ? img.naturalHeight : img.naturalWidth;
+          canvas.height = rotated ? img.naturalWidth : img.naturalHeight;
+          const ctx = canvas.getContext("2d");
+          ctx.save();
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate((item.rotation * Math.PI) / 180);
+          ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+          ctx.restore();
+
+          const imgDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+          const imgWmm = canvas.width * 0.2646;
+          const imgHmm = canvas.height * 0.2646;
+
+          let isLandscape = imgWmm > imgHmm;
+          if (orientationChoice === "portrait") isLandscape = false;
+          if (orientationChoice === "landscape") isLandscape = true;
+
+          let format = pageSizeChoice === "auto" ? [imgWmm + marginMm * 2, imgHmm + marginMm * 2] : pageSizeChoice;
+          const orientationArg = isLandscape ? "l" : "p";
+
+          if (i === 0) doc = new jsPDF({ orientation: orientationArg, unit: "mm", format: format });
+          else doc.addPage(format, orientationArg);
+
+          const pageW = doc.internal.pageSize.getWidth();
+          const pageH = doc.internal.pageSize.getHeight();
+          const availW = pageW - marginMm * 2;
+          const availH = pageH - marginMm * 2;
+          const scale = Math.min(availW / imgWmm, availH / imgHmm);
+          const drawW = imgWmm * scale;
+          const drawH = imgHmm * scale;
+          const x = (pageW - drawW) / 2;
+          const y = (pageH - drawH) / 2;
+          doc.addImage(imgDataUrl, "JPEG", x, y, drawW, drawH);
+        }
+        return new Uint8Array(doc.output("arraybuffer"));
+      }
+
+      async function handleProtectedCreate() {
+        errorSpan.textContent = "";
+        const pw = pwUser.value;
+        const confirm = pwConfirm.value;
+        if (!pw) { errorSpan.textContent = "Please enter a password."; return; }
+        if (pw.length < 4) { errorSpan.textContent = "Password must be at least 4 characters."; return; }
+        if (pw !== confirm) { errorSpan.textContent = "Passwords do not match."; return; }
+
+        const originalLabel = actionBtn.textContent;
+        actionBtn.textContent = "Encrypting…";
+        actionBtn.disabled = true;
+        try {
+          const plainBytes = await buildPlainPdfBytes();
+          if (!plainBytes) { errorSpan.textContent = "Add at least one image first."; return; }
+          const algorithm = document.getElementById("pdf-enc-128").checked ? "aes128" : "aes256";
+          const permissions = buildPermissions();
+          const encBytes = await window.SmartPdfCrypto.encryptPdfBytes(plainBytes, {
+            userPassword: pw,
+            ownerPassword: pw,
+            algorithm,
+            permissions
+          });
+          const blob = new Blob([encBytes], { type: "application/pdf" });
+          dlBtn.href = URL.createObjectURL(blob);
+          dlBtn.setAttribute("download", "protected-document.pdf");
+          dlBtn.style.display = "inline-flex";
+        } catch (err) {
+          console.error("PDF encryption failed:", err);
+          errorSpan.textContent = "Encryption failed. Please try again.";
+        } finally {
+          actionBtn.textContent = originalLabel;
+          actionBtn.disabled = false;
+        }
+      }
+
+      /* Capture-phase interceptor: only takes over when Protect PDF is
+         checked, otherwise the original unprotected flow runs untouched. */
+      actionBtn.addEventListener("click", (e) => {
+        if (!protectToggle.checked) return;
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        handleProtectedCreate();
+      }, true);
+    })();
+
+    /* =====================================================================
+       PREMIUM FEATURE: AI Image Editor
+       ===================================================================== */
+    (function () {
+      const dropzone = document.getElementById("dropzone-ai-editor");
+      const fileInput = document.getElementById("file-ai-editor");
+      const workspace = document.getElementById("aied-workspace");
+      const stageWrap = document.getElementById("aied-stage-wrap");
+      const stageInner = document.getElementById("aied-stage-inner");
+      const canvas = document.getElementById("aied-canvas");
+      const beforeCanvas = document.getElementById("aied-canvas-before");
+      const sliderHandle = document.getElementById("aied-slider-handle");
+      const ctx = canvas.getContext("2d");
+      const beforeCtx = beforeCanvas.getContext("2d");
+
+      if (!dropzone || !canvas) return;
+
+      let baseCanvas = document.createElement("canvas"); // committed pixel state
+      let baseCtx = baseCanvas.getContext("2d");
+      let originalDataUrl = null; // pristine original, for Reset
+      let history = []; // array of dataURLs
+      let historyIndex = -1;
+      let zoom = 1;
+      let currentTool = "none";
+      let currentFilterPreset = "none";
+      let pendingPlacement = null; // { kind: 'text'|'emoji', value, color, size }
+      let showBeforeAfter = false;
+
+      const adj = {
+        brightness: 100, contrast: 100, saturation: 100, exposure: 0,
+        highlights: 0, shadows: 0, temperature: 0, tint: 0, hue: 0,
+        blur: 0, sharpen: 0, vignette: 0, opacity: 100, pixelate: 0,
+        radius: 0, borderw: 0
+      };
+
+      /* ---------- drag & drop / browse / paste ---------- */
+      function bindDropzone() {
+        dropzone.addEventListener("click", () => fileInput.click());
+        dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("drag-over"); });
+        ["dragleave", "drop"].forEach((ev) => dropzone.addEventListener(ev, () => dropzone.classList.remove("drag-over")));
+        dropzone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          if (e.dataTransfer.files && e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener("change", (e) => {
+          if (e.target.files && e.target.files.length) loadFile(e.target.files[0]);
+        });
+        document.addEventListener("paste", (e) => {
+          if (!document.getElementById("panel-ai-editor").classList.contains("active")) return;
+          const items = e.clipboardData && e.clipboardData.items;
+          if (!items) return;
+          for (const item of items) {
+            if (item.type && item.type.startsWith("image/")) {
+              loadFile(item.getAsFile());
+              break;
+            }
+          }
+        });
+      }
+
+      function loadFile(file) {
+        if (!file || !file.type.startsWith("image/")) return;
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 2200;
+          let w = img.naturalWidth, h = img.naturalHeight;
+          if (w > MAX || h > MAX) {
+            const scale = MAX / Math.max(w, h);
+            w = Math.round(w * scale); h = Math.round(h * scale);
+          }
+          baseCanvas.width = w; baseCanvas.height = h;
+          baseCtx.clearRect(0, 0, w, h);
+          baseCtx.drawImage(img, 0, 0, w, h);
+          originalDataUrl = baseCanvas.toDataURL("image/png");
+          history = [originalDataUrl];
+          historyIndex = 0;
+          resetAdjustments();
+          workspace.style.display = "block";
+          render();
+          URL.revokeObjectURL(url);
+        };
+        img.src = url;
+      }
+
+      /* ---------- adjustments UI wiring ---------- */
+      const sliderIds = ["brightness","contrast","saturation","exposure","highlights","shadows",
+        "temperature","tint","hue","blur","sharpen","vignette","opacity","pixelate","radius","borderw"];
+      function bindSliders() {
+        sliderIds.forEach((key) => {
+          const el = document.getElementById("aied-" + key);
+          const label = document.getElementById("aied-v-" + key);
+          if (!el) return;
+          el.addEventListener("input", () => {
+            adj[key] = parseFloat(el.value);
+            if (label) label.textContent = el.value;
+            render();
+          });
+        });
+      }
+      function resetAdjustments() {
+        Object.assign(adj, {
+          brightness: 100, contrast: 100, saturation: 100, exposure: 0,
+          highlights: 0, shadows: 0, temperature: 0, tint: 0, hue: 0,
+          blur: 0, sharpen: 0, vignette: 0, opacity: 100, pixelate: 0,
+          radius: adj.radius, borderw: adj.borderw
+        });
+        sliderIds.forEach((key) => {
+          const el = document.getElementById("aied-" + key);
+          const label = document.getElementById("aied-v-" + key);
+          if (!el || key === "radius" || key === "borderw") return;
+          el.value = adj[key];
+          if (label) label.textContent = String(adj[key]);
+        });
+        currentFilterPreset = "none";
+        document.querySelectorAll(".aied-filter-grid button").forEach((b) => b.classList.toggle("active", b.dataset.filter === "none"));
+      }
+
+      document.querySelectorAll(".aied-filter-grid button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          currentFilterPreset = btn.dataset.filter;
+          document.querySelectorAll(".aied-filter-grid button").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          render();
+        });
+      });
+
+      /* ---------- render pipeline ---------- */
+      function roundRectPath(c, x, y, w, h, r) {
+        r = Math.min(r, w / 2, h / 2);
+        c.beginPath();
+        c.moveTo(x + r, y);
+        c.arcTo(x + w, y, x + w, y + h, r);
+        c.arcTo(x + w, y + h, x, y + h, r);
+        c.arcTo(x, y + h, x, y, r);
+        c.arcTo(x, y, x + w, y, r);
+        c.closePath();
+      }
+
+      function buildCssFilter() {
+        const exposureBoost = adj.exposure * 0.6;
+        const brightness = Math.max(0, adj.brightness + exposureBoost) / 100;
+        const parts = [
+          `brightness(${brightness})`,
+          `contrast(${adj.contrast / 100})`,
+          `saturate(${adj.saturation / 100})`,
+          `hue-rotate(${adj.hue}deg)`,
+          `opacity(${adj.opacity / 100})`
+        ];
+        if (adj.blur > 0) parts.push(`blur(${adj.blur * 0.4}px)`);
+        if (currentFilterPreset === "grayscale") parts.push("grayscale(1)");
+        if (currentFilterPreset === "sepia") parts.push("sepia(1)");
+        if (currentFilterPreset === "invert") parts.push("invert(1)");
+        return parts.join(" ");
+      }
+
+      function applyPixelAdjustments(imgData) {
+        const d = imgData.data;
+        const temp = adj.temperature * 0.6;
+        const tint = adj.tint * 0.6;
+        const high = adj.highlights;
+        const shad = adj.shadows;
+        const needsPass = temp !== 0 || tint !== 0 || high !== 0 || shad !== 0;
+        if (!needsPass) return imgData;
+        for (let i = 0; i < d.length; i += 4) {
+          let r = d[i], g = d[i + 1], b = d[i + 2];
+          if (temp !== 0) { r += temp; b -= temp; }
+          if (tint !== 0) { g += tint; }
+          const lum = (r + g + b) / 3;
+          if (high !== 0 && lum > 150) {
+            const factor = ((lum - 150) / 105) * (high / 100) * 60;
+            r += factor; g += factor; b += factor;
+          }
+          if (shad !== 0 && lum < 120) {
+            const factor = ((120 - lum) / 120) * (shad / 100) * 60;
+            r += factor; g += factor; b += factor;
+          }
+          d[i] = Math.max(0, Math.min(255, r));
+          d[i + 1] = Math.max(0, Math.min(255, g));
+          d[i + 2] = Math.max(0, Math.min(255, b));
+        }
+        return imgData;
+      }
+
+      function applySharpen(c, w, h, amount) {
+        if (amount <= 0) return;
+        const src = c.getImageData(0, 0, w, h);
+        const dst = c.createImageData(w, h);
+        const s = src.data, o = dst.data;
+        const k = amount / 100;
+        const weight = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const idx = (y * w + x) * 4;
+            if (x === 0 || y === 0 || x === w - 1 || y === h - 1) {
+              o[idx] = s[idx]; o[idx + 1] = s[idx + 1]; o[idx + 2] = s[idx + 2]; o[idx + 3] = s[idx + 3];
+              continue;
+            }
+            for (let ch = 0; ch < 3; ch++) {
+              let sum = 0, wi = 0;
+              for (let ky = -1; ky <= 1; ky++) {
+                for (let kx = -1; kx <= 1; kx++) {
+                  const nIdx = ((y + ky) * w + (x + kx)) * 4 + ch;
+                  sum += s[nIdx] * weight[wi]; wi++;
+                }
+              }
+              const original = s[idx + ch];
+              o[idx + ch] = Math.max(0, Math.min(255, original + (sum - original) * k));
+            }
+            o[idx + 3] = s[idx + 3];
+          }
+        }
+        c.putImageData(dst, 0, 0);
+      }
+
+      function applyVignette(c, w, h, amount) {
+        if (amount <= 0) return;
+        const grad = c.createRadialGradient(w / 2, h / 2, w * 0.25, w / 2, h / 2, w * 0.72);
+        grad.addColorStop(0, "rgba(0,0,0,0)");
+        grad.addColorStop(1, `rgba(0,0,0,${(amount / 100) * 0.85})`);
+        c.save();
+        c.fillStyle = grad;
+        c.globalCompositeOperation = "multiply";
+        c.fillRect(0, 0, w, h);
+        c.restore();
+      }
+
+      function render() {
+        const w = baseCanvas.width, h = baseCanvas.height;
+        if (!w || !h) return;
+        canvas.width = w; canvas.height = h;
+        ctx.clearRect(0, 0, w, h);
+        ctx.save();
+        if (adj.radius > 0) { roundRectPath(ctx, 0, 0, w, h, adj.radius); ctx.clip(); }
+
+        let sourceCanvas = baseCanvas;
+        if (adj.pixelate > 0) {
+          const factor = Math.max(2, adj.pixelate);
+          const tmp = document.createElement("canvas");
+          const sw = Math.max(1, Math.floor(w / factor));
+          const sh = Math.max(1, Math.floor(h / factor));
+          tmp.width = sw; tmp.height = sh;
+          const tctx = tmp.getContext("2d");
+          tctx.imageSmoothingEnabled = false;
+          tctx.drawImage(baseCanvas, 0, 0, sw, sh);
+          const tmp2 = document.createElement("canvas");
+          tmp2.width = w; tmp2.height = h;
+          const tctx2 = tmp2.getContext("2d");
+          tctx2.imageSmoothingEnabled = false;
+          tctx2.drawImage(tmp, 0, 0, w, h);
+          sourceCanvas = tmp2;
+        }
+
+        ctx.filter = buildCssFilter();
+        ctx.drawImage(sourceCanvas, 0, 0);
+        ctx.filter = "none";
+        ctx.restore();
+
+        if (adj.temperature !== 0 || adj.tint !== 0 || adj.highlights !== 0 || adj.shadows !== 0) {
+          const imgData = ctx.getImageData(0, 0, w, h);
+          applyPixelAdjustments(imgData);
+          ctx.putImageData(imgData, 0, 0);
+        }
+        if (adj.sharpen > 0) applySharpen(ctx, w, h, adj.sharpen);
+        if (adj.vignette > 0) applyVignette(ctx, w, h, adj.vignette);
+        if (adj.borderw > 0) {
+          ctx.save();
+          const bw = document.getElementById("aied-border-color");
+          ctx.strokeStyle = bw ? bw.value : "#7fff6e";
+          ctx.lineWidth = adj.borderw;
+          roundRectPath(ctx, adj.borderw / 2, adj.borderw / 2, w - adj.borderw, h - adj.borderw, Math.max(0, adj.radius - adj.borderw / 2));
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        renderBeforeAfter();
+      }
+
+      function renderBeforeAfter() {
+        if (!showBeforeAfter || !originalDataUrl) { beforeCanvas.style.display = "none"; sliderHandle.style.display = "none"; return; }
+        const w = canvas.width, h = canvas.height;
+        beforeCanvas.width = w; beforeCanvas.height = h;
+        beforeCanvas.style.display = "block";
+        sliderHandle.style.display = "block";
+        const img = new Image();
+        img.onload = () => {
+          beforeCtx.clearRect(0, 0, w, h);
+          beforeCtx.drawImage(img, 0, 0, w, h);
+          applySplit(0.5);
+        };
+        img.src = originalDataUrl;
+      }
+      function applySplit(fraction) {
+        const w = canvas.width;
+        beforeCanvas.style.clipPath = `inset(0 ${(1 - fraction) * 100}% 0 0)`;
+        sliderHandle.style.left = (fraction * 100) + "%";
+      }
+      let dragActive = false;
+      sliderHandle.addEventListener("pointerdown", () => { dragActive = true; });
+      window.addEventListener("pointerup", () => { dragActive = false; });
+      window.addEventListener("pointermove", (e) => {
+        if (!dragActive) return;
+        const rect = canvas.getBoundingClientRect();
+        let fraction = (e.clientX - rect.left) / rect.width;
+        fraction = Math.max(0, Math.min(1, fraction));
+        applySplit(fraction);
+      });
+
+      document.getElementById("aied-toggle-preview").addEventListener("click", (e) => {
+        showBeforeAfter = !showBeforeAfter;
+        e.currentTarget.classList.toggle("active", showBeforeAfter);
+        renderBeforeAfter();
+      });
+
+      /* ---------- history / undo / redo ---------- */
+      function commitToHistory() {
+        const dataUrl = baseCanvas.toDataURL("image/png");
+        history = history.slice(0, historyIndex + 1);
+        history.push(dataUrl);
+        if (history.length > 25) history.shift();
+        historyIndex = history.length - 1;
+      }
+      function commitRenderToBase() {
+        baseCanvas.width = canvas.width;
+        baseCanvas.height = canvas.height;
+        baseCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
+        baseCtx.drawImage(canvas, 0, 0);
+        resetAdjustments();
+        commitToHistory();
+        render();
+      }
+      function loadHistoryState(idx) {
+        const url = history[idx];
+        if (!url) return;
+        const img = new Image();
+        img.onload = () => {
+          baseCanvas.width = img.naturalWidth;
+          baseCanvas.height = img.naturalHeight;
+          baseCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
+          baseCtx.drawImage(img, 0, 0);
+          resetAdjustments();
+          render();
+        };
+        img.src = url;
+      }
+      document.getElementById("aied-undo").addEventListener("click", () => {
+        if (historyIndex > 0) { historyIndex--; loadHistoryState(historyIndex); }
+      });
+      document.getElementById("aied-redo").addEventListener("click", () => {
+        if (historyIndex < history.length - 1) { historyIndex++; loadHistoryState(historyIndex); }
+      });
+      document.getElementById("aied-reset").addEventListener("click", () => {
+        if (!originalDataUrl) return;
+        history = [originalDataUrl];
+        historyIndex = 0;
+        loadHistoryState(0);
+        zoom = 1;
+        stageInner.style.transform = "scale(1)";
+      });
+
+      /* ---------- rotate / flip (structural, commit immediately) ---------- */
+      function transformBase(fn) {
+        const w = baseCanvas.width, h = baseCanvas.height;
+        const swap = fn.swap;
+        const tmp = document.createElement("canvas");
+        tmp.width = swap ? h : w;
+        tmp.height = swap ? w : h;
+        const tctx = tmp.getContext("2d");
+        tctx.save();
+        fn.apply(tctx, w, h);
+        tctx.drawImage(baseCanvas, swap ? -w / 2 : -w / 2, swap ? -h / 2 : -h / 2);
+        tctx.restore();
+        baseCanvas = tmp;
+        baseCtx = baseCanvas.getContext("2d");
+        commitToHistory();
+        render();
+      }
+      document.getElementById("aied-rotate-r").addEventListener("click", () => {
+        transformBase({
+          swap: true,
+          apply(c, w, h) { c.translate(h / 2, w / 2); c.rotate(Math.PI / 2); }
+        });
+      });
+      document.getElementById("aied-rotate-l").addEventListener("click", () => {
+        transformBase({
+          swap: true,
+          apply(c, w, h) { c.translate(h / 2, w / 2); c.rotate(-Math.PI / 2); }
+        });
+      });
+      document.getElementById("aied-flip-h").addEventListener("click", () => {
+        transformBase({
+          swap: false,
+          apply(c, w, h) { c.translate(w / 2, h / 2); c.scale(-1, 1); }
+        });
+      });
+      document.getElementById("aied-flip-v").addEventListener("click", () => {
+        transformBase({
+          swap: false,
+          apply(c, w, h) { c.translate(w / 2, h / 2); c.scale(1, -1); }
+        });
+      });
+
+      /* ---------- zoom ---------- */
+      document.getElementById("aied-zoom-in").addEventListener("click", () => {
+        zoom = Math.min(3, zoom + 0.2);
+        stageInner.style.transform = `scale(${zoom})`;
+      });
+      document.getElementById("aied-zoom-out").addEventListener("click", () => {
+        zoom = Math.max(0.3, zoom - 0.2);
+        stageInner.style.transform = `scale(${zoom})`;
+      });
+
+      /* ---------- resize ---------- */
+      document.getElementById("aied-resize-apply").addEventListener("click", () => {
+        const wEl = document.getElementById("aied-resize-w");
+        const hEl = document.getElementById("aied-resize-h");
+        const nw = parseInt(wEl.value, 10);
+        const nh = parseInt(hEl.value, 10);
+        if (!nw || !nh) return;
+        const tmp = document.createElement("canvas");
+        tmp.width = nw; tmp.height = nh;
+        tmp.getContext("2d").drawImage(baseCanvas, 0, 0, nw, nh);
+        baseCanvas = tmp;
+        baseCtx = baseCanvas.getContext("2d");
+        commitToHistory();
+        render();
+      });
+      document.getElementById("aied-resize-w").addEventListener("input", () => {
+        if (!document.getElementById("aied-resize-lock").checked || !baseCanvas.width) return;
+        const ratio = baseCanvas.height / baseCanvas.width;
+        const w = parseInt(document.getElementById("aied-resize-w").value, 10) || 0;
+        document.getElementById("aied-resize-h").value = Math.round(w * ratio);
+      });
+      document.getElementById("aied-resize-h").addEventListener("input", () => {
+        if (!document.getElementById("aied-resize-lock").checked || !baseCanvas.height) return;
+        const ratio = baseCanvas.width / baseCanvas.height;
+        const h = parseInt(document.getElementById("aied-resize-h").value, 10) || 0;
+        document.getElementById("aied-resize-w").value = Math.round(h * ratio);
+      });
+
+      /* ---------- tool mode buttons ---------- */
+      const toolButtons = {
+        crop: document.getElementById("aied-tool-crop"),
+        draw: document.getElementById("aied-tool-draw"),
+        erase: document.getElementById("aied-tool-erase"),
+        text: document.getElementById("aied-tool-text"),
+        emoji: document.getElementById("aied-tool-emoji")
+      };
+      const cropControls = document.getElementById("aied-crop-controls");
+      const textGroup = document.getElementById("aied-text-group");
+      const emojiGroup = document.getElementById("aied-emoji-group");
+      const brushGroup = document.getElementById("aied-brush-group");
+
+      function setTool(name) {
+        currentTool = currentTool === name ? "none" : name;
+        Object.entries(toolButtons).forEach(([k, btn]) => btn.classList.toggle("active", k === currentTool));
+        cropControls.style.display = currentTool === "crop" ? "flex" : "none";
+        textGroup.style.display = currentTool === "text" ? "block" : "none";
+        emojiGroup.style.display = currentTool === "emoji" ? "block" : "none";
+        brushGroup.style.display = (currentTool === "draw" || currentTool === "erase") ? "block" : "none";
+        cropRect = null;
+        renderCropOverlay();
+      }
+      Object.entries(toolButtons).forEach(([k, btn]) => btn.addEventListener("click", () => setTool(k)));
+
+      /* ---------- crop ---------- */
+      let cropRect = null;
+      let cropDragStart = null;
+      function renderCropOverlay() {
+        render();
+        if (currentTool !== "crop" || !cropRect) return;
+        ctx.save();
+        ctx.strokeStyle = "#7fff6e";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        ctx.strokeRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+        ctx.restore();
+      }
+      function canvasPointFromEvent(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+      }
+      canvas.addEventListener("pointerdown", (e) => {
+        const pt = canvasPointFromEvent(e);
+        if (currentTool === "crop") {
+          cropDragStart = pt;
+          cropRect = { x: pt.x, y: pt.y, w: 0, h: 0 };
+        } else if (currentTool === "draw" || currentTool === "erase") {
+          drawing = true;
+          lastPt = pt;
+        } else if (currentTool === "text" && pendingPlacement) {
+          placeText(pt);
+        } else if (currentTool === "emoji" && pendingPlacement) {
+          placeEmoji(pt);
+        }
+      });
+      canvas.addEventListener("pointermove", (e) => {
+        const pt = canvasPointFromEvent(e);
+        if (currentTool === "crop" && cropDragStart) {
+          cropRect = {
+            x: Math.min(cropDragStart.x, pt.x), y: Math.min(cropDragStart.y, pt.y),
+            w: Math.abs(pt.x - cropDragStart.x), h: Math.abs(pt.y - cropDragStart.y)
+          };
+          renderCropOverlay();
+        } else if (drawing && (currentTool === "draw" || currentTool === "erase")) {
+          ctx.save();
+          ctx.lineJoin = "round"; ctx.lineCap = "round";
+          ctx.lineWidth = parseFloat(document.getElementById("aied-brush-size").value);
+          if (currentTool === "erase") {
+            ctx.globalCompositeOperation = "destination-out";
+          } else {
+            ctx.strokeStyle = document.getElementById("aied-brush-color").value;
+          }
+          ctx.beginPath();
+          ctx.moveTo(lastPt.x, lastPt.y);
+          ctx.lineTo(pt.x, pt.y);
+          ctx.stroke();
+          ctx.restore();
+          lastPt = pt;
+        }
+      });
+      let drawing = false, lastPt = null;
+      window.addEventListener("pointerup", () => {
+        if (drawing) { drawing = false; commitRenderToBase(); }
+        cropDragStart = null;
+      });
+
+      document.getElementById("aied-crop-apply").addEventListener("click", () => {
+        if (!cropRect || cropRect.w < 2 || cropRect.h < 2) return;
+        const tmp = document.createElement("canvas");
+        tmp.width = Math.round(cropRect.w);
+        tmp.height = Math.round(cropRect.h);
+        tmp.getContext("2d").drawImage(baseCanvas, -cropRect.x, -cropRect.y);
+        baseCanvas = tmp;
+        baseCtx = baseCanvas.getContext("2d");
+        cropRect = null;
+        setTool("crop"); // toggles off
+        commitToHistory();
+        render();
+      });
+      document.getElementById("aied-crop-cancel").addEventListener("click", () => {
+        cropRect = null;
+        setTool("crop");
+      });
+
+      /* ---------- text & emoji ---------- */
+      document.getElementById("aied-text-add").addEventListener("click", () => {
+        const val = document.getElementById("aied-text-input").value.trim();
+        if (!val) return;
+        pendingPlacement = {
+          kind: "text", value: val,
+          color: document.getElementById("aied-text-color").value,
+          size: parseInt(document.getElementById("aied-text-size").value, 10)
+        };
+        placeText({ x: baseCanvas.width / 2, y: baseCanvas.height / 2 });
+      });
+      document.querySelectorAll(".aied-emoji-grid button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          pendingPlacement = { kind: "emoji", value: btn.textContent, size: 64 };
+          placeEmoji({ x: baseCanvas.width / 2, y: baseCanvas.height / 2 });
+        });
+      });
+      function placeText(pt) {
+        if (!pendingPlacement) return;
+        ctx.save();
+        ctx.font = `700 ${pendingPlacement.size}px sans-serif`;
+        ctx.fillStyle = pendingPlacement.color;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(pendingPlacement.value, pt.x, pt.y);
+        ctx.restore();
+        pendingPlacement = null;
+        commitRenderToBase();
+      }
+      function placeEmoji(pt) {
+        if (!pendingPlacement) return;
+        ctx.save();
+        ctx.font = `${pendingPlacement.size}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(pendingPlacement.value, pt.x, pt.y);
+        ctx.restore();
+        pendingPlacement = null;
+        commitRenderToBase();
+      }
+
+      /* ---------- export ---------- */
+      const exportFormatSel = document.getElementById("aied-export-format");
+      const exportQuality = document.getElementById("aied-export-quality");
+      const downloadBtn = document.getElementById("aied-download");
+      downloadBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const format = exportFormatSel.value;
+        const mime = format === "png" ? "image/png" : format === "webp" ? "image/webp" : "image/jpeg";
+        const quality = parseInt(exportQuality.value, 10) / 100;
+        let exportCanvas = canvas;
+        if (mime !== "image/png") {
+          // flatten transparency onto white for formats without alpha support in a predictable way
+          exportCanvas = document.createElement("canvas");
+          exportCanvas.width = canvas.width; exportCanvas.height = canvas.height;
+          const ectx = exportCanvas.getContext("2d");
+          ectx.fillStyle = "#ffffff";
+          ectx.fillRect(0, 0, canvas.width, canvas.height);
+          ectx.drawImage(canvas, 0, 0);
+        }
+        exportCanvas.toBlob((blob) => {
+          if (!blob) return;
+          const url = URL.createObjectURL(blob);
+          downloadBtn.href = url;
+          downloadBtn.setAttribute("download", `edited-image.${format === "jpeg" ? "jpg" : format}`);
+          const tempLink = document.createElement("a");
+          tempLink.href = url;
+          tempLink.download = `edited-image.${format === "jpeg" ? "jpg" : format}`;
+          document.body.appendChild(tempLink);
+          tempLink.click();
+          document.body.removeChild(tempLink);
+          setTimeout(() => URL.revokeObjectURL(url), 4000);
+        }, mime, quality);
+      });
+
+      bindDropzone();
+      bindSliders();
+    })();
+
+    /* =====================================================================
+       PREMIUM FEATURE: Mesh Gradient Generator
+       ===================================================================== */
+    (function () {
+      const canvas = document.getElementById("mesh-canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const wrap = document.getElementById("mesh-canvas-wrap");
+      const glassOverlay = document.getElementById("mesh-glass-overlay");
+      const colorList = document.getElementById("mesh-color-list");
+      const presetGrid = document.getElementById("mesh-preset-grid");
+      const cssOutput = document.getElementById("mesh-css-output");
+
+      const toggles = {
+        animated: document.getElementById("mesh-toggle-animated"),
+        noise: document.getElementById("mesh-toggle-noise"),
+        glass: document.getElementById("mesh-toggle-glass"),
+        blob: document.getElementById("mesh-toggle-blob"),
+        glow: document.getElementById("mesh-toggle-glow"),
+        rounded: document.getElementById("mesh-toggle-rounded"),
+        transparent: document.getElementById("mesh-toggle-transparent")
+      };
+      const densitySlider = document.getElementById("mesh-density");
+      const speedSlider = document.getElementById("mesh-speed");
+      const sizeSlider = document.getElementById("mesh-size");
+
+      const PRESETS = {
+        "Aurora": ["#7fff6e", "#3dffd0", "#6e7bff", "#0d0d0f"],
+        "Cyber Green": ["#0d0d0f", "#7fff6e", "#0aff9d", "#1a3d2e"],
+        "Ocean": ["#003973", "#0077be", "#00c6ff", "#001f3f"],
+        "Sunset": ["#ff5f6d", "#ffc371", "#ff9a56", "#3a1c71"],
+        "Purple Neon": ["#8e2de2", "#4a00e0", "#ff00cc", "#160021"],
+        "AI Glow": ["#00f5d4", "#00bbf9", "#9b5de5", "#0d0d0f"],
+        "Dark Glass": ["#232526", "#414345", "#1c1c1c", "#3a3a3a"],
+        "Royal Blue": ["#020024", "#090979", "#00d4ff", "#000428"],
+        "Mint": ["#a8ff78", "#78ffd6", "#0f9b8e", "#00332c"],
+        "Rainbow": ["#ff0000", "#ff9900", "#ffee00", "#33ff00", "#00ffee", "#0033ff", "#9900ff"]
+      };
+
+      let colors = PRESETS["Aurora"].slice();
+      let blobs = [];
+      let animId = null;
+      let t = 0;
+
+      function randColor() {
+        const hue = Math.floor(Math.random() * 360);
+        const sat = 60 + Math.random() * 35;
+        const light = 45 + Math.random() * 25;
+        return `hsl(${hue} ${sat}% ${light}%)`;
+      }
+
+      function renderColorPickers() {
+        colorList.innerHTML = "";
+        colors.forEach((c, idx) => {
+          const chip = document.createElement("div");
+          chip.className = "mesh-color-chip";
+          chip.innerHTML = `<input type="color" value="${toHex(c)}" data-idx="${idx}">` +
+            (colors.length > 2 ? `<button type="button" class="mesh-remove-color" data-idx="${idx}">✕</button>` : "");
+          colorList.appendChild(chip);
+        });
+        colorList.querySelectorAll('input[type="color"]').forEach((inp) => {
+          inp.addEventListener("input", () => {
+            colors[parseInt(inp.dataset.idx, 10)] = inp.value;
+            buildBlobs();
+            renderStatic();
+          });
+        });
+        colorList.querySelectorAll(".mesh-remove-color").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            colors.splice(parseInt(btn.dataset.idx, 10), 1);
+            renderColorPickers();
+            buildBlobs();
+            renderStatic();
+          });
+        });
+      }
+      function toHex(c) {
+        if (c.startsWith("#")) return c;
+        const tmp = document.createElement("canvas").getContext("2d");
+        tmp.fillStyle = c;
+        return tmp.fillStyle;
+      }
+
+      document.getElementById("mesh-add-color").addEventListener("click", () => {
+        if (colors.length >= 8) return;
+        colors.push(randColor());
+        renderColorPickers();
+        buildBlobs();
+        renderStatic();
+      });
+
+      function renderPresets() {
+        presetGrid.innerHTML = "";
+        Object.entries(PRESETS).forEach(([name, palette]) => {
+          const sw = document.createElement("div");
+          sw.className = "mesh-preset-swatch";
+          sw.title = name;
+          sw.style.background = `linear-gradient(135deg, ${palette.join(",")})`;
+          sw.addEventListener("click", () => {
+            colors = palette.slice(0, 8);
+            renderColorPickers();
+            buildBlobs();
+            renderStatic();
+          });
+          presetGrid.appendChild(sw);
+        });
+      }
+
+      function buildBlobs() {
+        const density = parseInt(densitySlider.value, 10);
+        const sizePct = parseInt(sizeSlider.value, 10) / 100;
+        const w = canvas.width, h = canvas.height;
+        blobs = [];
+        for (let i = 0; i < density; i++) {
+          const color = colors[i % colors.length];
+          blobs.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            r: (Math.min(w, h) * (0.28 + Math.random() * 0.22)) * sizePct,
+            color,
+            vx: (Math.random() - 0.5) * 0.6,
+            vy: (Math.random() - 0.5) * 0.6,
+            phase: Math.random() * Math.PI * 2
+          });
+        }
+      }
+
+      function drawFrame() {
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        if (!toggles.transparent.checked) {
+          ctx.fillStyle = "#0d0d0f";
+          ctx.fillRect(0, 0, w, h);
+        }
+        const useBlob = toggles.blob.checked;
+        blobs.forEach((b) => {
+          const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+          grad.addColorStop(0, b.color);
+          grad.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.save();
+          ctx.globalCompositeOperation = "lighter";
+          if (useBlob) ctx.filter = "blur(18px)";
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.filter = "none";
+          ctx.restore();
+        });
+
+        if (toggles.glow.checked) {
+          ctx.save();
+          ctx.globalCompositeOperation = "screen";
+          ctx.filter = "blur(40px)";
+          blobs.forEach((b) => {
+            ctx.fillStyle = b.color;
+            ctx.globalAlpha = 0.35;
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.r * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          ctx.restore();
+        }
+
+        if (toggles.noise.checked) drawNoise(w, h);
+
+        wrap.classList.toggle("rounded", toggles.rounded.checked);
+        glassOverlay.classList.toggle("on", toggles.glass.checked);
+
+        updateCssOutput();
+      }
+
+      let noiseCache = null;
+      function drawNoise(w, h) {
+        if (!noiseCache || noiseCache.width !== w || noiseCache.height !== h) {
+          const off = document.createElement("canvas");
+          off.width = w; off.height = h;
+          const octx = off.getContext("2d");
+          const imgData = octx.createImageData(w, h);
+          for (let i = 0; i < imgData.data.length; i += 4) {
+            const v = Math.floor(Math.random() * 255);
+            imgData.data[i] = v; imgData.data[i + 1] = v; imgData.data[i + 2] = v; imgData.data[i + 3] = 18;
+          }
+          octx.putImageData(imgData, 0, 0);
+          noiseCache = off;
+        }
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        ctx.drawImage(noiseCache, 0, 0);
+        ctx.restore();
+      }
+
+      function updateCssOutput() {
+        const gradients = blobs.map((b) => {
+          const px = ((b.x / canvas.width) * 100).toFixed(1);
+          const py = ((b.y / canvas.height) * 100).toFixed(1);
+          return `radial-gradient(circle at ${px}% ${py}%, ${b.color} 0%, transparent ${Math.round((b.r / canvas.width) * 140)}%)`;
+        });
+        const css = `background-color: #0d0d0f;\nbackground-image:\n  ${gradients.join(",\n  ")};`;
+        cssOutput.value = css;
+      }
+
+      function animate() {
+        const speed = parseInt(speedSlider.value, 10) / 50;
+        blobs.forEach((b) => {
+          b.x += b.vx * speed;
+          b.y += b.vy * speed;
+          if (b.x < 0 || b.x > canvas.width) b.vx *= -1;
+          if (b.y < 0 || b.y > canvas.height) b.vy *= -1;
+        });
+        drawFrame();
+        animId = requestAnimationFrame(animate);
+      }
+      function renderStatic() {
+        if (animId) return; // animation loop already redraws continuously
+        drawFrame();
+      }
+      function startOrStopAnimation() {
+        if (toggles.animated.checked) {
+          if (!animId) animId = requestAnimationFrame(animate);
+        } else if (animId) {
+          cancelAnimationFrame(animId);
+          animId = null;
+          renderStatic();
+        }
+      }
+
+      Object.values(toggles).forEach((el) => el.addEventListener("change", () => {
+        if (el === toggles.animated) { startOrStopAnimation(); return; }
+        renderStatic();
+      }));
+      [densitySlider, sizeSlider].forEach((el) => el.addEventListener("input", () => {
+        document.getElementById("mesh-v-" + (el === densitySlider ? "density" : "size")).textContent = el.value;
+        buildBlobs();
+        renderStatic();
+      }));
+      speedSlider.addEventListener("input", () => {
+        document.getElementById("mesh-v-speed").textContent = speedSlider.value;
+      });
+
+      document.getElementById("mesh-random-colors").addEventListener("click", () => {
+        colors = colors.map(() => randColor());
+        renderColorPickers();
+        buildBlobs();
+        renderStatic();
+      });
+      document.getElementById("mesh-random-layout").addEventListener("click", () => {
+        buildBlobs();
+        renderStatic();
+      });
+
+      function triggerBlobDownload(blob, filename, linkEl) {
+        const url = URL.createObjectURL(blob);
+        if (linkEl) linkEl.href = url;
+        const tempLink = document.createElement("a");
+        tempLink.href = url;
+        tempLink.download = filename;
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        document.body.removeChild(tempLink);
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+      }
+
+      document.getElementById("mesh-download-png").addEventListener("click", (e) => {
+        e.preventDefault();
+        const linkEl = e.currentTarget;
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          triggerBlobDownload(blob, "mesh-gradient.png", linkEl);
+        }, "image/png");
+      });
+
+      document.getElementById("mesh-download-svg").addEventListener("click", (e) => {
+        e.preventDefault();
+        const svg = buildSvgString();
+        const blob = new Blob([svg], { type: "image/svg+xml" });
+        triggerBlobDownload(blob, "mesh-gradient.svg", e.currentTarget);
+      });
+
+      function buildSvgString() {
+        const w = canvas.width, h = canvas.height;
+        let defs = "";
+        let circles = "";
+        blobs.forEach((b, i) => {
+          defs += `<radialGradient id="g${i}" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="${b.color}" stop-opacity="1"/>
+            <stop offset="100%" stop-color="${b.color}" stop-opacity="0"/>
+          </radialGradient>`;
+          circles += `<circle cx="${b.x.toFixed(1)}" cy="${b.y.toFixed(1)}" r="${b.r.toFixed(1)}" fill="url(#g${i})" style="mix-blend-mode:screen"/>`;
+        });
+        const bg = toggles.transparent.checked ? "" : `<rect width="100%" height="100%" fill="#0d0d0f"/>`;
+        return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+          <defs>${defs}</defs>
+          ${bg}
+          ${circles}
+        </svg>`;
+      }
+
+      document.getElementById("mesh-copy-css").addEventListener("click", () => {
+        cssOutput.select();
+        navigator.clipboard && navigator.clipboard.writeText(cssOutput.value).catch(() => {
+          document.execCommand("copy");
+        });
+      });
+
+      renderColorPickers();
+      renderPresets();
+      buildBlobs();
+      renderStatic();
+    })();
+  </script>
+
 </body>
 </html>
