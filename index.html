@@ -10907,24 +10907,30 @@
       }
 
       // ---------- Gemini API ----------
-      function buildContentsFromMessages(messages) {
-        return messages.map(function (m) {
-          var parts = [];
-          (m.filesData || []).forEach(function (f) {
-            if (f.kind === "image" || f.kind === "pdf") {
-              parts.push({ inlineData: { mimeType: f.mimeType, data: f.data } });
-            } else if (f.text) {
-              parts.push({ text: "Attached file \"" + f.name + "\":\n\n" + f.text });
-            }
-          });
-          if (m.text) parts.push({ text: m.text });
-          if (!parts.length) parts.push({ text: "" });
-          return { role: m.role === "user" ? "user" : "model", parts: parts };
+
+      // Splits the full message list into the { message, files, history } shape:
+      // "history" is every prior turn (text-only — attachments from earlier turns
+      // aren't re-sent), and "message"/"files" are the newest (current) turn.
+      function buildChatRequestPayload(messages) {
+        var last = messages[messages.length - 1] || { text: "", filesData: [] };
+        var history = messages.slice(0, -1).map(function (m) {
+          return { role: m.role === "user" ? "user" : "model", text: m.text || "" };
         });
+        var files = (last.filesData || []).map(function (f) {
+          return {
+            name: f.name,
+            kind: f.kind,
+            mimeType: f.mimeType,
+            data: f.data || null,
+            text: f.text || null
+          };
+        });
+        return { message: last.text || "", files: files, history: history };
       }
 
       function streamGemini(messages, onChunk) {
         var tier = getTier();
+        var payload = buildChatRequestPayload(messages);
 
         // Note: deliberately NOT passing an AbortController signal into fetch's
         // init object here. Some WebViews / in-page preview consoles wrap
@@ -10938,7 +10944,9 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            contents: buildContentsFromMessages(messages),
+            message: payload.message,
+            files: payload.files,
+            history: payload.history,
             tier: tier,
             // Real local date/time/timezone, read fresh from the browser on every
             // request — the backend should use this (never a hardcoded/guessed date)
@@ -10958,46 +10966,25 @@
               data = rawText ? JSON.parse(rawText) : {};
             } catch (parseErr) {
               data = {
-                error: {
-                  message: "Server returned a non-JSON response (HTTP " + response.status + "). " +
-                    "This usually means /api/chat isn't deployed as a Vercel Serverless Function — " +
-                    "check the Vercel deployment's Functions tab. Raw response: " +
-                    rawText.slice(0, 200)
-                }
+                success: false,
+                error: "Server returned a non-JSON response (HTTP " + response.status + "). " +
+                  "This usually means /api/chat isn't deployed as a Vercel Serverless Function — " +
+                  "check the Vercel deployment's Functions tab. Raw response: " +
+                  rawText.slice(0, 200)
               };
             }
 
-            if (!response.ok || data.error) {
+            if (!response.ok || data.success === false) {
               console.error("AI Chat error response:", data);
               showServiceBanner(true);
-              var errMessage = (data && data.error && data.error.message) ||
-                ("Unable to contact AI (HTTP " + response.status + "). Please try again.");
+              var errMessage = data.error || ("Unable to contact AI (HTTP " + response.status + "). Please try again.");
               throw new Error(errMessage);
             }
             showServiceBanner(false);
 
             console.log("Gemini Response:", data);
 
-            // Check for safety/policy blocks, which return 200 OK with no candidates.
-            if (data.promptFeedback && data.promptFeedback.blockReason) {
-              throw new Error("Response blocked by Gemini safety filters (" + data.promptFeedback.blockReason + ").");
-            }
-
-            // Safe extraction of the reply text per the current Gemini REST API shape.
-            var text = "";
-            if (data.candidates && data.candidates.length) {
-              text = data.candidates
-                .flatMap(function (c) { return (c.content && c.content.parts) || []; })
-                .map(function (p) { return p.text || ""; })
-                .join("");
-            }
-            if (!text) {
-              text = data.text || "";
-            }
-            if (!text) {
-              text = "Sorry, no response was returned.";
-            }
-
+            var text = data.response || "Sorry, no response was returned.";
             onChunk(text);
           });
         });
