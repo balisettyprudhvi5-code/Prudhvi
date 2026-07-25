@@ -2944,8 +2944,8 @@
             <div class="aichat-modal-divider"></div>
             <label for="aichat-model-select">Model</label>
             <select id="aichat-model-select" class="aichat-select">
-              <option value="flash">Gemini 2.5 Flash (recommended)</option>
-              <option value="lite">Gemini 2.5 Flash Lite (fastest / automatic fallback)</option>
+              <option value="flash">Gemini 3.6 Flash (recommended)</option>
+              <option value="lite">Gemini 3.5 Flash Lite (fastest / automatic fallback)</option>
             </select>
           </div>
         </div>
@@ -10542,8 +10542,8 @@
       }
 
       // ---------- Model tier (sent to /api/chat; fallback chain lives server-side) ----------
-      // Only current Gemini models are supported: "flash" -> gemini-2.5-flash (primary),
-      // "lite" -> gemini-2.5-flash-lite (fastest / automatic fallback if primary is unavailable).
+      // Only current Gemini models are supported: "flash" -> gemini-3.6-flash (primary),
+      // "lite" -> gemini-3.5-flash-lite (fastest / automatic fallback if primary is unavailable).
       // Deprecated tiers (e.g. "pro") are intentionally not selectable here.
       function getTier() {
         var s = loadSettings();
@@ -11130,7 +11130,11 @@
         }).catch(function (err) {
           if (cancelToken.cancelled) return; // user already stopped generation; discard late error
           console.error("AI Chat Assistant generation error:", err);
-          finalizeErrorMessage(typing, "Unable to contact AI. Please try again.");
+          // Debug mode: surface the exact backend/Gemini error text (from /api/chat's
+          // JSON error body) instead of a vague generic message, so failures are
+          // diagnosable straight from the chat UI without digging through Vercel logs.
+          var exactMsg = (err && err.message) ? err.message : "Unable to contact AI. Please try again.";
+          finalizeErrorMessage(typing, exactMsg);
         });
       }
 
