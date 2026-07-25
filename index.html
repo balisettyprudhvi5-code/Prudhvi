@@ -2954,10 +2954,10 @@
             <div class="aichat-modal-divider"></div>
             <label for="aichat-model-select">Model</label>
             <select id="aichat-model-select" class="aichat-select">
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash (recommended)</option>
-              <option value="gemini-2.5-pro">Gemini 2.5 Pro (advanced reasoning)</option>
-              <option value="gemini-3.5-flash">Gemini 3.5 Flash (latest, fast)</option>
-              <option value="gemini-3.6-flash">Gemini 3.6 Flash (latest, agentic)</option>
+              <option value="gemini-3.6-flash">Gemini 3.6 Flash (latest, recommended)</option>
+              <option value="gemini-3.5-flash">Gemini 3.5 Flash (frontier reasoning)</option>
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash (fast, low-latency)</option>
+              <option value="gemini-2.5-pro">Gemini 2.5 Pro (deep reasoning)</option>
             </select>
           </div>
         </div>
@@ -10561,7 +10561,7 @@
       }
       function getModel() {
         var s = loadSettings();
-        return s.model || "gemini-2.5-flash";
+        return s.model || "gemini-3.6-flash";
       }
 
       function refreshKeyBanner() {
