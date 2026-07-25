@@ -2130,6 +2130,8 @@
     .aichat-messages {
       flex: 1;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
       padding: 1.2rem;
       display: flex;
       flex-direction: column;
@@ -2213,7 +2215,8 @@
     .aichat-file-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .aichat-file-row { display: flex; flex-wrap: wrap; gap: .3rem; }
     .aichat-msg.user .aichat-file-row { justify-content: flex-end; }
-    .aichat-typing { display: inline-flex; gap: 4px; padding: .3rem 0; }
+    .aichat-typing-label { font-size: .82rem; color: var(--muted); margin-right: .5rem; vertical-align: middle; }
+    .aichat-typing { display: inline-flex; gap: 4px; padding: .3rem 0; vertical-align: middle; }
     .aichat-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: aichatBounce 1.2s infinite ease-in-out; }
     .aichat-typing span:nth-child(2) { animation-delay: .15s; }
     .aichat-typing span:nth-child(3) { animation-delay: .3s; }
@@ -2941,9 +2944,8 @@
             <div class="aichat-modal-divider"></div>
             <label for="aichat-model-select">Model</label>
             <select id="aichat-model-select" class="aichat-select">
-              <option value="lite">Flash Lite (fastest, recommended)</option>
-              <option value="flash">Flash (balanced speed &amp; intelligence)</option>
-              <option value="pro">Pro (deepest reasoning)</option>
+              <option value="flash">Gemini 2.5 Flash (recommended)</option>
+              <option value="lite">Gemini 2.5 Flash Lite (fastest / automatic fallback)</option>
             </select>
           </div>
         </div>
@@ -10522,7 +10524,10 @@
         messages: [],        // {role:'user'|'model', text, files:[{name,kind,mimeType}], error:false}
         pendingFiles: [],     // {id,name,size,kind,mimeType,data|text}
         isGenerating: false,
-        abortController: null
+        currentCancelToken: null,
+        activeTyping: null,
+        revealCancelled: false,
+        revealInProgress: false
       };
 
       // ---------- Settings persistence ----------
@@ -10537,11 +10542,14 @@
       }
 
       // ---------- Model tier (sent to /api/chat; fallback chain lives server-side) ----------
+      // Only current Gemini models are supported: "flash" -> gemini-2.5-flash (primary),
+      // "lite" -> gemini-2.5-flash-lite (fastest / automatic fallback if primary is unavailable).
+      // Deprecated tiers (e.g. "pro") are intentionally not selectable here.
       function getTier() {
         var s = loadSettings();
         var t = s.tier;
-        if (t === "lite" || t === "flash" || t === "pro") return t;
-        return "lite";
+        if (t === "lite" || t === "flash") return t;
+        return "flash";
       }
 
       function showServiceBanner(show) {
@@ -10754,7 +10762,7 @@
         col.className = "aichat-msg-col";
         var bubble = document.createElement("div");
         bubble.className = "aichat-bubble";
-        bubble.innerHTML = '<span class="aichat-typing"><span></span><span></span><span></span></span>';
+        bubble.innerHTML = '<span class="aichat-typing-label">Smart Compress AI is thinking</span><span class="aichat-typing"><span></span><span></span><span></span></span>';
         col.appendChild(bubble);
 
         wrap.appendChild(avatar);
@@ -10876,6 +10884,28 @@
         });
       });
 
+      // ---------- Real date & time (never hardcoded — read fresh on every request) ----------
+      function getClientTimeContext() {
+        var now = new Date();
+        var tz = "UTC";
+        try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch (e) { /* fallback */ }
+        var dateStr, timeStr;
+        try {
+          dateStr = now.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+          timeStr = now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        } catch (e) {
+          dateStr = now.toDateString();
+          timeStr = now.toTimeString();
+        }
+        return {
+          iso: now.toISOString(),
+          date: dateStr,
+          time: timeStr,
+          timezone: tz,
+          utcOffsetMinutes: -now.getTimezoneOffset()
+        };
+      }
+
       // ---------- Gemini API ----------
       function buildContentsFromMessages(messages) {
         return messages.map(function (m) {
@@ -10893,17 +10923,29 @@
         });
       }
 
-      function streamGemini(messages, onChunk, signal) {
+      function streamGemini(messages, onChunk) {
         var tier = getTier();
 
+        // Note: deliberately NOT passing an AbortController signal into fetch's
+        // init object here. Some WebViews / in-page preview consoles wrap
+        // window.fetch to relay request details via postMessage for logging,
+        // and AbortSignal objects cannot be structured-cloned — that throws
+        // "DataCloneError: ...AbortSignal object could not be cloned" and was
+        // being mistaken for a real generation failure. Stopping is instead
+        // handled as a soft cancel (see runGeneration / stopBtn below): the
+        // in-flight request is left to finish, but its result is discarded.
         return fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: buildContentsFromMessages(messages),
-            tier: tier
-          }),
-          signal: signal
+            tier: tier,
+            // Real local date/time/timezone, read fresh from the browser on every
+            // request — the backend should use this (never a hardcoded/guessed date)
+            // and should trigger a live web search for anything time-sensitive
+            // (news, weather, scores, prices, "today"/"current" questions, etc).
+            clientTime: getClientTimeContext()
+          })
         }).then(function (response) {
           // Read as raw text first: if /api/chat isn't deployed (e.g. Vercel
           // returns its own 404/500 HTML page), response.json() would throw
@@ -10961,16 +11003,50 @@
         });
       }
 
-      // Runs streamGemini with one automatic retry on failure (skips retry
-      // for user-initiated aborts). Keeps the UI's loading state so the
-      // retry is invisible except for a brief label change.
-      function streamGeminiWithRetry(messages, onChunk, signal, onRetrying) {
-        return streamGemini(messages, onChunk, signal).catch(function (err) {
-          if (err && err.name === "AbortError") throw err;
+      // Runs streamGemini with one automatic retry on failure. Keeps the UI's
+      // loading state so the retry is invisible except for a brief label change.
+      function streamGeminiWithRetry(messages, onChunk, onRetrying) {
+        return streamGemini(messages, onChunk).catch(function (err) {
           if (typeof onRetrying === "function") onRetrying();
           return new Promise(function (resolve) { setTimeout(resolve, 800); })
-            .then(function () { return streamGemini(messages, onChunk, signal); });
+            .then(function () { return streamGemini(messages, onChunk); });
         });
+      }
+
+      // ---------- Word-by-word reveal ----------
+      // /api/chat currently returns one complete JSON payload rather than a
+      // token stream, so we simulate ChatGPT-style word-by-word streaming on
+      // the client once the full reply has arrived. This keeps the UI feeling
+      // instant without requiring the response to be re-rendered all at once.
+      // If /api/chat is later upgraded to Server-Sent Events, streamGemini's
+      // onChunk callback can be invoked multiple times and this still works
+      // unchanged (it will just reveal each incoming chunk immediately).
+      function revealTextProgressively(bubbleEl, fullText, isCancelled, onDone) {
+        var words = fullText.split(/(\s+)/); // keep whitespace tokens so spacing is preserved
+        var i = 0;
+        var shown = "";
+        function step() {
+          if (isCancelled()) {
+            bubbleEl.innerHTML = renderMarkdown(fullText);
+            attachCodeCopyButtons(bubbleEl);
+            onDone();
+            return;
+          }
+          // Reveal a few words per tick for long replies so it never feels sluggish.
+          var wordsPerTick = fullText.length > 1200 ? 4 : 2;
+          for (var n = 0; n < wordsPerTick && i < words.length; n++, i++) {
+            shown += words[i];
+          }
+          bubbleEl.innerHTML = renderMarkdown(shown);
+          attachCodeCopyButtons(bubbleEl);
+          scrollToBottomIfNear();
+          if (i < words.length) {
+            setTimeout(step, 18);
+          } else {
+            onDone();
+          }
+        }
+        step();
       }
 
       // ---------- Send / generate flow ----------
@@ -11015,38 +11091,46 @@
         var typing = renderTypingIndicator();
         var accumulated = "";
         var firstChunkReceived = false;
-        var controller = new AbortController();
-        state.abortController = controller;
+        // Soft-cancel token: Stop no longer calls AbortController.abort() on the
+        // fetch itself (see streamGemini for why) — instead it flips this flag,
+        // and every callback below checks it before touching the UI so a late
+        // network response is simply ignored after Stop has been pressed.
+        var cancelToken = { cancelled: false };
+        state.currentCancelToken = cancelToken;
+        state.revealCancelled = false;
+        state.activeTyping = typing;
 
         var historyForRequest = state.messages.filter(function (m) { return !m.error; });
 
         streamGeminiWithRetry(historyForRequest, function (chunk, finishReason) {
           if (chunk) {
             accumulated += chunk;
-            if (!firstChunkReceived) {
-              firstChunkReceived = true;
-              typing.bubble.innerHTML = "";
-            }
-            typing.bubble.innerHTML = renderMarkdown(accumulated);
-            attachCodeCopyButtons(typing.bubble);
-            scrollToBottomIfNear();
+            firstChunkReceived = true;
           }
           if (finishReason) {
             accumulated += "\n\n_[Response stopped: " + finishReason + "]_";
           }
-        }, controller.signal, function onRetrying() {
-          if (!firstChunkReceived) {
+        }, function onRetrying() {
+          if (!firstChunkReceived && !cancelToken.cancelled) {
             typing.bubble.innerHTML = '<span class="aichat-typing-retry">Connection hiccup — retrying…</span>';
           }
         }).then(function () {
-          finalizeAIMessage(typing, accumulated, false);
+          if (cancelToken.cancelled) return; // user already stopped generation; discard late result
+          state.revealInProgress = true;
+          typing.bubble.innerHTML = "";
+          revealTextProgressively(
+            typing.bubble,
+            accumulated,
+            function isCancelled() { return state.revealCancelled; },
+            function onDone() {
+              state.revealInProgress = false;
+              finalizeAIMessage(typing, accumulated, false);
+            }
+          );
         }).catch(function (err) {
-          if (err && err.name === "AbortError") {
-            finalizeAIMessage(typing, accumulated || "_Generation stopped._", false);
-          } else {
-            var errMsg = (err && err.message) ? err.message : "Something went wrong contacting Gemini.";
-            finalizeErrorMessage(typing, errMsg);
-          }
+          if (cancelToken.cancelled) return; // user already stopped generation; discard late error
+          console.error("AI Chat Assistant generation error:", err);
+          finalizeErrorMessage(typing, "Unable to contact AI. Please try again.");
         });
       }
 
@@ -11056,7 +11140,8 @@
         renderMessage("ai", text, [], { isError: isError });
         persistHistory();
         setGenerating(false);
-        state.abortController = null;
+        state.currentCancelToken = null;
+        state.activeTyping = null;
       }
 
       function finalizeErrorMessage(typingRefs, errMsg) {
@@ -11066,7 +11151,8 @@
         renderMessage("ai", displayText, [], { isError: true });
         persistHistory();
         setGenerating(false);
-        state.abortController = null;
+        state.currentCancelToken = null;
+        state.activeTyping = null;
       }
 
       function regenerateFromMessage(wrapEl) {
@@ -11096,7 +11182,18 @@
       }
 
       stopBtn.addEventListener("click", function () {
-        if (state.abortController) state.abortController.abort();
+        if (!state.isGenerating) return;
+        state.revealCancelled = true; // instantly finish any in-progress word-by-word reveal
+        if (state.currentCancelToken) state.currentCancelToken.cancelled = true;
+        // If the reveal hasn't started yet (still waiting on the network response
+        // or mid-retry), there's nothing for revealTextProgressively to cancel —
+        // finalize now so the user isn't stuck waiting. If a reveal IS already
+        // animating, leave it alone; it finalizes itself on its next tick because
+        // revealCancelled is now true. Either way, any late network response is
+        // discarded because currentCancelToken is already marked cancelled above.
+        if (state.activeTyping && !state.revealInProgress) {
+          finalizeAIMessage(state.activeTyping, "_Generation stopped._", false);
+        }
       });
 
       sendBtn.addEventListener("click", function () { sendMessage(); });
@@ -11120,7 +11217,10 @@
 
       // ---------- New Chat / Clear Chat ----------
       function resetChat() {
-        if (state.abortController) state.abortController.abort();
+        state.revealCancelled = true;
+        if (state.currentCancelToken) state.currentCancelToken.cancelled = true;
+        state.currentCancelToken = null;
+        state.activeTyping = null;
         setGenerating(false);
         state.messages = [];
         state.pendingFiles = [];
