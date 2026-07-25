@@ -74,6 +74,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js" defer></script>
 
   <script type="application/ld+json">
   {
@@ -1877,7 +1879,6 @@
     }
     .pro-tool-badge.is-live { color: var(--accent); border-color: var(--accent); background: rgba(127,255,110,.08); }
     .pro-tool-card.is-soon { opacity: .82; }
-    .pro-tool-mesh-wrap { grid-column: 1 / -1; }
     .tool-workspace-standalone {
       background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
       padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,.4); display: block; animation: fadeUp .4s ease both;
@@ -1915,6 +1916,68 @@
     .pdfprotect-strength-bar span { display: block; height: 100%; width: 0%; border-radius: 99px; transition: width .25s ease, background .25s ease; }
     .pdfprotect-strength-label { font-family: var(--mono); font-size: .72rem; white-space: nowrap; }
     @media (max-width: 600px) { .pro-tools-grid { grid-template-columns: 1fr; } }
+
+    /* ================= Premium: Pro Tools card→panel navigation (additive) ================= */
+    .pro-tool-card.is-clickable { cursor: pointer; }
+    .pro-tool-card.is-clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .pro-tools-grid.pt-hidden { display: none; }
+    .pro-tool-panel { display: none; }
+    .pro-tool-panel.is-open { display: block; animation: fadeUp .35s ease both; }
+    .pro-tool-back-btn {
+      display: inline-flex; align-items: center; gap: .5rem; background: transparent; border: 1px solid var(--border);
+      color: var(--muted); font-family: var(--sans); font-size: .85rem; font-weight: 600; padding: .55rem 1rem;
+      border-radius: var(--radius-sm); cursor: pointer; margin-bottom: 1.4rem; transition: all .2s ease;
+    }
+    .pro-tool-back-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+    .pro-tool-back-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(127,255,110,.06); }
+
+    /* ================= Premium: Meme Generator (additive, self-contained) ================= */
+    .meme-layout { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.6rem; align-items: start; }
+    @media (max-width: 900px) { .meme-layout { grid-template-columns: 1fr; } }
+    .meme-preview-col { display: flex; flex-direction: column; gap: 1rem; }
+    .meme-canvas-wrap {
+      position: relative; width: 100%; border-radius: var(--radius-sm); overflow: hidden;
+      background: repeating-conic-gradient(#20202a 0% 25%, #17171b 0% 50%) 50% / 16px 16px;
+      border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; min-height: 220px;
+    }
+    #meme-canvas { display: block; width: 100%; height: auto; touch-action: none; }
+    .meme-canvas-wrap.has-image #meme-canvas { cursor: default; }
+    .meme-canvas-wrap.is-dragging-move #meme-canvas { cursor: grabbing; }
+    .meme-empty-state { padding: 2.5rem 1rem; text-align: center; width: 100%; }
+    .meme-quick-actions { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .meme-layers-panel { display: flex; flex-direction: column; gap: .5rem; max-height: 190px; overflow-y: auto; padding-right: .2rem; }
+    .meme-layer-row {
+      display: flex; align-items: center; gap: .6rem; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: .5rem .7rem; cursor: pointer; transition: border-color .2s ease;
+    }
+    .meme-layer-row:hover { border-color: var(--muted); }
+    .meme-layer-row.active { border-color: var(--accent); background: rgba(127,255,110,.06); }
+    .meme-layer-row span.meme-layer-text { flex: 1; font-size: .82rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .meme-layer-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; line-height: 1; padding: .1rem .3rem; }
+    .meme-layer-del:hover { color: var(--danger); }
+    .meme-empty-layers { font-size: .8rem; color: var(--muted); text-align: center; padding: .6rem; }
+    .meme-controls-col { display: flex; flex-direction: column; gap: 1rem; }
+    .meme-controls-col fieldset { border: none; display: flex; flex-direction: column; gap: 1rem; }
+    .meme-controls-col fieldset:disabled { opacity: .45; pointer-events: none; }
+    .meme-toggle-row { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .meme-tbtn {
+      background: var(--bg); border: 1px solid var(--border); color: var(--text); min-width: 38px; height: 38px; padding: 0 .7rem;
+      border-radius: var(--radius-sm); cursor: pointer; font-size: .9rem; display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+      transition: all .2s ease; font-family: var(--sans);
+    }
+    .meme-tbtn:hover { border-color: var(--accent); color: var(--accent); }
+    .meme-tbtn.active { border-color: var(--accent); color: var(--accent); background: rgba(127,255,110,.08); }
+    .meme-tbtn.meme-bold { font-weight: 800; }
+    .meme-tbtn.meme-italic { font-style: italic; }
+    .meme-color-row { display: flex; align-items: center; gap: .8rem; }
+    .meme-color-row label { flex: 1; }
+    .meme-color-row input[type="color"] {
+      width: 40px; height: 32px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); cursor: pointer; padding: 2px;
+    }
+    .meme-text-input { width: 100%; background: var(--bg); border: 1px solid var(--border); padding: .6rem .75rem; color: var(--text);
+      font-family: var(--sans); font-size: .92rem; border-radius: var(--radius-sm); outline: none; resize: vertical; min-height: 44px; }
+    .meme-text-input:focus { border-color: var(--accent2); }
+    @media (max-width: 640px) { .meme-layers-panel { max-height: 140px; } }
 
     /* ================= Premium: AI Image Cleaner (additive, self-contained) ================= */
     .pro-tool-badge.is-beta { color: var(--accent2); border-color: var(--accent2); background: rgba(61,255,208,.08); }
@@ -2019,6 +2082,222 @@
     .btn-back-tools svg { width: 15px; height: 15px; }
     @media (max-width: 640px) {
       .btn-back-tools { width: 100%; justify-content: center; }
+    }
+
+    /* ================= Premium: AI Chat Assistant (additive, self-contained) ================= */
+    .aichat-app {
+      display: flex;
+      flex-direction: column;
+      height: 72vh;
+      min-height: 480px;
+      max-height: 780px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .aichat-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      padding: .7rem .9rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .aichat-tbtn { font-size: .78rem; padding: .5rem .85rem; display: inline-flex; align-items: center; gap: .35rem; }
+    .aichat-tbtn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+    .aichat-key-banner {
+      background: rgba(255,92,92,.08);
+      color: #ff9a9a;
+      border-bottom: 1px solid rgba(255,92,92,.25);
+      padding: .7rem 1rem;
+      font-size: .82rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    .aichat-key-banner button {
+      margin-left: .6rem;
+      background: transparent;
+      border: 1px solid rgba(255,92,92,.4);
+      color: #ff9a9a;
+      padding: .3rem .7rem;
+      border-radius: 6px;
+      font-size: .75rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .aichat-key-banner button:hover { background: rgba(255,92,92,.12); }
+    .aichat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      scroll-behavior: smooth;
+    }
+    .aichat-empty { margin: auto; text-align: center; color: var(--muted); padding: 1.5rem; max-width: 460px; }
+    .aichat-empty .aichat-empty-icon {
+      width: 54px; height: 54px; margin: 0 auto 1rem; border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: grid; place-items: center;
+    }
+    .aichat-empty .aichat-empty-icon svg { width: 28px; height: 28px; stroke: #0d0d0f; fill: none; }
+    .aichat-empty h4 { color: var(--text); margin-bottom: .5rem; font-size: 1.08rem; }
+    .aichat-empty p { font-size: .85rem; line-height: 1.6; }
+    .aichat-suggest-row { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-top: 1.1rem; }
+    .aichat-suggest-chip {
+      background: var(--surface2); border: 1px solid var(--border); padding: .5rem .85rem;
+      border-radius: 20px; font-size: .78rem; cursor: pointer; color: var(--text); transition: all .15s;
+      font-family: var(--sans);
+    }
+    .aichat-suggest-chip:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+    .aichat-msg { display: flex; gap: .6rem; align-items: flex-start; }
+    .aichat-msg.user { flex-direction: row-reverse; }
+    .aichat-avatar {
+      width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+      flex-shrink: 0; font-size: .85rem; font-weight: 700; margin-top: 2px;
+    }
+    .aichat-avatar.ai { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0d0d0f; }
+    .aichat-avatar.ai svg { width: 16px; height: 16px; stroke: #0d0d0f; fill: none; }
+    .aichat-avatar.user { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+    .aichat-msg-col { display: flex; flex-direction: column; max-width: 78%; }
+    .aichat-msg.user .aichat-msg-col { align-items: flex-end; }
+    .aichat-bubble {
+      padding: .75rem 1rem; border-radius: var(--radius-sm); font-size: .89rem; line-height: 1.65;
+      word-wrap: break-word; overflow-wrap: anywhere;
+    }
+    .aichat-msg.user .aichat-bubble { background: var(--accent); color: #0d0d0f; border-top-right-radius: 3px; }
+    .aichat-msg.ai .aichat-bubble { background: var(--surface2); border: 1px solid var(--border); border-top-left-radius: 3px; }
+    .aichat-msg.ai .aichat-bubble.is-error { border-color: rgba(255,92,92,.4); color: #ff9a9a; }
+    .aichat-bubble p { margin-bottom: .55rem; }
+    .aichat-bubble p:last-child { margin-bottom: 0; }
+    .aichat-bubble ul, .aichat-bubble ol { margin: .3rem 0 .6rem 1.3rem; }
+    .aichat-bubble li { margin-bottom: .25rem; }
+    .aichat-bubble a { color: var(--accent2); }
+    .aichat-bubble h1, .aichat-bubble h2, .aichat-bubble h3 { margin: .6rem 0 .4rem; line-height: 1.35; }
+    .aichat-bubble blockquote { border-left: 3px solid var(--accent); padding-left: .8rem; color: var(--muted); margin: .5rem 0; }
+    .aichat-bubble table { border-collapse: collapse; margin: .6rem 0; font-size: .82rem; display: block; overflow-x: auto; }
+    .aichat-bubble th, .aichat-bubble td { border: 1px solid var(--border); padding: .4rem .6rem; }
+    .aichat-bubble :not(pre) > code {
+      background: rgba(127,255,110,.1); padding: .12rem .38rem; border-radius: 4px;
+      font-family: var(--mono); font-size: .85em; color: var(--accent2);
+    }
+    .aichat-bubble pre {
+      background: #0a0a0d; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 1rem; overflow-x: auto; margin: .65rem 0; position: relative; font-family: var(--mono); font-size: .8rem;
+    }
+    .aichat-bubble pre code { font-family: var(--mono); color: #d8d8e2; background: none; padding: 0; }
+    .aichat-code-copy-btn {
+      position: absolute; top: .5rem; right: .5rem; font-size: .68rem; padding: .3rem .6rem;
+      background: var(--surface); border: 1px solid var(--border); color: var(--muted);
+      border-radius: 6px; cursor: pointer; transition: all .15s; font-family: var(--sans);
+    }
+    .aichat-code-copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .aichat-msg-actions { display: flex; gap: .4rem; margin-top: .45rem; flex-wrap: wrap; }
+    .aichat-msg.user .aichat-msg-actions { justify-content: flex-end; }
+    .aichat-msg-action-btn {
+      font-size: .7rem; padding: .32rem .62rem; background: transparent; border: 1px solid var(--border);
+      color: var(--muted); border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center;
+      gap: .3rem; transition: all .15s; font-family: var(--sans);
+    }
+    .aichat-msg-action-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; }
+    .aichat-msg-action-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .aichat-file-chip {
+      display: inline-flex; align-items: center; gap: .35rem; background: rgba(0,0,0,.15);
+      border: 1px solid rgba(0,0,0,.2); padding: .3rem .55rem; border-radius: 8px; font-size: .72rem;
+      margin: 0 0 .4rem; max-width: 100%;
+    }
+    .aichat-msg.ai .aichat-file-chip { background: var(--surface); border-color: var(--border); color: var(--muted); }
+    .aichat-file-chip svg { width: 13px; height: 13px; stroke: currentColor; fill: none; flex-shrink: 0; }
+    .aichat-file-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .aichat-file-row { display: flex; flex-wrap: wrap; gap: .3rem; }
+    .aichat-msg.user .aichat-file-row { justify-content: flex-end; }
+    .aichat-typing { display: inline-flex; gap: 4px; padding: .3rem 0; }
+    .aichat-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: aichatBounce 1.2s infinite ease-in-out; }
+    .aichat-typing span:nth-child(2) { animation-delay: .15s; }
+    .aichat-typing span:nth-child(3) { animation-delay: .3s; }
+    @keyframes aichatBounce { 0%, 60%, 100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-5px); opacity: 1; } }
+    .aichat-attach-preview { display: flex; flex-wrap: wrap; gap: .4rem; padding: 0 .9rem; }
+    .aichat-attach-preview:empty { display: none; }
+    .aichat-attach-chip {
+      display: inline-flex; align-items: center; gap: .4rem; background: var(--surface2);
+      border: 1px solid var(--border); padding: .4rem .5rem .4rem .7rem; border-radius: 8px; font-size: .75rem;
+      color: var(--text); max-width: 220px;
+    }
+    .aichat-attach-chip svg { width: 14px; height: 14px; stroke: var(--accent); fill: none; flex-shrink: 0; }
+    .aichat-attach-chip .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .aichat-attach-chip .remove {
+      cursor: pointer; color: var(--muted); font-weight: 700; background: none; border: none;
+      font-size: .9rem; line-height: 1; padding: 0 .1rem; flex-shrink: 0;
+    }
+    .aichat-attach-chip .remove:hover { color: var(--danger); }
+    .aichat-inputbar { display: flex; align-items: flex-end; gap: .5rem; padding: .8rem .9rem; border-top: 1px solid var(--border); background: var(--surface2); }
+    .aichat-icon-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted); width: 40px; height: 40px;
+      border-radius: var(--radius-sm); display: grid; place-items: center; cursor: pointer; flex-shrink: 0;
+      font-size: 1rem; transition: all .15s;
+    }
+    .aichat-icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
+    .aichat-icon-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .aichat-textarea {
+      flex: 1; resize: none; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text); padding: .7rem .85rem; font-family: var(--sans); font-size: .9rem; max-height: 160px;
+      line-height: 1.5; overflow-y: auto;
+    }
+    .aichat-textarea:focus { outline: none; border-color: var(--accent); }
+    .aichat-textarea:disabled { opacity: .6; }
+    .aichat-send-btn {
+      width: 42px; height: 42px; border-radius: 50%; background: var(--accent); border: none; display: grid;
+      place-items: center; cursor: pointer; flex-shrink: 0; transition: all .15s;
+    }
+    .aichat-send-btn svg { width: 18px; height: 18px; stroke: #0d0d0f; fill: #0d0d0f; }
+    .aichat-send-btn:hover:not(:disabled) { transform: scale(1.07); }
+    .aichat-send-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .aichat-stop-btn { font-size: .78rem; padding: .68rem 1rem; white-space: nowrap; }
+    .aichat-meta-row {
+      display: flex; justify-content: space-between; align-items: center; padding: .4rem .9rem .7rem;
+      font-size: .72rem; color: var(--muted); font-family: var(--mono); flex-wrap: wrap; gap: .4rem;
+    }
+    .aichat-meta-row .aichat-hint { opacity: .75; }
+    .aichat-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.62); z-index: 9999; display: none;
+      align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(2px);
+    }
+    .aichat-modal-overlay.is-open { display: flex; }
+    .aichat-modal {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      max-width: 460px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.5);
+      animation: fadeUp .25s ease both;
+    }
+    .aichat-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.1rem 1.3rem; border-bottom: 1px solid var(--border); }
+    .aichat-modal-header h3 { font-size: 1.05rem; display: flex; align-items: center; gap: .5rem; }
+    .aichat-modal-close { background: transparent; border: none; color: var(--muted); font-size: 1.2rem; cursor: pointer; line-height: 1; }
+    .aichat-modal-close:hover { color: var(--text); }
+    .aichat-modal-body { padding: 1.2rem 1.3rem 1.4rem; display: flex; flex-direction: column; gap: .5rem; }
+    .aichat-modal-body label { font-size: .82rem; color: var(--muted); font-weight: 600; }
+    .aichat-key-input-wrap { display: flex; gap: .4rem; }
+    .aichat-key-input-wrap input {
+      flex: 1; min-width: 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: .65rem .8rem; color: var(--text); font-family: var(--mono); font-size: .85rem;
+    }
+    .aichat-key-input-wrap input:focus { outline: none; border-color: var(--accent); }
+    .aichat-key-hint { font-size: .75rem; color: var(--muted); line-height: 1.55; }
+    .aichat-modal-actions { display: flex; gap: .6rem; margin-top: .3rem; flex-wrap: wrap; }
+    .aichat-key-status { font-size: .78rem; min-height: 1.2em; font-weight: 600; }
+    .aichat-key-status.is-ok { color: var(--accent); }
+    .aichat-key-status.is-err { color: var(--danger); }
+    .aichat-modal-divider { height: 1px; background: var(--border); margin: .7rem 0; }
+    .aichat-select {
+      background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: .65rem .8rem;
+      border-radius: var(--radius-sm); font-family: var(--sans); font-size: .85rem; width: 100%;
+    }
+    @media (max-width: 640px) {
+      .aichat-app { height: 80vh; min-height: 420px; }
+      .aichat-msg-col { max-width: 88%; }
+      .aichat-toolbar { justify-content: center; }
+      .aichat-tbtn { flex: 1 1 auto; justify-content: center; }
+      .aichat-meta-row { justify-content: center; text-align: center; }
     }
   </style>
 
@@ -2235,7 +2514,7 @@
       <h2 id="pro-tools-heading" class="section-title" style="text-align: center;">Pro Tools</h2>
       <p class="pro-tools-subtitle">Unlock advanced AI-powered creative tools designed for professionals.</p>
 
-      <div class="pro-tools-grid">
+      <div class="pro-tools-grid" id="pro-tools-grid">
 
         <div class="pro-tool-card is-soon">
           <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
@@ -2243,29 +2522,145 @@
           <p>Generate stunning AI images from text prompts.</p>
         </div>
 
-
-        <div class="pro-tool-card is-soon">
+        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-meme" tabindex="0" role="button" aria-label="Open Meme Generator">
           <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 15s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg></div>
           <h3>Meme Generator <span class="pro-tool-badge is-live">Live</span></h3>
-          <p>Create memes using customizable templates.</p>
+          <p>Upload an image, add draggable text layers, and export your meme as PNG or JPG.</p>
         </div>
 
-        <div class="pro-tool-card is-live">
+        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-aicleaner" tabindex="0" role="button" aria-label="Open AI Image Cleaner">
+          <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 15a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4V9a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4z"/><circle cx="9" cy="10" r="1.5"/><path d="M21 17l-5.5-5.5L9 18"/></svg></div>
+          <h3>AI Image Cleaner <span class="pro-tool-badge is-beta">Beta</span></h3>
+          <p>Remove backgrounds or erase unwanted objects from photos — all in one tool.</p>
+        </div>
+
+        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-favicon" tabindex="0" role="button" aria-label="Open Favicon Generator">
           <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg></div>
           <h3>Favicon Generator <span class="pro-tool-badge is-live">Live</span></h3>
           <p>Generate high-quality favicon files from any image.</p>
-          <div class="favicon-drop" id="favicon-drop">
-            <input type="file" id="favicon-file" accept="image/*" class="file-input-hidden" style="display:none;" />
-            <span style="font-size:.82rem;color:var(--muted);">Drop image or <span style="color:var(--accent);text-decoration:underline;">browse</span></span>
-          </div>
-          <div class="favicon-preview-grid" id="favicon-preview-grid"></div>
-          <div class="action-row" id="favicon-actions" style="display:none;">
-            <button type="button" class="btn-secondary" id="favicon-download-all" style="font-size:.8rem;">Download All (.zip)</button>
-          </div>
         </div>
 
-        <div class="pro-tool-mesh-wrap">
-          <div class="tool-workspace-standalone aic-workspace" id="panel-aicleaner">
+        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-meshgen" tabindex="0" role="button" aria-label="Open Mesh Gradient Generator">
+          <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="7" cy="8" r="4"/><circle cx="16" cy="9" r="5"/><circle cx="11" cy="17" r="4"/></svg></div>
+          <h3>Mesh Gradient Generator <span class="pro-tool-badge is-live">Live</span></h3>
+          <p>Design glassmorphic multi-color gradient backgrounds and wallpapers.</p>
+        </div>
+
+        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-aichat" tabindex="0" role="button" aria-label="Open AI Chat Assistant">
+          <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M12 7V3"/><circle cx="12" cy="2.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="8.5" cy="13.5" r="1.3" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13.5" r="1.3" fill="currentColor" stroke="none"/><path d="M8.5 17h7"/><path d="M3 12H1M23 12h-2"/></svg></div>
+          <h3>AI Chat Assistant <span class="pro-tool-badge is-live">LIVE</span></h3>
+          <p>Chat with Gemini AI instantly.</p>
+        </div>
+
+      </div>
+
+      <!-- ============== Meme Generator panel ============== -->
+      <div class="pro-tool-panel" id="panel-meme">
+        <button type="button" class="pro-tool-back-btn" data-pt-back>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Pro Tools
+        </button>
+        <div class="tool-workspace-standalone">
+          <div class="tool-title-row">
+            <h2>Meme Generator <span class="premium-badge">LIVE</span> <span>Upload, caption, and export memes — 100% offline in your browser.</span></h2>
+          </div>
+
+          <div class="meme-layout">
+            <div class="meme-preview-col">
+              <div class="aic-drop" id="meme-drop">
+                <input type="file" id="meme-file" accept="image/*" class="file-input-hidden" />
+                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                <p><span class="aic-browse">Click to upload</span> or drag &amp; drop an image</p>
+              </div>
+
+              <div class="meme-canvas-wrap" id="meme-canvas-wrap" style="display:none;">
+                <canvas id="meme-canvas"></canvas>
+              </div>
+
+              <div class="meme-quick-actions" id="meme-quick-actions" style="display:none;">
+                <button type="button" class="btn-secondary" id="meme-add-top">+ Top Text</button>
+                <button type="button" class="btn-secondary" id="meme-add-bottom">+ Bottom Text</button>
+                <button type="button" class="btn-secondary" id="meme-add-layer">+ Add Text Layer</button>
+                <button type="button" class="btn-secondary" id="meme-change-image">Change Image</button>
+              </div>
+
+              <div class="action-row" id="meme-actions" style="display:none;">
+                <button type="button" class="btn-secondary" id="meme-undo" disabled>↶ Undo</button>
+                <button type="button" class="btn-secondary" id="meme-redo" disabled>↷ Redo</button>
+                <button type="button" class="btn-secondary" id="meme-reset">Reset Text</button>
+                <button type="button" class="btn-primary" id="meme-download-png">Download PNG</button>
+                <button type="button" class="btn-secondary" id="meme-download-jpg">Download JPG</button>
+              </div>
+            </div>
+
+            <div class="meme-controls-col" id="meme-controls-col" style="display:none;">
+              <div class="control-group">
+                <label>Text Layers</label>
+                <div class="meme-layers-panel" id="meme-layers-panel">
+                  <p class="meme-empty-layers">No text layers yet. Add one to get started.</p>
+                </div>
+              </div>
+
+              <fieldset id="meme-fieldset" disabled>
+                <div class="control-group">
+                  <label for="meme-text-content">Layer Text</label>
+                  <textarea class="meme-text-input" id="meme-text-content" rows="2" placeholder="Select a layer to edit its text"></textarea>
+                </div>
+
+                <div class="control-group">
+                  <label for="meme-font-family">Font Family</label>
+                  <select id="meme-font-family">
+                    <option value="'Impact', 'Arial Narrow', sans-serif">Impact</option>
+                    <option value="'Space Grotesk', sans-serif">Space Grotesk</option>
+                    <option value="'Space Mono', monospace">Space Mono</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="'Comic Sans MS', cursive">Comic Sans</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                  </select>
+                </div>
+
+                <div class="control-group">
+                  <div class="range-row"><label for="meme-font-size">Font Size</label><span class="range-val-lbl" id="meme-font-size-lbl">48px</span></div>
+                  <input type="range" id="meme-font-size" min="10" max="160" step="1" value="48">
+                </div>
+
+                <div class="meme-toggle-row">
+                  <button type="button" class="meme-tbtn meme-bold" id="meme-bold" aria-pressed="false" title="Bold">B</button>
+                  <button type="button" class="meme-tbtn meme-italic" id="meme-italic" aria-pressed="false" title="Italic">I</button>
+                  <button type="button" class="meme-tbtn" id="meme-shadow" aria-pressed="false" title="Shadow">🌑 Shadow</button>
+                </div>
+
+                <div class="meme-color-row">
+                  <label>Text Color</label>
+                  <input type="color" id="meme-text-color" value="#ffffff">
+                </div>
+                <div class="meme-color-row">
+                  <label>Outline Color</label>
+                  <input type="color" id="meme-stroke-color" value="#000000">
+                </div>
+                <div class="control-group">
+                  <div class="range-row"><label for="meme-stroke-width">Outline Thickness</label><span class="range-val-lbl" id="meme-stroke-width-lbl">4px</span></div>
+                  <input type="range" id="meme-stroke-width" min="0" max="20" step="1" value="4">
+                </div>
+
+                <div class="action-row" style="justify-content:flex-start;">
+                  <button type="button" class="btn-secondary" id="meme-delete-layer">Delete Layer</button>
+                </div>
+              </fieldset>
+              <p class="meme-empty-layers" id="meme-no-selection-hint">Tip: drag a layer on the canvas to move it, use the bottom-right handle to resize, and the top handle to rotate.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============== AI Image Cleaner panel ============== -->
+      <div class="pro-tool-panel" id="panel-aicleaner">
+        <button type="button" class="pro-tool-back-btn" data-pt-back>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Pro Tools
+        </button>
+        <div class="tool-workspace-standalone aic-workspace">
             <div class="tool-title-row">
               <h2>✨ AI Image Cleaner <span class="premium-badge pro-tool-badge is-beta" style="margin-left:.5rem;">Beta</span> <span>Remove backgrounds and erase unwanted objects from images in one powerful tool.</span></h2>
             </div>
@@ -2369,8 +2764,34 @@
           </div>
         </div>
 
-        <div class="pro-tool-mesh-wrap">
-          <div class="tool-workspace-standalone" id="panel-meshgen">
+      <!-- ============== Favicon Generator panel ============== -->
+      <div class="pro-tool-panel" id="panel-favicon">
+        <button type="button" class="pro-tool-back-btn" data-pt-back>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Pro Tools
+        </button>
+        <div class="tool-workspace-standalone">
+          <div class="tool-title-row">
+            <h2>Favicon Generator <span class="premium-badge">LIVE</span> <span>Generate a full set of favicon sizes from any image.</span></h2>
+          </div>
+          <div class="favicon-drop" id="favicon-drop">
+            <input type="file" id="favicon-file" accept="image/*" class="file-input-hidden" style="display:none;" />
+            <span style="font-size:.82rem;color:var(--muted);">Drop image or <span style="color:var(--accent);text-decoration:underline;">browse</span></span>
+          </div>
+          <div class="favicon-preview-grid" id="favicon-preview-grid"></div>
+          <div class="action-row" id="favicon-actions" style="display:none;">
+            <button type="button" class="btn-secondary" id="favicon-download-all" style="font-size:.8rem;">Download All (.zip)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============== Mesh Gradient Generator panel ============== -->
+      <div class="pro-tool-panel" id="panel-meshgen">
+        <button type="button" class="pro-tool-back-btn" data-pt-back>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Pro Tools
+        </button>
+        <div class="tool-workspace-standalone">
             <div class="tool-title-row">
               <h2>Mesh Gradient Generator <span class="premium-badge">PRO</span> <span>Glassmorphic Multi-Color Backgrounds &amp; Wallpapers</span></h2>
             </div>
@@ -2433,9 +2854,114 @@
             </div>
           </div>
         </div>
-
       </div>
-    </div>
+
+      <!-- ============== AI Chat Assistant panel ============== -->
+      <div class="pro-tool-panel" id="panel-aichat">
+        <button type="button" class="pro-tool-back-btn" data-pt-back>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Pro Tools
+        </button>
+        <div class="tool-workspace-standalone">
+          <div class="tool-title-row">
+            <h2>AI Chat Assistant <span class="premium-badge">LIVE</span> <span>Chat with Gemini AI instantly.</span></h2>
+          </div>
+
+          <div class="aichat-app" id="aichat-app">
+            <div class="aichat-toolbar">
+              <button type="button" class="btn-secondary aichat-tbtn" id="aichat-new-btn">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> New Chat
+              </button>
+              <button type="button" class="btn-secondary aichat-tbtn" id="aichat-clear-btn">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg> Clear Chat
+              </button>
+              <button type="button" class="btn-secondary aichat-tbtn" id="aichat-export-txt-btn">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg> Export TXT
+              </button>
+              <button type="button" class="btn-secondary aichat-tbtn" id="aichat-export-pdf-btn">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> Export PDF
+              </button>
+              <button type="button" class="btn-secondary aichat-tbtn" id="aichat-settings-btn">
+                <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings
+              </button>
+            </div>
+
+            <div class="aichat-key-banner" id="aichat-key-banner" style="display:none;">
+              Please enter your Gemini API Key in Settings.
+              <button type="button" id="aichat-banner-settings-btn">Open Settings</button>
+            </div>
+
+            <div class="aichat-messages" id="aichat-messages" aria-live="polite">
+              <div class="aichat-empty" id="aichat-empty-state">
+                <div class="aichat-empty-icon">
+                  <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M12 7V3"/><circle cx="8.5" cy="13.5" r="1.3" fill="#0d0d0f" stroke="none"/><circle cx="15.5" cy="13.5" r="1.3" fill="#0d0d0f" stroke="none"/><path d="M8.5 17h7"/></svg>
+                </div>
+                <h4>Start chatting with Gemini</h4>
+                <p>Ask anything — coding help, math, writing, summaries, translation, brainstorming, explanations, or image prompt ideas.</p>
+                <div class="aichat-suggest-row">
+                  <button type="button" class="aichat-suggest-chip" data-prompt="Explain how neural networks work, in simple terms.">💡 Explain a concept</button>
+                  <button type="button" class="aichat-suggest-chip" data-prompt="Write a Python function that reverses a linked list, with comments.">💻 Help me code</button>
+                  <button type="button" class="aichat-suggest-chip" data-prompt="Summarize the plot of a story I'll paste in.">📝 Summarize text</button>
+                  <button type="button" class="aichat-suggest-chip" data-prompt="Translate 'Where is the nearest train station?' into French, Spanish, and Japanese.">🌐 Translate</button>
+                  <button type="button" class="aichat-suggest-chip" data-prompt="Brainstorm 5 creative names for a coffee shop that also sells books.">🧠 Brainstorm ideas</button>
+                  <button type="button" class="aichat-suggest-chip" data-prompt="Write a detailed image-generation prompt for a cozy cyberpunk cafe at night.">🎨 Image prompt</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="aichat-attach-preview" id="aichat-attach-preview"></div>
+
+            <div class="aichat-inputbar">
+              <button type="button" class="aichat-icon-btn" id="aichat-attach-btn" title="Attach a file" aria-label="Attach a file">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21.44 11.05 12.25 20.24a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.67 3.67 0 0 1 5.19 5.19l-9.2 9.19a1.83 1.83 0 0 1-2.59-2.59l8.49-8.48"/></svg>
+              </button>
+              <input type="file" id="aichat-file-input" style="display:none;" multiple accept=".txt,.pdf,.docx,image/*" />
+              <textarea id="aichat-input" class="aichat-textarea" rows="1" placeholder="Message AI Chat Assistant... (Shift+Enter for new line)"></textarea>
+              <button type="button" class="btn-secondary aichat-stop-btn" id="aichat-stop-btn" style="display:none;">Stop</button>
+              <button type="button" class="aichat-send-btn" id="aichat-send-btn" aria-label="Send message">
+                <svg viewBox="0 0 24 24"><path d="M2 12 21 3l-5.5 18-4.5-7-9-2z"/></svg>
+              </button>
+            </div>
+            <div class="aichat-meta-row">
+              <span class="aichat-hint">Enter to send · Shift+Enter for new line</span>
+              <span id="aichat-wordcount">0 words · 0 characters</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============== AI Chat Assistant — Settings modal ============== -->
+      <div class="aichat-modal-overlay" id="aichat-settings-overlay">
+        <div class="aichat-modal" role="dialog" aria-modal="true" aria-labelledby="aichat-settings-title">
+          <div class="aichat-modal-header">
+            <h3 id="aichat-settings-title">⚙️ AI Chat Settings</h3>
+            <button type="button" class="aichat-modal-close" id="aichat-settings-close" aria-label="Close settings">✕</button>
+          </div>
+          <div class="aichat-modal-body">
+            <label for="aichat-api-key-input">Gemini API Key</label>
+            <div class="aichat-key-input-wrap">
+              <input type="password" id="aichat-api-key-input" placeholder="Paste your Gemini API key" autocomplete="off" spellcheck="false" />
+              <button type="button" class="aichat-icon-btn" id="aichat-key-toggle-visibility" title="Show/Hide API key" aria-label="Show or hide API key">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <p class="aichat-key-hint">Your key is stored only in this browser's local storage and is sent directly to Google's Gemini API — never to Smart Compress's servers. Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.</p>
+            <div class="aichat-modal-actions">
+              <button type="button" class="btn-primary" id="aichat-key-save">Save API Key</button>
+              <button type="button" class="btn-secondary" id="aichat-key-remove">Remove API Key</button>
+            </div>
+            <p class="aichat-key-status" id="aichat-key-status"></p>
+            <div class="aichat-modal-divider"></div>
+            <label for="aichat-model-select">Model</label>
+            <select id="aichat-model-select" class="aichat-select">
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash (recommended)</option>
+              <option value="gemini-2.5-pro">Gemini 2.5 Pro (advanced reasoning)</option>
+              <option value="gemini-3.5-flash">Gemini 3.5 Flash (latest, fast)</option>
+              <option value="gemini-3.6-flash">Gemini 3.6 Flash (latest, agentic)</option>
+            </select>
+          </div>
+        </div>
+      </div>
   </section>
 
   <section class="tools-menu-section workspace-section" id="tools-suite" aria-labelledby="suite-heading">
@@ -8741,6 +9267,633 @@
     })();
   </script>
 
+  <!-- ================= Premium: Pro Tools card→panel navigation (additive, self-contained) ================= -->
+  <script>
+    (function initProToolsNav() {
+      "use strict";
+      var grid = document.getElementById("pro-tools-grid");
+      if (!grid) return;
+
+      var panels = Array.prototype.slice.call(document.querySelectorAll(".pro-tool-panel"));
+
+      function closeAllPanels() {
+        panels.forEach(function (p) { p.classList.remove("is-open"); });
+      }
+
+      function showGrid() {
+        closeAllPanels();
+        grid.classList.remove("pt-hidden");
+      }
+
+      function openPanel(id) {
+        var target = document.getElementById(id);
+        if (!target) return;
+        closeAllPanels();
+        grid.classList.add("pt-hidden");
+        target.classList.add("is-open");
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      grid.querySelectorAll("[data-pt-open]").forEach(function (card) {
+        card.addEventListener("click", function () {
+          openPanel(card.getAttribute("data-pt-open"));
+        });
+        card.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openPanel(card.getAttribute("data-pt-open"));
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-pt-back]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          showGrid();
+          grid.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+
+      // Reset to the card grid whenever the Pro Tools workspace itself is left/re-entered.
+      var proToolsSection = document.getElementById("pro-tools");
+      if (proToolsSection) {
+        document.querySelectorAll('a[href="#tools-suite"]').forEach(function (a) {
+          a.addEventListener("click", showGrid);
+        });
+      }
+    })();
+  </script>
+
+  <!-- ================= Premium: Meme Generator (additive, self-contained) ================= -->
+  <script>
+    (function initMemeGenerator() {
+      "use strict";
+      var dropzone = document.getElementById("meme-drop");
+      if (!dropzone) return; // panel not present, do nothing
+
+      var fileInput = document.getElementById("meme-file");
+      var canvasWrap = document.getElementById("meme-canvas-wrap");
+      var canvas = document.getElementById("meme-canvas");
+      var ctx = canvas.getContext("2d");
+      var quickActions = document.getElementById("meme-quick-actions");
+      var actionsRow = document.getElementById("meme-actions");
+      var controlsCol = document.getElementById("meme-controls-col");
+      var layersPanel = document.getElementById("meme-layers-panel");
+      var fieldset = document.getElementById("meme-fieldset");
+      var noSelectionHint = document.getElementById("meme-no-selection-hint");
+
+      var addTopBtn = document.getElementById("meme-add-top");
+      var addBottomBtn = document.getElementById("meme-add-bottom");
+      var addLayerBtn = document.getElementById("meme-add-layer");
+      var changeImageBtn = document.getElementById("meme-change-image");
+      var undoBtn = document.getElementById("meme-undo");
+      var redoBtn = document.getElementById("meme-redo");
+      var resetBtn = document.getElementById("meme-reset");
+      var downloadPngBtn = document.getElementById("meme-download-png");
+      var downloadJpgBtn = document.getElementById("meme-download-jpg");
+      var deleteLayerBtn = document.getElementById("meme-delete-layer");
+
+      var textContentEl = document.getElementById("meme-text-content");
+      var fontFamilyEl = document.getElementById("meme-font-family");
+      var fontSizeEl = document.getElementById("meme-font-size");
+      var fontSizeLbl = document.getElementById("meme-font-size-lbl");
+      var boldBtn = document.getElementById("meme-bold");
+      var italicBtn = document.getElementById("meme-italic");
+      var shadowBtn = document.getElementById("meme-shadow");
+      var textColorEl = document.getElementById("meme-text-color");
+      var strokeColorEl = document.getElementById("meme-stroke-color");
+      var strokeWidthEl = document.getElementById("meme-stroke-width");
+      var strokeWidthLbl = document.getElementById("meme-stroke-width-lbl");
+
+      var MAX_DIM = 1400;
+      var HANDLE_R = 11;           // hit radius for corner/rotate handles (canvas px)
+      var ROTATE_OFFSET = 42;      // distance of rotate handle above the text box (canvas px)
+      var HISTORY_LIMIT = 60;
+
+      var baseImage = null;
+      var layers = [];             // { id, text, x, y, fontSize, fontFamily, bold, italic, color, strokeColor, strokeWidth, shadow, rotation }
+      var selectedId = null;
+      var nextLayerNum = 1;
+
+      var history = [];
+      var historyIndex = -1;
+
+      var pointer = { mode: null, layerId: null, startX: 0, startY: 0, startLayerX: 0, startLayerY: 0, startFontSize: 0, startDist: 0, startRotation: 0, startAngle: 0 };
+
+      /* ---------------- Upload ---------------- */
+      dropzone.addEventListener("click", function () { fileInput.click(); });
+      dropzone.addEventListener("dragover", function (e) { e.preventDefault(); dropzone.classList.add("drag-over"); });
+      ["dragleave", "drop"].forEach(function (evt) {
+        dropzone.addEventListener(evt, function () { dropzone.classList.remove("drag-over"); });
+      });
+      dropzone.addEventListener("drop", function (e) {
+        e.preventDefault();
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+      });
+      fileInput.addEventListener("change", function (e) {
+        if (e.target.files && e.target.files.length > 0) handleFile(e.target.files[0]);
+      });
+      changeImageBtn.addEventListener("click", function () { fileInput.click(); });
+
+      function handleFile(file) {
+        if (!file || !file.type.startsWith("image/")) return;
+        var img = new Image();
+        img.onload = function () {
+          var scale = Math.min(1, MAX_DIM / Math.max(img.naturalWidth, img.naturalHeight));
+          canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+          baseImage = img;
+          layers = [];
+          selectedId = null;
+          nextLayerNum = 1;
+          history = [];
+          historyIndex = -1;
+          snapshot();
+
+          dropzone.style.display = "none";
+          canvasWrap.style.display = "flex";
+          canvasWrap.classList.add("has-image");
+          quickActions.style.display = "flex";
+          actionsRow.style.display = "flex";
+          controlsCol.style.display = "flex";
+
+          render(true);
+          refreshLayersPanel();
+          refreshControls();
+          updateUndoRedoButtons();
+          URL.revokeObjectURL(img.src);
+        };
+        img.src = URL.createObjectURL(file);
+      }
+
+      /* ---------------- Layer helpers ---------------- */
+      function makeLayer(text, x, y) {
+        return {
+          id: "layer-" + (nextLayerNum++) + "-" + Date.now().toString(36),
+          text: text,
+          x: x, y: y,
+          fontSize: Math.max(18, Math.round(canvas.height * 0.09)),
+          fontFamily: "'Impact', 'Arial Narrow', sans-serif",
+          bold: false,
+          italic: false,
+          color: "#ffffff",
+          strokeColor: "#000000",
+          strokeWidth: 4,
+          shadow: false,
+          rotation: 0
+        };
+      }
+
+      function getLayer(id) {
+        for (var i = 0; i < layers.length; i++) if (layers[i].id === id) return layers[i];
+        return null;
+      }
+
+      function addLayer(text, x, y) {
+        var l = makeLayer(text, x, y);
+        layers.push(l);
+        selectedId = l.id;
+        render(true);
+        refreshLayersPanel();
+        refreshControls();
+        snapshot();
+      }
+
+      addTopBtn.addEventListener("click", function () {
+        if (!baseImage) return;
+        addLayer("TOP TEXT", canvas.width / 2, Math.max(40, canvas.height * 0.1));
+      });
+      addBottomBtn.addEventListener("click", function () {
+        if (!baseImage) return;
+        addLayer("BOTTOM TEXT", canvas.width / 2, Math.min(canvas.height - 40, canvas.height * 0.9));
+      });
+      addLayerBtn.addEventListener("click", function () {
+        if (!baseImage) return;
+        addLayer("New Text", canvas.width / 2, canvas.height / 2);
+      });
+
+      deleteLayerBtn.addEventListener("click", function () {
+        if (!selectedId) return;
+        layers = layers.filter(function (l) { return l.id !== selectedId; });
+        selectedId = null;
+        render(true);
+        refreshLayersPanel();
+        refreshControls();
+        snapshot();
+      });
+
+      /* ---------------- Text measuring ---------------- */
+      function fontString(l) {
+        return (l.italic ? "italic " : "") + (l.bold ? "bold " : "") + l.fontSize + "px " + l.fontFamily;
+      }
+
+      function layerBox(l) {
+        ctx.font = fontString(l);
+        var w = Math.max(ctx.measureText(l.text || " ").width, 10) + 24;
+        var h = l.fontSize * 1.35;
+        return { w: w, h: h };
+      }
+
+      function toLocal(l, px, py) {
+        var dx = px - l.x, dy = py - l.y;
+        var cos = Math.cos(-l.rotation), sin = Math.sin(-l.rotation);
+        return { x: dx * cos - dy * sin, y: dx * sin + dy * cos };
+      }
+
+      function toWorld(l, lx, ly) {
+        var cos = Math.cos(l.rotation), sin = Math.sin(l.rotation);
+        return { x: l.x + lx * cos - ly * sin, y: l.y + lx * sin + ly * cos };
+      }
+
+      /* ---------------- Rendering ---------------- */
+      function render(includeOverlay) {
+        if (!baseImage) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(baseImage, 0, 0, canvas.width, canvas.height);
+
+        layers.forEach(function (l) {
+          ctx.save();
+          ctx.translate(l.x, l.y);
+          ctx.rotate(l.rotation);
+          ctx.font = fontString(l);
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.lineJoin = "round";
+
+          if (l.shadow) {
+            ctx.shadowColor = "rgba(0,0,0,.85)";
+            ctx.shadowBlur = Math.max(4, l.fontSize * 0.12);
+            ctx.shadowOffsetX = l.fontSize * 0.04;
+            ctx.shadowOffsetY = l.fontSize * 0.06;
+          } else {
+            ctx.shadowColor = "transparent";
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+          }
+
+          if (l.strokeWidth > 0) {
+            ctx.strokeStyle = l.strokeColor;
+            ctx.lineWidth = l.strokeWidth;
+            ctx.strokeText(l.text, 0, 0);
+          }
+          ctx.fillStyle = l.color;
+          ctx.fillText(l.text, 0, 0);
+
+          ctx.restore();
+
+          if (includeOverlay && l.id === selectedId) {
+            var box = layerBox(l);
+            ctx.save();
+            ctx.translate(l.x, l.y);
+            ctx.rotate(l.rotation);
+            ctx.shadowColor = "transparent"; ctx.shadowBlur = 0;
+            ctx.strokeStyle = "#7fff6e";
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 4]);
+            ctx.strokeRect(-box.w / 2, -box.h / 2, box.w, box.h);
+            ctx.setLineDash([]);
+
+            // rotate handle + connector
+            ctx.beginPath();
+            ctx.moveTo(0, -box.h / 2);
+            ctx.lineTo(0, -box.h / 2 - ROTATE_OFFSET);
+            ctx.stroke();
+            drawHandle(0, -box.h / 2 - ROTATE_OFFSET);
+
+            // resize handle (bottom-right)
+            drawHandle(box.w / 2, box.h / 2);
+
+            ctx.restore();
+          }
+        });
+      }
+
+      function drawHandle(lx, ly) {
+        ctx.beginPath();
+        ctx.arc(lx, ly, HANDLE_R * 0.55, 0, Math.PI * 2);
+        ctx.fillStyle = "#0d0d0f";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#7fff6e";
+        ctx.stroke();
+      }
+
+      /* ---------------- Pointer interaction ---------------- */
+      function canvasPoint(e) {
+        var rect = canvas.getBoundingClientRect();
+        var scaleX = canvas.width / rect.width;
+        var scaleY = canvas.height / rect.height;
+        var clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX);
+        var clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY);
+        return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+      }
+
+      function hitTest(pt) {
+        // Check handles of the currently-selected layer first
+        var sel = getLayer(selectedId);
+        if (sel) {
+          var box = layerBox(sel);
+          var rotateHandleWorld = toWorld(sel, 0, -box.h / 2 - ROTATE_OFFSET);
+          if (dist(pt, rotateHandleWorld) <= HANDLE_R) return { mode: "rotate", layer: sel };
+          var resizeHandleWorld = toWorld(sel, box.w / 2, box.h / 2);
+          if (dist(pt, resizeHandleWorld) <= HANDLE_R) return { mode: "resize", layer: sel };
+        }
+        // Then check layer bodies, topmost first
+        for (var i = layers.length - 1; i >= 0; i--) {
+          var l = layers[i];
+          var b = layerBox(l);
+          var local = toLocal(l, pt.x, pt.y);
+          if (Math.abs(local.x) <= b.w / 2 && Math.abs(local.y) <= b.h / 2) {
+            return { mode: "move", layer: l };
+          }
+        }
+        return null;
+      }
+
+      function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+
+      canvas.addEventListener("pointerdown", function (e) {
+        if (!baseImage) return;
+        var pt = canvasPoint(e);
+        var hit = hitTest(pt);
+        if (!hit) {
+          selectedId = null;
+          render(true);
+          refreshLayersPanel();
+          refreshControls();
+          return;
+        }
+        selectedId = hit.layer.id;
+        var l = hit.layer;
+        pointer.mode = hit.mode;
+        pointer.layerId = l.id;
+        pointer.startX = pt.x;
+        pointer.startY = pt.y;
+        pointer.startLayerX = l.x;
+        pointer.startLayerY = l.y;
+        pointer.startFontSize = l.fontSize;
+        pointer.startDist = Math.max(1, dist(pt, { x: l.x, y: l.y }));
+        pointer.startRotation = l.rotation;
+        canvasWrap.classList.toggle("is-dragging-move", hit.mode === "move");
+        try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+        render(true);
+        refreshLayersPanel();
+        refreshControls();
+      });
+
+      canvas.addEventListener("pointermove", function (e) {
+        if (!pointer.mode) return;
+        var pt = canvasPoint(e);
+        var l = getLayer(pointer.layerId);
+        if (!l) return;
+
+        if (pointer.mode === "move") {
+          l.x = pointer.startLayerX + (pt.x - pointer.startX);
+          l.y = pointer.startLayerY + (pt.y - pointer.startY);
+        } else if (pointer.mode === "resize") {
+          var d = Math.max(1, dist(pt, { x: l.x, y: l.y }));
+          var scale = d / pointer.startDist;
+          l.fontSize = Math.min(400, Math.max(8, Math.round(pointer.startFontSize * scale)));
+          if (l.id === selectedId) {
+            fontSizeEl.value = l.fontSize;
+            fontSizeLbl.textContent = l.fontSize + "px";
+          }
+        } else if (pointer.mode === "rotate") {
+          var angle = Math.atan2(pt.y - l.y, pt.x - l.x);
+          l.rotation = angle + Math.PI / 2;
+        }
+        render(true);
+      });
+
+      function endDrag() {
+        if (!pointer.mode) return;
+        pointer.mode = null;
+        canvasWrap.classList.remove("is-dragging-move");
+        snapshot();
+        refreshLayersPanel();
+      }
+      canvas.addEventListener("pointerup", endDrag);
+      canvas.addEventListener("pointercancel", endDrag);
+      canvas.addEventListener("pointerleave", function (e) {
+        if (pointer.mode && e.buttons === 0) endDrag();
+      });
+
+      /* ---------------- Layers panel ---------------- */
+      function refreshLayersPanel() {
+        layersPanel.innerHTML = "";
+        if (!layers.length) {
+          var empty = document.createElement("p");
+          empty.className = "meme-empty-layers";
+          empty.textContent = "No text layers yet. Add one to get started.";
+          layersPanel.appendChild(empty);
+          return;
+        }
+        layers.forEach(function (l) {
+          var row = document.createElement("div");
+          row.className = "meme-layer-row" + (l.id === selectedId ? " active" : "");
+          var span = document.createElement("span");
+          span.className = "meme-layer-text";
+          span.textContent = l.text || "(empty)";
+          var del = document.createElement("button");
+          del.type = "button";
+          del.className = "meme-layer-del";
+          del.title = "Delete layer";
+          del.textContent = "✕";
+          del.addEventListener("click", function (e) {
+            e.stopPropagation();
+            layers = layers.filter(function (x) { return x.id !== l.id; });
+            if (selectedId === l.id) selectedId = null;
+            render(true);
+            refreshLayersPanel();
+            refreshControls();
+            snapshot();
+          });
+          row.addEventListener("click", function () {
+            selectedId = l.id;
+            render(true);
+            refreshLayersPanel();
+            refreshControls();
+          });
+          row.appendChild(span);
+          row.appendChild(del);
+          layersPanel.appendChild(row);
+        });
+      }
+
+      /* ---------------- Controls panel ---------------- */
+      function refreshControls() {
+        var l = getLayer(selectedId);
+        fieldset.disabled = !l;
+        noSelectionHint.style.display = l ? "none" : "block";
+        if (!l) {
+          textContentEl.value = "";
+          return;
+        }
+        textContentEl.value = l.text;
+        fontFamilyEl.value = l.fontFamily;
+        fontSizeEl.value = l.fontSize;
+        fontSizeLbl.textContent = l.fontSize + "px";
+        boldBtn.classList.toggle("active", l.bold);
+        boldBtn.setAttribute("aria-pressed", l.bold ? "true" : "false");
+        italicBtn.classList.toggle("active", l.italic);
+        italicBtn.setAttribute("aria-pressed", l.italic ? "true" : "false");
+        shadowBtn.classList.toggle("active", l.shadow);
+        shadowBtn.setAttribute("aria-pressed", l.shadow ? "true" : "false");
+        textColorEl.value = l.color;
+        strokeColorEl.value = l.strokeColor;
+        strokeWidthEl.value = l.strokeWidth;
+        strokeWidthLbl.textContent = l.strokeWidth + "px";
+      }
+
+      textContentEl.addEventListener("input", function () {
+        var l = getLayer(selectedId);
+        if (!l) return;
+        l.text = textContentEl.value;
+        render(true);
+        refreshLayersPanel();
+      });
+      textContentEl.addEventListener("blur", snapshot);
+
+      fontFamilyEl.addEventListener("change", function () {
+        var l = getLayer(selectedId); if (!l) return;
+        l.fontFamily = fontFamilyEl.value;
+        render(true); snapshot();
+      });
+      fontSizeEl.addEventListener("input", function () {
+        var l = getLayer(selectedId); if (!l) return;
+        l.fontSize = parseInt(fontSizeEl.value, 10);
+        fontSizeLbl.textContent = l.fontSize + "px";
+        render(true);
+      });
+      fontSizeEl.addEventListener("change", snapshot);
+
+      boldBtn.addEventListener("click", function () {
+        var l = getLayer(selectedId); if (!l) return;
+        l.bold = !l.bold;
+        refreshControls(); render(true); snapshot();
+      });
+      italicBtn.addEventListener("click", function () {
+        var l = getLayer(selectedId); if (!l) return;
+        l.italic = !l.italic;
+        refreshControls(); render(true); snapshot();
+      });
+      shadowBtn.addEventListener("click", function () {
+        var l = getLayer(selectedId); if (!l) return;
+        l.shadow = !l.shadow;
+        refreshControls(); render(true); snapshot();
+      });
+
+      textColorEl.addEventListener("input", function () {
+        var l = getLayer(selectedId); if (!l) return;
+        l.color = textColorEl.value; render(true);
+      });
+      textColorEl.addEventListener("change", snapshot);
+
+      strokeColorEl.addEventListener("input", function () {
+        var l = getLayer(selectedId); if (!l) return;
+        l.strokeColor = strokeColorEl.value; render(true);
+      });
+      strokeColorEl.addEventListener("change", snapshot);
+
+      strokeWidthEl.addEventListener("input", function () {
+        var l = getLayer(selectedId); if (!l) return;
+        l.strokeWidth = parseInt(strokeWidthEl.value, 10);
+        strokeWidthLbl.textContent = l.strokeWidth + "px";
+        render(true);
+      });
+      strokeWidthEl.addEventListener("change", snapshot);
+
+      /* ---------------- Undo / Redo / Reset ---------------- */
+      function snapshot() {
+        var state = JSON.stringify({ layers: layers, selectedId: selectedId });
+        if (historyIndex >= 0 && history[historyIndex] === state) return;
+        history = history.slice(0, historyIndex + 1);
+        history.push(state);
+        if (history.length > HISTORY_LIMIT) history.shift();
+        historyIndex = history.length - 1;
+        updateUndoRedoButtons();
+      }
+
+      function applyState(state) {
+        var parsed = JSON.parse(state);
+        layers = parsed.layers;
+        selectedId = parsed.selectedId;
+        render(true);
+        refreshLayersPanel();
+        refreshControls();
+        updateUndoRedoButtons();
+      }
+
+      function updateUndoRedoButtons() {
+        undoBtn.disabled = historyIndex <= 0;
+        redoBtn.disabled = historyIndex < 0 || historyIndex >= history.length - 1;
+      }
+
+      undoBtn.addEventListener("click", function () {
+        if (historyIndex <= 0) return;
+        historyIndex--;
+        applyState(history[historyIndex]);
+      });
+      redoBtn.addEventListener("click", function () {
+        if (historyIndex >= history.length - 1) return;
+        historyIndex++;
+        applyState(history[historyIndex]);
+      });
+
+      resetBtn.addEventListener("click", function () {
+        if (!layers.length) return;
+        if (!window.confirm("Remove all text layers from this meme?")) return;
+        layers = [];
+        selectedId = null;
+        render(true);
+        refreshLayersPanel();
+        refreshControls();
+        snapshot();
+      });
+
+      /* ---------------- Export ---------------- */
+      function exportImage(mime, filename) {
+        if (!baseImage) return;
+        render(false); // strip selection overlay before export
+        if (mime === "image/jpeg") {
+          var flat = document.createElement("canvas");
+          flat.width = canvas.width;
+          flat.height = canvas.height;
+          var fctx = flat.getContext("2d");
+          fctx.fillStyle = "#ffffff";
+          fctx.fillRect(0, 0, flat.width, flat.height);
+          fctx.drawImage(canvas, 0, 0);
+          flat.toBlob(function (blob) { triggerDownload(blob, filename); render(true); }, mime, 0.92);
+        } else {
+          canvas.toBlob(function (blob) { triggerDownload(blob, filename); render(true); }, mime);
+        }
+      }
+
+      function triggerDownload(blob, filename) {
+        if (!blob) return;
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      }
+
+      downloadPngBtn.addEventListener("click", function () { exportImage("image/png", "meme.png"); });
+      downloadJpgBtn.addEventListener("click", function () { exportImage("image/jpeg", "meme.jpg"); });
+
+      /* ---------------- Reset panel when navigating away/back ---------------- */
+      var backBtn = document.querySelector('#panel-meme [data-pt-back]');
+      if (backBtn) {
+        backBtn.addEventListener("click", function () {
+          selectedId = null;
+          if (baseImage) { render(true); refreshLayersPanel(); refreshControls(); }
+        });
+      }
+    })();
+  </script>
+
   <!-- ================= Premium: AI Image Cleaner (additive, self-contained) ================= -->
   <script>
     (function () {
@@ -9346,5 +10499,774 @@
       if (backBtn) backBtn.addEventListener("click", goToolsSuite);
     })();
   </script>
+  <!-- ================= Premium: AI Chat Assistant (additive, self-contained) ================= -->
+  <script>
+    (function initAIChatAssistant() {
+      "use strict";
+      var app = document.getElementById("aichat-app");
+      if (!app) return; // panel not present, do nothing
+
+      var SETTINGS_KEY = "aichat_gemini_settings_v1";
+      var HISTORY_KEY = "aichat_history_v1";
+      var MAX_ATTACH_TEXT_CHARS = 24000;
+
+      var messagesEl = document.getElementById("aichat-messages");
+      var emptyStateEl = document.getElementById("aichat-empty-state");
+      var attachPreviewEl = document.getElementById("aichat-attach-preview");
+      var inputEl = document.getElementById("aichat-input");
+      var sendBtn = document.getElementById("aichat-send-btn");
+      var stopBtn = document.getElementById("aichat-stop-btn");
+      var attachBtn = document.getElementById("aichat-attach-btn");
+      var fileInput = document.getElementById("aichat-file-input");
+      var wordCountEl = document.getElementById("aichat-wordcount");
+      var keyBanner = document.getElementById("aichat-key-banner");
+      var bannerSettingsBtn = document.getElementById("aichat-banner-settings-btn");
+
+      var newChatBtn = document.getElementById("aichat-new-btn");
+      var clearChatBtn = document.getElementById("aichat-clear-btn");
+      var exportTxtBtn = document.getElementById("aichat-export-txt-btn");
+      var exportPdfBtn = document.getElementById("aichat-export-pdf-btn");
+      var settingsBtn = document.getElementById("aichat-settings-btn");
+
+      var settingsOverlay = document.getElementById("aichat-settings-overlay");
+      var settingsClose = document.getElementById("aichat-settings-close");
+      var apiKeyInput = document.getElementById("aichat-api-key-input");
+      var keyToggleBtn = document.getElementById("aichat-key-toggle-visibility");
+      var keySaveBtn = document.getElementById("aichat-key-save");
+      var keyRemoveBtn = document.getElementById("aichat-key-remove");
+      var keyStatusEl = document.getElementById("aichat-key-status");
+      var modelSelect = document.getElementById("aichat-model-select");
+
+      // ---------- State ----------
+      var state = {
+        messages: [],        // {role:'user'|'model', text, files:[{name,kind,mimeType}], error:false}
+        pendingFiles: [],     // {id,name,size,kind,mimeType,data|text}
+        isGenerating: false,
+        abortController: null
+      };
+
+      // ---------- Settings persistence ----------
+      function loadSettings() {
+        try {
+          var raw = localStorage.getItem(SETTINGS_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) { return {}; }
+      }
+      function saveSettings(s) {
+        try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch (e) { /* storage unavailable */ }
+      }
+      function getApiKey() {
+        var s = loadSettings();
+        return s.apiKey || "";
+      }
+      function getModel() {
+        var s = loadSettings();
+        return s.model || "gemini-2.5-flash";
+      }
+
+      function refreshKeyBanner() {
+        var hasKey = !!getApiKey();
+        keyBanner.style.display = hasKey ? "none" : "block";
+        sendBtn.disabled = false; // keep clickable; sending will route to settings if missing
+      }
+
+      // ---------- History persistence ----------
+      function persistHistory() {
+        try {
+          var slim = state.messages.map(function (m) {
+            return { role: m.role, text: m.text, files: (m.files || []).map(function (f) { return { name: f.name, kind: f.kind }; }), error: !!m.error };
+          });
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(slim));
+        } catch (e) { /* ignore quota errors */ }
+      }
+      function loadHistory() {
+        try {
+          var raw = localStorage.getItem(HISTORY_KEY);
+          var arr = raw ? JSON.parse(raw) : [];
+          if (Array.isArray(arr)) {
+            arr.forEach(function (m) {
+              state.messages.push({ role: m.role, text: m.text, files: m.files || [], error: !!m.error });
+              renderMessage(m.role, m.text, m.files || [], { skipActions: false, isError: !!m.error });
+            });
+            if (arr.length) toggleEmptyState(false);
+          }
+        } catch (e) { /* ignore corrupt history */ }
+      }
+
+      // ---------- Utility ----------
+      function toggleEmptyState(show) {
+        emptyStateEl.style.display = show ? "flex" : "none";
+      }
+      function escapeHtml(str) {
+        var div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+      }
+      function scrollToBottomIfNear() {
+        var threshold = 140;
+        var distanceFromBottom = messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight;
+        if (distanceFromBottom < threshold) {
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+      }
+      function forceScrollToBottom() {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+      function fileIconSvg() {
+        return '<svg viewBox="0 0 24 24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+      }
+      function imageIconSvg() {
+        return '<svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+      }
+
+      // ---------- Markdown rendering ----------
+      function renderMarkdown(text) {
+        var html;
+        try {
+          if (window.marked) {
+            var raw = typeof window.marked.parse === "function" ? window.marked.parse(text) : window.marked(text);
+            html = window.DOMPurify ? window.DOMPurify.sanitize(raw) : raw;
+          } else {
+            html = escapeHtml(text).replace(/\n/g, "<br>");
+          }
+        } catch (e) {
+          html = escapeHtml(text).replace(/\n/g, "<br>");
+        }
+        return html;
+      }
+
+      function attachCodeCopyButtons(container) {
+        var blocks = container.querySelectorAll("pre");
+        blocks.forEach(function (pre) {
+          if (pre.querySelector(".aichat-code-copy-btn")) return;
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "aichat-code-copy-btn";
+          btn.textContent = "Copy";
+          btn.addEventListener("click", function () {
+            var codeEl = pre.querySelector("code") || pre;
+            var text = codeEl.textContent || "";
+            copyTextToClipboard(text).then(function () {
+              btn.textContent = "Copied!";
+              setTimeout(function () { btn.textContent = "Copy"; }, 1500);
+            });
+          });
+          pre.appendChild(btn);
+        });
+      }
+
+      function copyTextToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(text).catch(function () { fallbackCopy(text); });
+        }
+        return new Promise(function (resolve) { fallbackCopy(text); resolve(); });
+      }
+      function fallbackCopy(text) {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (e) { /* no-op */ }
+        document.body.removeChild(ta);
+      }
+
+      // ---------- Rendering messages ----------
+      function renderFileChips(files) {
+        if (!files || !files.length) return "";
+        var chips = files.map(function (f) {
+          var icon = f.kind === "image" ? imageIconSvg() : fileIconSvg();
+          return '<span class="aichat-file-chip">' + icon + '<span>' + escapeHtml(f.name) + '</span></span>';
+        }).join("");
+        return '<div class="aichat-file-row">' + chips + '</div>';
+      }
+
+      function renderMessage(role, text, files, opts) {
+        opts = opts || {};
+        toggleEmptyState(false);
+
+        var wrap = document.createElement("div");
+        wrap.className = "aichat-msg " + (role === "user" ? "user" : "ai");
+
+        var avatar = document.createElement("div");
+        avatar.className = "aichat-avatar " + (role === "user" ? "user" : "ai");
+        if (role === "user") {
+          avatar.textContent = "U";
+        } else {
+          avatar.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M12 7V3"/><circle cx="8.5" cy="13.5" r="1.3" fill="#0d0d0f" stroke="none"/><circle cx="15.5" cy="13.5" r="1.3" fill="#0d0d0f" stroke="none"/><path d="M8.5 17h7"/></svg>';
+        }
+
+        var col = document.createElement("div");
+        col.className = "aichat-msg-col";
+
+        var filesHtml = renderFileChips(files);
+        if (filesHtml) {
+          var filesWrap = document.createElement("div");
+          filesWrap.innerHTML = filesHtml;
+          col.appendChild(filesWrap);
+        }
+
+        var bubble = document.createElement("div");
+        bubble.className = "aichat-bubble" + (opts.isError ? " is-error" : "");
+        if (role === "user") {
+          bubble.textContent = text;
+        } else {
+          bubble.innerHTML = renderMarkdown(text || "");
+          attachCodeCopyButtons(bubble);
+        }
+        col.appendChild(bubble);
+
+        if (!opts.skipActions) {
+          var actions = document.createElement("div");
+          actions.className = "aichat-msg-actions";
+
+          if (role === "ai" && !opts.isError) {
+            var copyBtn = document.createElement("button");
+            copyBtn.type = "button";
+            copyBtn.className = "aichat-msg-action-btn";
+            copyBtn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg> Copy';
+            copyBtn.addEventListener("click", function () {
+              copyTextToClipboard(text).then(function () {
+                copyBtn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Copied';
+                setTimeout(function () { copyBtn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg> Copy'; }, 1500);
+              });
+            });
+            actions.appendChild(copyBtn);
+
+            var regenBtn = document.createElement("button");
+            regenBtn.type = "button";
+            regenBtn.className = "aichat-msg-action-btn";
+            regenBtn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 17-6.5l2.5 2.5M22 12.5a10 10 0 0 1-17 6.5L2.5 16.5"/></svg> Regenerate';
+            regenBtn.addEventListener("click", function () { regenerateFromMessage(wrap); });
+            actions.appendChild(regenBtn);
+          }
+
+          if (opts.isError) {
+            var retryBtn = document.createElement("button");
+            retryBtn.type = "button";
+            retryBtn.className = "aichat-msg-action-btn";
+            retryBtn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 17-6.5l2.5 2.5M22 12.5a10 10 0 0 1-17 6.5L2.5 16.5"/></svg> Retry';
+            retryBtn.addEventListener("click", function () { retryFromErrorMessage(wrap); });
+            actions.appendChild(retryBtn);
+          }
+
+          if (actions.childNodes.length) col.appendChild(actions);
+        }
+
+        wrap.appendChild(role === "user" ? col : avatar);
+        wrap.appendChild(role === "user" ? avatar : col);
+        messagesEl.appendChild(wrap);
+        forceScrollToBottom();
+        return { wrap: wrap, bubble: bubble, col: col };
+      }
+
+      // ---------- Typing indicator ----------
+      function renderTypingIndicator() {
+        toggleEmptyState(false);
+        var wrap = document.createElement("div");
+        wrap.className = "aichat-msg ai";
+        wrap.id = "aichat-typing-wrap";
+
+        var avatar = document.createElement("div");
+        avatar.className = "aichat-avatar ai";
+        avatar.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M12 7V3"/><circle cx="8.5" cy="13.5" r="1.3" fill="#0d0d0f" stroke="none"/><circle cx="15.5" cy="13.5" r="1.3" fill="#0d0d0f" stroke="none"/><path d="M8.5 17h7"/></svg>';
+
+        var col = document.createElement("div");
+        col.className = "aichat-msg-col";
+        var bubble = document.createElement("div");
+        bubble.className = "aichat-bubble";
+        bubble.innerHTML = '<span class="aichat-typing"><span></span><span></span><span></span></span>';
+        col.appendChild(bubble);
+
+        wrap.appendChild(avatar);
+        wrap.appendChild(col);
+        messagesEl.appendChild(wrap);
+        forceScrollToBottom();
+        return { wrap: wrap, bubble: bubble, col: col };
+      }
+
+      // ---------- Word / character counter ----------
+      function updateCounter() {
+        var text = inputEl.value;
+        var chars = text.length;
+        var words = text.trim().length ? text.trim().split(/\s+/).length : 0;
+        wordCountEl.textContent = words + " word" + (words === 1 ? "" : "s") + " · " + chars + " character" + (chars === 1 ? "" : "s");
+      }
+
+      function autoResizeTextarea() {
+        inputEl.style.height = "auto";
+        inputEl.style.height = Math.min(inputEl.scrollHeight, 160) + "px";
+      }
+
+      // ---------- Attachments ----------
+      function fileKindFor(file) {
+        if (file.type && file.type.indexOf("image/") === 0) return "image";
+        if (file.type === "application/pdf" || /\.pdf$/i.test(file.name)) return "pdf";
+        if (/\.docx$/i.test(file.name)) return "docx";
+        return "text";
+      }
+
+      function readFileAsDataURL(file) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function () { resolve(reader.result); };
+          reader.onerror = function () { reject(reader.error); };
+          reader.readAsDataURL(file);
+        });
+      }
+      function readFileAsText(file) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function () { resolve(reader.result); };
+          reader.onerror = function () { reject(reader.error); };
+          reader.readAsText(file);
+        });
+      }
+      function readFileAsArrayBuffer(file) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function () { resolve(reader.result); };
+          reader.onerror = function () { reject(reader.error); };
+          reader.readAsArrayBuffer(file);
+        });
+      }
+
+      function processFile(file) {
+        var kind = fileKindFor(file);
+        var id = "f_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+
+        if (kind === "image" || kind === "pdf") {
+          return readFileAsDataURL(file).then(function (dataUrl) {
+            var base64 = dataUrl.split(",")[1] || "";
+            return {
+              id: id, name: file.name, size: file.size, kind: kind,
+              mimeType: kind === "pdf" ? "application/pdf" : (file.type || "image/png"),
+              data: base64
+            };
+          });
+        }
+        if (kind === "docx") {
+          return readFileAsArrayBuffer(file).then(function (buf) {
+            if (!window.mammoth) throw new Error("DOCX reader unavailable");
+            return window.mammoth.extractRawText({ arrayBuffer: buf }).then(function (result) {
+              var text = (result.value || "").slice(0, MAX_ATTACH_TEXT_CHARS);
+              return { id: id, name: file.name, size: file.size, kind: "text", mimeType: "text/plain", text: text };
+            });
+          });
+        }
+        // plain text / other
+        return readFileAsText(file).then(function (text) {
+          return { id: id, name: file.name, size: file.size, kind: "text", mimeType: "text/plain", text: (text || "").slice(0, MAX_ATTACH_TEXT_CHARS) };
+        });
+      }
+
+      function renderAttachPreview() {
+        attachPreviewEl.innerHTML = "";
+        state.pendingFiles.forEach(function (f) {
+          var chip = document.createElement("div");
+          chip.className = "aichat-attach-chip";
+          var icon = f.kind === "image" ? imageIconSvg() : fileIconSvg();
+          chip.innerHTML = icon + '<span class="name">' + escapeHtml(f.name) + '</span>';
+          var removeBtn = document.createElement("button");
+          removeBtn.type = "button";
+          removeBtn.className = "remove";
+          removeBtn.setAttribute("aria-label", "Remove " + f.name);
+          removeBtn.textContent = "✕";
+          removeBtn.addEventListener("click", function () {
+            state.pendingFiles = state.pendingFiles.filter(function (x) { return x.id !== f.id; });
+            renderAttachPreview();
+          });
+          chip.appendChild(removeBtn);
+          attachPreviewEl.appendChild(chip);
+        });
+      }
+
+      attachBtn.addEventListener("click", function () { fileInput.click(); });
+      fileInput.addEventListener("change", function () {
+        var files = Array.prototype.slice.call(fileInput.files || []);
+        fileInput.value = "";
+        if (!files.length) return;
+        Promise.all(files.map(function (f) {
+          return processFile(f).catch(function (err) {
+            console.error("AI Chat Assistant file read error:", err);
+            return null;
+          });
+        })).then(function (results) {
+          results.forEach(function (r) { if (r) state.pendingFiles.push(r); });
+          renderAttachPreview();
+        });
+      });
+
+      // ---------- Gemini API ----------
+      function buildContentsFromMessages(messages) {
+        return messages.map(function (m) {
+          var parts = [];
+          (m.filesData || []).forEach(function (f) {
+            if (f.kind === "image" || f.kind === "pdf") {
+              parts.push({ inlineData: { mimeType: f.mimeType, data: f.data } });
+            } else if (f.text) {
+              parts.push({ text: "Attached file \"" + f.name + "\":\n\n" + f.text });
+            }
+          });
+          if (m.text) parts.push({ text: m.text });
+          if (!parts.length) parts.push({ text: "" });
+          return { role: m.role === "user" ? "user" : "model", parts: parts };
+        });
+      }
+
+      function streamGemini(messages, onChunk, signal) {
+        var apiKey = getApiKey();
+        var model = getModel();
+        var url = "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":streamGenerateContent?alt=sse";
+
+        return fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
+          },
+          body: JSON.stringify({
+            contents: buildContentsFromMessages(messages),
+            generationConfig: { temperature: 0.9, topP: 0.95 }
+          }),
+          signal: signal
+        }).then(function (response) {
+          if (!response.ok) {
+            return response.text().then(function (bodyText) {
+              var msg = "Request failed (HTTP " + response.status + ").";
+              try {
+                var parsed = JSON.parse(bodyText);
+                if (parsed && parsed.error && parsed.error.message) msg = parsed.error.message;
+              } catch (e) { /* ignore parse error */ }
+              throw new Error(msg);
+            });
+          }
+          var reader = response.body.getReader();
+          var decoder = new TextDecoder("utf-8");
+          var buffer = "";
+
+          function pump() {
+            return reader.read().then(function (result) {
+              if (result.done) return;
+              buffer += decoder.decode(result.value, { stream: true });
+              var frames = buffer.split("\n\n");
+              buffer = frames.pop();
+              frames.forEach(function (frame) {
+                var lines = frame.split("\n");
+                lines.forEach(function (line) {
+                  line = line.trim();
+                  if (line.indexOf("data:") !== 0) return;
+                  var jsonStr = line.slice(5).trim();
+                  if (!jsonStr || jsonStr === "[DONE]") return;
+                  try {
+                    var obj = JSON.parse(jsonStr);
+                    var cands = obj.candidates || [];
+                    if (cands.length && cands[0].content && cands[0].content.parts) {
+                      cands[0].content.parts.forEach(function (p) {
+                        if (p.text) onChunk(p.text);
+                      });
+                    }
+                    if (cands.length && cands[0].finishReason && cands[0].finishReason !== "STOP" && cands[0].finishReason !== "MAX_TOKENS") {
+                      // surface non-standard finish reasons (SAFETY, RECITATION, etc.) without throwing away partial text
+                      onChunk("", cands[0].finishReason);
+                    }
+                  } catch (e) { /* ignore malformed frame */ }
+                });
+              });
+              return pump();
+            });
+          }
+          return pump();
+        });
+      }
+
+      // ---------- Send / generate flow ----------
+      function setGenerating(isGen) {
+        state.isGenerating = isGen;
+        sendBtn.style.display = isGen ? "none" : "grid";
+        stopBtn.style.display = isGen ? "inline-flex" : "none";
+        inputEl.disabled = isGen;
+      }
+
+      function openSettings() {
+        settingsOverlay.classList.add("is-open");
+        apiKeyInput.value = getApiKey();
+        modelSelect.value = getModel();
+        setTimeout(function () { apiKeyInput.focus(); }, 50);
+      }
+      function closeSettings() {
+        settingsOverlay.classList.remove("is-open");
+      }
+
+      function sendMessage(promptOverride) {
+        if (state.isGenerating) return;
+        var text = (typeof promptOverride === "string" ? promptOverride : inputEl.value).trim();
+        var files = state.pendingFiles.slice();
+
+        if (!text && !files.length) return;
+
+        if (!getApiKey()) {
+          refreshKeyBanner();
+          openSettings();
+          return;
+        }
+
+        var userMsg = { role: "user", text: text, files: files.map(function (f) { return { name: f.name, kind: f.kind }; }), filesData: files };
+        state.messages.push(userMsg);
+        renderMessage("user", text, userMsg.files, {});
+        persistHistory();
+
+        inputEl.value = "";
+        autoResizeTextarea();
+        updateCounter();
+        state.pendingFiles = [];
+        renderAttachPreview();
+
+        runGeneration();
+      }
+
+      function runGeneration() {
+        setGenerating(true);
+        var typing = renderTypingIndicator();
+        var accumulated = "";
+        var firstChunkReceived = false;
+        var controller = new AbortController();
+        state.abortController = controller;
+
+        var historyForRequest = state.messages.filter(function (m) { return !m.error; });
+
+        streamGemini(historyForRequest, function (chunk, finishReason) {
+          if (chunk) {
+            accumulated += chunk;
+            if (!firstChunkReceived) {
+              firstChunkReceived = true;
+              typing.bubble.innerHTML = "";
+            }
+            typing.bubble.innerHTML = renderMarkdown(accumulated);
+            attachCodeCopyButtons(typing.bubble);
+            scrollToBottomIfNear();
+          }
+          if (finishReason) {
+            accumulated += "\n\n_[Response stopped: " + finishReason + "]_";
+          }
+        }, controller.signal).then(function () {
+          finalizeAIMessage(typing, accumulated, false);
+        }).catch(function (err) {
+          if (err && err.name === "AbortError") {
+            finalizeAIMessage(typing, accumulated || "_Generation stopped._", false);
+          } else {
+            var errMsg = (err && err.message) ? err.message : "Something went wrong contacting Gemini.";
+            finalizeErrorMessage(typing, errMsg);
+          }
+        });
+      }
+
+      function finalizeAIMessage(typingRefs, text, isError) {
+        typingRefs.wrap.remove();
+        state.messages.push({ role: "model", text: text, files: [], error: false });
+        renderMessage("ai", text, [], { isError: isError });
+        persistHistory();
+        setGenerating(false);
+        state.abortController = null;
+      }
+
+      function finalizeErrorMessage(typingRefs, errMsg) {
+        typingRefs.wrap.remove();
+        var displayText = "⚠️ " + errMsg;
+        state.messages.push({ role: "model", text: displayText, files: [], error: true });
+        renderMessage("ai", displayText, [], { isError: true });
+        persistHistory();
+        setGenerating(false);
+        state.abortController = null;
+        if (/api key|permission|unauthenticated|API_KEY_INVALID/i.test(errMsg)) {
+          refreshKeyBanner();
+        }
+      }
+
+      function regenerateFromMessage(wrapEl) {
+        if (state.isGenerating) return;
+        // find index of this AI message in DOM and remove the last model message from state + DOM
+        var lastModelIndex = -1;
+        for (var i = state.messages.length - 1; i >= 0; i--) {
+          if (state.messages[i].role === "model") { lastModelIndex = i; break; }
+        }
+        if (lastModelIndex === -1) return;
+        state.messages.splice(lastModelIndex, 1);
+        wrapEl.remove();
+        persistHistory();
+        runGeneration();
+      }
+
+      function retryFromErrorMessage(wrapEl) {
+        if (state.isGenerating) return;
+        var idx = -1;
+        for (var i = state.messages.length - 1; i >= 0; i--) {
+          if (state.messages[i].role === "model" && state.messages[i].error) { idx = i; break; }
+        }
+        if (idx !== -1) state.messages.splice(idx, 1);
+        wrapEl.remove();
+        persistHistory();
+        runGeneration();
+      }
+
+      stopBtn.addEventListener("click", function () {
+        if (state.abortController) state.abortController.abort();
+      });
+
+      sendBtn.addEventListener("click", function () { sendMessage(); });
+      inputEl.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      inputEl.addEventListener("input", function () { updateCounter(); autoResizeTextarea(); });
+
+      messagesEl.addEventListener("click", function (e) {
+        var chip = e.target.closest(".aichat-suggest-chip");
+        if (chip) {
+          inputEl.value = chip.getAttribute("data-prompt") || "";
+          updateCounter();
+          autoResizeTextarea();
+          inputEl.focus();
+        }
+      });
+
+      // ---------- New Chat / Clear Chat ----------
+      function resetChat() {
+        if (state.abortController) state.abortController.abort();
+        setGenerating(false);
+        state.messages = [];
+        state.pendingFiles = [];
+        renderAttachPreview();
+        messagesEl.querySelectorAll(".aichat-msg, #aichat-typing-wrap").forEach(function (n) { n.remove(); });
+        toggleEmptyState(true);
+        try { localStorage.removeItem(HISTORY_KEY); } catch (e) { /* ignore */ }
+      }
+      newChatBtn.addEventListener("click", resetChat);
+      clearChatBtn.addEventListener("click", function () {
+        if (!state.messages.length) return;
+        if (window.confirm("Clear the current conversation? This cannot be undone.")) {
+          resetChat();
+        }
+      });
+
+      // ---------- Export ----------
+      function downloadBlob(blob, filename) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }
+
+      exportTxtBtn.addEventListener("click", function () {
+        if (!state.messages.length) return;
+        var lines = state.messages.map(function (m) {
+          var label = m.role === "user" ? "You" : "AI Assistant";
+          return label + ":\n" + m.text + "\n";
+        });
+        var blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+        downloadBlob(blob, "ai-chat-export.txt");
+      });
+
+      exportPdfBtn.addEventListener("click", function () {
+        if (!state.messages.length) return;
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+          alert("PDF export library is still loading — please try again in a moment.");
+          return;
+        }
+        var doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
+        var margin = 40;
+        var maxWidth = 515;
+        var y = margin;
+        var lineHeight = 15;
+        var pageHeight = doc.internal.pageSize.getHeight();
+
+        doc.setFontSize(16);
+        doc.text("AI Chat Assistant — Conversation Export", margin, y);
+        y += 26;
+        doc.setFontSize(10);
+
+        state.messages.forEach(function (m) {
+          var label = m.role === "user" ? "You" : "AI Assistant";
+          doc.setFont(undefined, "bold");
+          if (y > pageHeight - margin) { doc.addPage(); y = margin; }
+          doc.text(label + ":", margin, y);
+          y += lineHeight;
+          doc.setFont(undefined, "normal");
+          var textLines = doc.splitTextToSize(m.text || "", maxWidth);
+          textLines.forEach(function (line) {
+            if (y > pageHeight - margin) { doc.addPage(); y = margin; }
+            doc.text(line, margin, y);
+            y += lineHeight;
+          });
+          y += 8;
+        });
+
+        doc.save("ai-chat-export.pdf");
+      });
+
+      // ---------- Settings modal ----------
+      settingsBtn.addEventListener("click", openSettings);
+      bannerSettingsBtn.addEventListener("click", openSettings);
+      settingsClose.addEventListener("click", closeSettings);
+      settingsOverlay.addEventListener("click", function (e) {
+        if (e.target === settingsOverlay) closeSettings();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && settingsOverlay.classList.contains("is-open")) closeSettings();
+      });
+
+      keyToggleBtn.addEventListener("click", function () {
+        var isPassword = apiKeyInput.type === "password";
+        apiKeyInput.type = isPassword ? "text" : "password";
+      });
+
+      keySaveBtn.addEventListener("click", function () {
+        var key = apiKeyInput.value.trim();
+        if (!key) {
+          keyStatusEl.textContent = "Please enter a valid API key.";
+          keyStatusEl.className = "aichat-key-status is-err";
+          return;
+        }
+        var s = loadSettings();
+        s.apiKey = key;
+        s.model = modelSelect.value;
+        saveSettings(s);
+        keyStatusEl.textContent = "✓ API key saved locally.";
+        keyStatusEl.className = "aichat-key-status is-ok";
+        refreshKeyBanner();
+        setTimeout(function () { closeSettings(); }, 700);
+      });
+
+      keyRemoveBtn.addEventListener("click", function () {
+        var s = loadSettings();
+        delete s.apiKey;
+        saveSettings(s);
+        apiKeyInput.value = "";
+        keyStatusEl.textContent = "API key removed.";
+        keyStatusEl.className = "aichat-key-status is-err";
+        refreshKeyBanner();
+      });
+
+      modelSelect.addEventListener("change", function () {
+        var s = loadSettings();
+        s.model = modelSelect.value;
+        saveSettings(s);
+      });
+
+      // ---------- Init ----------
+      loadHistory();
+      refreshKeyBanner();
+      updateCounter();
+      modelSelect.value = getModel();
+    })();
+  </script>
+
 </body>
 </html>
