@@ -2954,10 +2954,9 @@
             <div class="aichat-modal-divider"></div>
             <label for="aichat-model-select">Model</label>
             <select id="aichat-model-select" class="aichat-select">
-              <option value="gemini-3.6-flash">Gemini 3.6 Flash (latest, recommended)</option>
-              <option value="gemini-3.5-flash">Gemini 3.5 Flash (frontier reasoning)</option>
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash (fast, low-latency)</option>
-              <option value="gemini-2.5-pro">Gemini 2.5 Pro (deep reasoning)</option>
+              <option value="lite">Flash Lite (fastest, recommended)</option>
+              <option value="flash">Flash (balanced speed &amp; intelligence)</option>
+              <option value="pro">Pro (deepest reasoning)</option>
             </select>
           </div>
         </div>
@@ -10559,9 +10558,25 @@
         var s = loadSettings();
         return s.apiKey || "";
       }
-      function getModel() {
+
+      // ---------- Model tiers ----------
+      // Each tier lists candidate model IDs newest-first. The "-latest" alias
+      // is tried first so the assistant automatically rides Google's newest
+      // release for that tier; explicit stable IDs behind it are fallbacks
+      // used only if the alias or newer model is unavailable for this key/region.
+      var MODEL_CHAINS = {
+        lite: ["gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-2.5-flash-lite"],
+        flash: ["gemini-flash-latest", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash"],
+        pro: ["gemini-pro-latest", "gemini-3.1-pro-preview", "gemini-2.5-pro"]
+      };
+      function getTier() {
         var s = loadSettings();
-        return s.model || "gemini-3.6-flash";
+        var t = s.tier || s.model; // migrate legacy raw-model-name setting if present
+        if (t === "lite" || t === "flash" || t === "pro") return t;
+        return "lite";
+      }
+      function getModelChain() {
+        return MODEL_CHAINS[getTier()] || MODEL_CHAINS.lite;
       }
 
       function refreshKeyBanner() {
@@ -10915,70 +10930,90 @@
         });
       }
 
+      function isModelUnavailableError(status, bodyText) {
+        if (status === 404) return true;
+        var s = (bodyText || "").toLowerCase();
+        return /not found|not supported|does not exist|unable to find|unknown model|no access to model|not available in your (region|location)/.test(s);
+      }
+
       function streamGemini(messages, onChunk, signal) {
         var apiKey = getApiKey();
-        var model = getModel();
-        var url = "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":streamGenerateContent?alt=sse";
+        var chain = getModelChain();
 
-        return fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": apiKey
-          },
-          body: JSON.stringify({
-            contents: buildContentsFromMessages(messages),
-            generationConfig: { temperature: 0.9, topP: 0.95 }
-          }),
-          signal: signal
-        }).then(function (response) {
-          if (!response.ok) {
-            return response.text().then(function (bodyText) {
-              var msg = "Request failed (HTTP " + response.status + ").";
-              try {
-                var parsed = JSON.parse(bodyText);
-                if (parsed && parsed.error && parsed.error.message) msg = parsed.error.message;
-              } catch (e) { /* ignore parse error */ }
-              throw new Error(msg);
-            });
-          }
-          var reader = response.body.getReader();
-          var decoder = new TextDecoder("utf-8");
-          var buffer = "";
+        function attempt(chainIndex) {
+          var model = chain[chainIndex];
+          var url = "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":streamGenerateContent?alt=sse";
 
-          function pump() {
-            return reader.read().then(function (result) {
-              if (result.done) return;
-              buffer += decoder.decode(result.value, { stream: true });
-              var frames = buffer.split("\n\n");
-              buffer = frames.pop();
-              frames.forEach(function (frame) {
-                var lines = frame.split("\n");
-                lines.forEach(function (line) {
-                  line = line.trim();
-                  if (line.indexOf("data:") !== 0) return;
-                  var jsonStr = line.slice(5).trim();
-                  if (!jsonStr || jsonStr === "[DONE]") return;
-                  try {
-                    var obj = JSON.parse(jsonStr);
-                    var cands = obj.candidates || [];
-                    if (cands.length && cands[0].content && cands[0].content.parts) {
-                      cands[0].content.parts.forEach(function (p) {
-                        if (p.text) onChunk(p.text);
-                      });
-                    }
-                    if (cands.length && cands[0].finishReason && cands[0].finishReason !== "STOP" && cands[0].finishReason !== "MAX_TOKENS") {
-                      // surface non-standard finish reasons (SAFETY, RECITATION, etc.) without throwing away partial text
-                      onChunk("", cands[0].finishReason);
-                    }
-                  } catch (e) { /* ignore malformed frame */ }
-                });
+          return fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": apiKey
+            },
+            body: JSON.stringify({
+              contents: buildContentsFromMessages(messages),
+              generationConfig: { temperature: 0.9, topP: 0.95 }
+            }),
+            signal: signal
+          }).then(function (response) {
+            if (!response.ok) {
+              return response.text().then(function (bodyText) {
+                var msg = "Request failed (HTTP " + response.status + ").";
+                try {
+                  var parsed = JSON.parse(bodyText);
+                  if (parsed && parsed.error && parsed.error.message) msg = parsed.error.message;
+                } catch (e) { /* ignore parse error */ }
+
+                if (isModelUnavailableError(response.status, bodyText) && chainIndex + 1 < chain.length) {
+                  // This model isn't available for this key/account/region — silently
+                  // move on to the next candidate in the tier instead of surfacing an error.
+                  return attempt(chainIndex + 1);
+                }
+                var err = new Error(msg);
+                err.status = response.status;
+                throw err;
               });
-              return pump();
-            });
-          }
-          return pump();
-        });
+            }
+            var reader = response.body.getReader();
+            var decoder = new TextDecoder("utf-8");
+            var buffer = "";
+
+            function pump() {
+              return reader.read().then(function (result) {
+                if (result.done) return;
+                buffer += decoder.decode(result.value, { stream: true });
+                var frames = buffer.split("\n\n");
+                buffer = frames.pop();
+                frames.forEach(function (frame) {
+                  var lines = frame.split("\n");
+                  lines.forEach(function (line) {
+                    line = line.trim();
+                    if (line.indexOf("data:") !== 0) return;
+                    var jsonStr = line.slice(5).trim();
+                    if (!jsonStr || jsonStr === "[DONE]") return;
+                    try {
+                      var obj = JSON.parse(jsonStr);
+                      var cands = obj.candidates || [];
+                      if (cands.length && cands[0].content && cands[0].content.parts) {
+                        cands[0].content.parts.forEach(function (p) {
+                          if (p.text) onChunk(p.text);
+                        });
+                      }
+                      if (cands.length && cands[0].finishReason && cands[0].finishReason !== "STOP" && cands[0].finishReason !== "MAX_TOKENS") {
+                        // surface non-standard finish reasons (SAFETY, RECITATION, etc.) without throwing away partial text
+                        onChunk("", cands[0].finishReason);
+                      }
+                    } catch (e) { /* ignore malformed frame */ }
+                  });
+                });
+                return pump();
+              });
+            }
+            return pump();
+          });
+        }
+
+        return attempt(0);
       }
 
       // ---------- Send / generate flow ----------
@@ -10992,7 +11027,7 @@
       function openSettings() {
         settingsOverlay.classList.add("is-open");
         apiKeyInput.value = getApiKey();
-        modelSelect.value = getModel();
+        modelSelect.value = getTier();
         setTimeout(function () { apiKeyInput.focus(); }, 50);
       }
       function closeSettings() {
@@ -11236,7 +11271,8 @@
         }
         var s = loadSettings();
         s.apiKey = key;
-        s.model = modelSelect.value;
+        s.tier = modelSelect.value;
+        delete s.model; // legacy raw-model-name field, superseded by tier
         saveSettings(s);
         keyStatusEl.textContent = "✓ API key saved locally.";
         keyStatusEl.className = "aichat-key-status is-ok";
@@ -11256,7 +11292,8 @@
 
       modelSelect.addEventListener("change", function () {
         var s = loadSettings();
-        s.model = modelSelect.value;
+        s.tier = modelSelect.value;
+        delete s.model;
         saveSettings(s);
       });
 
@@ -11264,7 +11301,7 @@
       loadHistory();
       refreshKeyBanner();
       updateCounter();
-      modelSelect.value = getModel();
+      modelSelect.value = getTier();
     })();
   </script>
 
