@@ -10905,17 +10905,41 @@
           }),
           signal: signal
         }).then(function (response) {
-          return response.json().catch(function () { return {}; }).then(function (data) {
+          // Read as raw text first: if /api/chat isn't deployed (e.g. Vercel
+          // returns its own 404/500 HTML page), response.json() would throw
+          // and previously got swallowed into a generic "Unable to contact
+          // AI" message. Parsing text ourselves lets us surface what Vercel
+          // (or Gemini) actually said.
+          return response.text().then(function (rawText) {
+            var data;
+            try {
+              data = rawText ? JSON.parse(rawText) : {};
+            } catch (parseErr) {
+              data = {
+                error: {
+                  message: "Server returned a non-JSON response (HTTP " + response.status + "). " +
+                    "This usually means /api/chat isn't deployed as a Vercel Serverless Function — " +
+                    "check the Vercel deployment's Functions tab. Raw response: " +
+                    rawText.slice(0, 200)
+                }
+              };
+            }
+
             if (!response.ok || data.error) {
-              console.error(data);
+              console.error("AI Chat error response:", data);
               showServiceBanner(true);
-              var errMessage = (data && data.error && data.error.message) || "Unable to contact AI. Please try again.";
-              alert(errMessage);
+              var errMessage = (data && data.error && data.error.message) ||
+                ("Unable to contact AI (HTTP " + response.status + "). Please try again.");
               throw new Error(errMessage);
             }
             showServiceBanner(false);
 
             console.log("Gemini Response:", data);
+
+            // Check for safety/policy blocks, which return 200 OK with no candidates.
+            if (data.promptFeedback && data.promptFeedback.blockReason) {
+              throw new Error("Response blocked by Gemini safety filters (" + data.promptFeedback.blockReason + ").");
+            }
 
             // Safe extraction of the reply text per the current Gemini REST API shape.
             var text = "";
@@ -10934,6 +10958,18 @@
 
             onChunk(text);
           });
+        });
+      }
+
+      // Runs streamGemini with one automatic retry on failure (skips retry
+      // for user-initiated aborts). Keeps the UI's loading state so the
+      // retry is invisible except for a brief label change.
+      function streamGeminiWithRetry(messages, onChunk, signal, onRetrying) {
+        return streamGemini(messages, onChunk, signal).catch(function (err) {
+          if (err && err.name === "AbortError") throw err;
+          if (typeof onRetrying === "function") onRetrying();
+          return new Promise(function (resolve) { setTimeout(resolve, 800); })
+            .then(function () { return streamGemini(messages, onChunk, signal); });
         });
       }
 
@@ -10984,7 +11020,7 @@
 
         var historyForRequest = state.messages.filter(function (m) { return !m.error; });
 
-        streamGemini(historyForRequest, function (chunk, finishReason) {
+        streamGeminiWithRetry(historyForRequest, function (chunk, finishReason) {
           if (chunk) {
             accumulated += chunk;
             if (!firstChunkReceived) {
@@ -10998,7 +11034,11 @@
           if (finishReason) {
             accumulated += "\n\n_[Response stopped: " + finishReason + "]_";
           }
-        }, controller.signal).then(function () {
+        }, controller.signal, function onRetrying() {
+          if (!firstChunkReceived) {
+            typing.bubble.innerHTML = '<span class="aichat-typing-retry">Connection hiccup — retrying…</span>';
+          }
+        }).then(function () {
           finalizeAIMessage(typing, accumulated, false);
         }).catch(function (err) {
           if (err && err.name === "AbortError") {
