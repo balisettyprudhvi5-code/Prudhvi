@@ -2887,8 +2887,7 @@
             </div>
 
             <div class="aichat-key-banner" id="aichat-key-banner" style="display:none;">
-              Please enter your Gemini API Key in Settings.
-              <button type="button" id="aichat-banner-settings-btn">Open Settings</button>
+              AI service is temporarily unavailable. Please try again shortly.
             </div>
 
             <div class="aichat-messages" id="aichat-messages" aria-live="polite">
@@ -2938,19 +2937,7 @@
             <button type="button" class="aichat-modal-close" id="aichat-settings-close" aria-label="Close settings">✕</button>
           </div>
           <div class="aichat-modal-body">
-            <label for="aichat-api-key-input">Gemini API Key</label>
-            <div class="aichat-key-input-wrap">
-              <input type="password" id="aichat-api-key-input" placeholder="Paste your Gemini API key" autocomplete="off" spellcheck="false" />
-              <button type="button" class="aichat-icon-btn" id="aichat-key-toggle-visibility" title="Show/Hide API key" aria-label="Show or hide API key">
-                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
-            <p class="aichat-key-hint">Your key is stored only in this browser's local storage and is sent directly to Google's Gemini API — never to Smart Compress's servers. Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.</p>
-            <div class="aichat-modal-actions">
-              <button type="button" class="btn-primary" id="aichat-key-save">Save API Key</button>
-              <button type="button" class="btn-secondary" id="aichat-key-remove">Remove API Key</button>
-            </div>
-            <p class="aichat-key-status" id="aichat-key-status"></p>
+            <p class="aichat-key-hint">🔒 This assistant is powered by a secure backend. Your Gemini API key lives only in the server's environment variables (<code>GEMINI_API_KEY</code>) — it is never sent to, stored in, or visible from your browser.</p>
             <div class="aichat-modal-divider"></div>
             <label for="aichat-model-select">Model</label>
             <select id="aichat-model-select" class="aichat-select">
@@ -10519,7 +10506,6 @@
       var fileInput = document.getElementById("aichat-file-input");
       var wordCountEl = document.getElementById("aichat-wordcount");
       var keyBanner = document.getElementById("aichat-key-banner");
-      var bannerSettingsBtn = document.getElementById("aichat-banner-settings-btn");
 
       var newChatBtn = document.getElementById("aichat-new-btn");
       var clearChatBtn = document.getElementById("aichat-clear-btn");
@@ -10529,11 +10515,6 @@
 
       var settingsOverlay = document.getElementById("aichat-settings-overlay");
       var settingsClose = document.getElementById("aichat-settings-close");
-      var apiKeyInput = document.getElementById("aichat-api-key-input");
-      var keyToggleBtn = document.getElementById("aichat-key-toggle-visibility");
-      var keySaveBtn = document.getElementById("aichat-key-save");
-      var keyRemoveBtn = document.getElementById("aichat-key-remove");
-      var keyStatusEl = document.getElementById("aichat-key-status");
       var modelSelect = document.getElementById("aichat-model-select");
 
       // ---------- State ----------
@@ -10554,35 +10535,17 @@
       function saveSettings(s) {
         try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch (e) { /* storage unavailable */ }
       }
-      function getApiKey() {
-        var s = loadSettings();
-        return s.apiKey || "";
-      }
 
-      // ---------- Model tiers ----------
-      // Each tier lists candidate model IDs newest-first. The "-latest" alias
-      // is tried first so the assistant automatically rides Google's newest
-      // release for that tier; explicit stable IDs behind it are fallbacks
-      // used only if the alias or newer model is unavailable for this key/region.
-      var MODEL_CHAINS = {
-        lite: ["gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-2.5-flash-lite"],
-        flash: ["gemini-flash-latest", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash"],
-        pro: ["gemini-pro-latest", "gemini-3.1-pro-preview", "gemini-2.5-pro"]
-      };
+      // ---------- Model tier (sent to /api/chat; fallback chain lives server-side) ----------
       function getTier() {
         var s = loadSettings();
-        var t = s.tier || s.model; // migrate legacy raw-model-name setting if present
+        var t = s.tier;
         if (t === "lite" || t === "flash" || t === "pro") return t;
         return "lite";
       }
-      function getModelChain() {
-        return MODEL_CHAINS[getTier()] || MODEL_CHAINS.lite;
-      }
 
-      function refreshKeyBanner() {
-        var hasKey = !!getApiKey();
-        keyBanner.style.display = hasKey ? "none" : "block";
-        sendBtn.disabled = false; // keep clickable; sending will route to settings if missing
+      function showServiceBanner(show) {
+        keyBanner.style.display = show ? "block" : "none";
       }
 
       // ---------- History persistence ----------
@@ -10930,71 +10893,48 @@
         });
       }
 
-      function isModelUnavailableError(status, bodyText) {
-        if (status === 404) return true;
-        var s = (bodyText || "").toLowerCase();
-        return /not found|not supported|does not exist|unable to find|unknown model|no access to model|not available in your (region|location)/.test(s);
-      }
-
       function streamGemini(messages, onChunk, signal) {
-        var apiKey = getApiKey();
-        var chain = getModelChain();
+        var tier = getTier();
 
-        function attempt(chainIndex) {
-          var model = chain[chainIndex];
-          // Latest Gemini REST endpoint (non-streaming generateContent, v1beta).
-          var url = "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent";
+        return fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: buildContentsFromMessages(messages),
+            tier: tier
+          }),
+          signal: signal
+        }).then(function (response) {
+          return response.json().catch(function () { return {}; }).then(function (data) {
+            if (!response.ok || data.error) {
+              console.error(data);
+              showServiceBanner(true);
+              var errMessage = (data && data.error && data.error.message) || "Unable to contact AI. Please try again.";
+              alert(errMessage);
+              throw new Error(errMessage);
+            }
+            showServiceBanner(false);
 
-          return fetch(url, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": apiKey
-            },
-            body: JSON.stringify({
-              contents: buildContentsFromMessages(messages),
-              generationConfig: { temperature: 0.9, topP: 0.95 }
-            }),
-            signal: signal
-          }).then(function (response) {
-            return response.json().catch(function () { return {}; }).then(function (data) {
-              if (!response.ok || data.error) {
-                if (isModelUnavailableError(response.status, JSON.stringify(data)) && chainIndex + 1 < chain.length) {
-                  // This model isn't available for this key/account/region — silently
-                  // move on to the next candidate in the tier instead of surfacing an error.
-                  return attempt(chainIndex + 1);
-                }
-                console.error(data);
-                var errMessage = (data && data.error && data.error.message) || "Unknown Gemini API error";
-                alert(errMessage);
-                var err = new Error(errMessage);
-                err.status = response.status;
-                throw err;
-              }
+            console.log("Gemini Response:", data);
 
-              console.log("Gemini Response:", data);
+            // Safe extraction of the reply text per the current Gemini REST API shape.
+            var text = "";
+            if (data.candidates && data.candidates.length) {
+              text = data.candidates
+                .flatMap(function (c) { return (c.content && c.content.parts) || []; })
+                .map(function (p) { return p.text || ""; })
+                .join("");
+            }
+            if (!text) {
+              text = data.text || "";
+            }
+            if (!text) {
+              text = "Sorry, no response was returned.";
+            }
 
-              // Safe extraction of the reply text per the current Gemini REST API shape.
-              var text = "";
-              if (data.candidates && data.candidates.length) {
-                text = data.candidates
-                  .flatMap(function (c) { return (c.content && c.content.parts) || []; })
-                  .map(function (p) { return p.text || ""; })
-                  .join("");
-              }
-              if (!text) {
-                text = data.text || "";
-              }
-              if (!text) {
-                text = "Sorry, no response was returned.";
-              }
-
-              onChunk(text);
-            });
+            onChunk(text);
           });
-        }
-
-        return attempt(0);
+        });
       }
 
       // ---------- Send / generate flow ----------
@@ -11007,9 +10947,7 @@
 
       function openSettings() {
         settingsOverlay.classList.add("is-open");
-        apiKeyInput.value = getApiKey();
         modelSelect.value = getTier();
-        setTimeout(function () { apiKeyInput.focus(); }, 50);
       }
       function closeSettings() {
         settingsOverlay.classList.remove("is-open");
@@ -11021,12 +10959,6 @@
         var files = state.pendingFiles.slice();
 
         if (!text && !files.length) return;
-
-        if (!getApiKey()) {
-          refreshKeyBanner();
-          openSettings();
-          return;
-        }
 
         var userMsg = { role: "user", text: text, files: files.map(function (f) { return { name: f.name, kind: f.kind }; }), filesData: files };
         state.messages.push(userMsg);
@@ -11095,9 +11027,6 @@
         persistHistory();
         setGenerating(false);
         state.abortController = null;
-        if (/api key|permission|unauthenticated|API_KEY_INVALID/i.test(errMsg)) {
-          refreshKeyBanner();
-        }
       }
 
       function regenerateFromMessage(wrapEl) {
@@ -11229,7 +11158,6 @@
 
       // ---------- Settings modal ----------
       settingsBtn.addEventListener("click", openSettings);
-      bannerSettingsBtn.addEventListener("click", openSettings);
       settingsClose.addEventListener("click", closeSettings);
       settingsOverlay.addEventListener("click", function (e) {
         if (e.target === settingsOverlay) closeSettings();
@@ -11238,49 +11166,15 @@
         if (e.key === "Escape" && settingsOverlay.classList.contains("is-open")) closeSettings();
       });
 
-      keyToggleBtn.addEventListener("click", function () {
-        var isPassword = apiKeyInput.type === "password";
-        apiKeyInput.type = isPassword ? "text" : "password";
-      });
-
-      keySaveBtn.addEventListener("click", function () {
-        var key = apiKeyInput.value.trim();
-        if (!key) {
-          keyStatusEl.textContent = "Please enter a valid API key.";
-          keyStatusEl.className = "aichat-key-status is-err";
-          return;
-        }
-        var s = loadSettings();
-        s.apiKey = key;
-        s.tier = modelSelect.value;
-        delete s.model; // legacy raw-model-name field, superseded by tier
-        saveSettings(s);
-        keyStatusEl.textContent = "✓ API key saved locally.";
-        keyStatusEl.className = "aichat-key-status is-ok";
-        refreshKeyBanner();
-        setTimeout(function () { closeSettings(); }, 700);
-      });
-
-      keyRemoveBtn.addEventListener("click", function () {
-        var s = loadSettings();
-        delete s.apiKey;
-        saveSettings(s);
-        apiKeyInput.value = "";
-        keyStatusEl.textContent = "API key removed.";
-        keyStatusEl.className = "aichat-key-status is-err";
-        refreshKeyBanner();
-      });
-
       modelSelect.addEventListener("change", function () {
         var s = loadSettings();
         s.tier = modelSelect.value;
-        delete s.model;
         saveSettings(s);
       });
 
       // ---------- Init ----------
       loadHistory();
-      refreshKeyBanner();
+      showServiceBanner(false);
       updateCounter();
       modelSelect.value = getTier();
     })();
