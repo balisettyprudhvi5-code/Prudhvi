@@ -1,9 +1,9 @@
 {
-  "name": "smart-compress",
+  "name": "smart-compress-gemini-backend",
   "version": "1.0.0",
   "private": true,
-  "type": "commonjs",
+  "description": "Gemini AI backend for Smart Compress (Vercel Serverless Function)",
   "engines": {
-    "node": "20.x"
+    "node": ">=18.0.0"
   }
 }
