@@ -2552,7 +2552,7 @@
         <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-aichat" tabindex="0" role="button" aria-label="Open AI Chat Assistant">
           <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M12 7V3"/><circle cx="12" cy="2.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="8.5" cy="13.5" r="1.3" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13.5" r="1.3" fill="currentColor" stroke="none"/><path d="M8.5 17h7"/><path d="M3 12H1M23 12h-2"/></svg></div>
           <h3>AI Chat Assistant <span class="pro-tool-badge is-live">LIVE</span></h3>
-          <p>Chat with Gemini AI instantly.</p>
+          <p>Chat with AI instantly.</p>
         </div>
 
       </div>
@@ -2867,7 +2867,7 @@
         </button>
         <div class="tool-workspace-standalone">
           <div class="tool-title-row">
-            <h2>AI Chat Assistant <span class="premium-badge">LIVE</span> <span>Chat with Gemini AI instantly.</span></h2>
+            <h2>AI Chat Assistant <span class="premium-badge">LIVE</span> <span>Chat with AI instantly.</span></h2>
           </div>
 
           <div class="aichat-app" id="aichat-app">
@@ -2898,7 +2898,7 @@
                 <div class="aichat-empty-icon">
                   <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M12 7V3"/><circle cx="8.5" cy="13.5" r="1.3" fill="#0d0d0f" stroke="none"/><circle cx="15.5" cy="13.5" r="1.3" fill="#0d0d0f" stroke="none"/><path d="M8.5 17h7"/></svg>
                 </div>
-                <h4>Start chatting with Gemini</h4>
+                <h4>Start chatting with AI</h4>
                 <p>Ask anything — coding help, math, writing, summaries, translation, brainstorming, explanations, or image prompt ideas.</p>
                 <div class="aichat-suggest-row">
                   <button type="button" class="aichat-suggest-chip" data-prompt="Explain how neural networks work, in simple terms.">💡 Explain a concept</button>
@@ -2940,12 +2940,12 @@
             <button type="button" class="aichat-modal-close" id="aichat-settings-close" aria-label="Close settings">✕</button>
           </div>
           <div class="aichat-modal-body">
-            <p class="aichat-key-hint">🔒 This assistant is powered by a secure backend. Your Gemini API key lives only in the server's environment variables (<code>GEMINI_API_KEY</code>) — it is never sent to, stored in, or visible from your browser.</p>
+            <p class="aichat-key-hint">🔒 This assistant is powered by a secure backend. Your OpenRouter API key lives only in the server's environment variables (<code>OPENROUTER_API_KEY</code>) — it is never sent to, stored in, or visible from your browser.</p>
             <div class="aichat-modal-divider"></div>
             <label for="aichat-model-select">Model</label>
             <select id="aichat-model-select" class="aichat-select">
-              <option value="flash">Gemini 3.6 Flash (recommended)</option>
-              <option value="lite">Gemini 3.5 Flash Lite (fastest / automatic fallback)</option>
+              <option value="flash">GPT OSS 20B (OpenRouter, free)</option>
+              <option value="lite">GPT OSS 20B (OpenRouter, free)</option>
             </select>
           </div>
         </div>
@@ -10541,10 +10541,9 @@
         try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch (e) { /* storage unavailable */ }
       }
 
-      // ---------- Model tier (sent to /api/chat; fallback chain lives server-side) ----------
-      // Only current Gemini models are supported: "flash" -> gemini-3.6-flash (primary),
-      // "lite" -> gemini-3.5-flash-lite (fastest / automatic fallback if primary is unavailable).
-      // Deprecated tiers (e.g. "pro") are intentionally not selectable here.
+      // ---------- Model tier (sent to /api/chat, accepted but currently ignored server-side) ----------
+      // The backend now always uses a single OpenRouter model (openai/gpt-oss-20b:free).
+      // The "flash"/"lite" values are kept for UI/localStorage compatibility only.
       function getTier() {
         var s = loadSettings();
         var t = s.tier;
@@ -10906,7 +10905,7 @@
         };
       }
 
-      // ---------- Gemini API ----------
+      // ---------- AI Chat API (OpenRouter, via /api/chat) ----------
 
       // Splits the full message list into the { message, files, history } shape:
       // "history" is every prior turn (text-only — attachments from earlier turns
@@ -10928,7 +10927,7 @@
         return { message: last.text || "", files: files, history: history };
       }
 
-      function streamGemini(messages, onChunk) {
+      function streamChat(messages, onChunk) {
         var tier = getTier();
         var payload = buildChatRequestPayload(messages);
 
@@ -10959,7 +10958,7 @@
           // returns its own 404/500 HTML page), response.json() would throw
           // and previously got swallowed into a generic "Unable to contact
           // AI" message. Parsing text ourselves lets us surface what Vercel
-          // (or Gemini) actually said.
+          // (or OpenRouter) actually said.
           return response.text().then(function (rawText) {
             var data;
             try {
@@ -10982,7 +10981,7 @@
             }
             showServiceBanner(false);
 
-            console.log("Gemini Response:", data);
+            console.log("AI Chat Response:", data);
 
             var text = data.response || "Sorry, no response was returned.";
             onChunk(text);
@@ -10990,13 +10989,13 @@
         });
       }
 
-      // Runs streamGemini with one automatic retry on failure. Keeps the UI's
+      // Runs streamChat with one automatic retry on failure. Keeps the UI's
       // loading state so the retry is invisible except for a brief label change.
-      function streamGeminiWithRetry(messages, onChunk, onRetrying) {
-        return streamGemini(messages, onChunk).catch(function (err) {
+      function streamChatWithRetry(messages, onChunk, onRetrying) {
+        return streamChat(messages, onChunk).catch(function (err) {
           if (typeof onRetrying === "function") onRetrying();
           return new Promise(function (resolve) { setTimeout(resolve, 800); })
-            .then(function () { return streamGemini(messages, onChunk); });
+            .then(function () { return streamChat(messages, onChunk); });
         });
       }
 
@@ -11005,7 +11004,7 @@
       // token stream, so we simulate ChatGPT-style word-by-word streaming on
       // the client once the full reply has arrived. This keeps the UI feeling
       // instant without requiring the response to be re-rendered all at once.
-      // If /api/chat is later upgraded to Server-Sent Events, streamGemini's
+      // If /api/chat is later upgraded to Server-Sent Events, streamChat's
       // onChunk callback can be invoked multiple times and this still works
       // unchanged (it will just reveal each incoming chunk immediately).
       function revealTextProgressively(bubbleEl, fullText, isCancelled, onDone) {
@@ -11079,7 +11078,7 @@
         var accumulated = "";
         var firstChunkReceived = false;
         // Soft-cancel token: Stop no longer calls AbortController.abort() on the
-        // fetch itself (see streamGemini for why) — instead it flips this flag,
+        // fetch itself (see streamChat for why) — instead it flips this flag,
         // and every callback below checks it before touching the UI so a late
         // network response is simply ignored after Stop has been pressed.
         var cancelToken = { cancelled: false };
@@ -11089,7 +11088,7 @@
 
         var historyForRequest = state.messages.filter(function (m) { return !m.error; });
 
-        streamGeminiWithRetry(historyForRequest, function (chunk, finishReason) {
+        streamChatWithRetry(historyForRequest, function (chunk, finishReason) {
           if (chunk) {
             accumulated += chunk;
             firstChunkReceived = true;
@@ -11117,7 +11116,7 @@
         }).catch(function (err) {
           if (cancelToken.cancelled) return; // user already stopped generation; discard late error
           console.error("AI Chat Assistant generation error:", err);
-          // Debug mode: surface the exact backend/Gemini error text (from /api/chat's
+          // Debug mode: surface the exact backend/OpenRouter error text (from /api/chat's
           // JSON error body) instead of a vague generic message, so failures are
           // diagnosable straight from the chat UI without digging through Vercel logs.
           var exactMsg = (err && err.message) ? err.message : "Unable to contact AI. Please try again.";
