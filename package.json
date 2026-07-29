@@ -2,6 +2,7 @@
   "name": "smart-compress",
   "version": "1.0.0",
   "private": true,
+  "description": "Smart Compress — AI Chat backend powered by OpenRouter (Vercel Serverless Function)",
   "type": "commonjs",
   "engines": {
     "node": "20.x"
