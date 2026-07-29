@@ -1,71 +1,46 @@
 # Smart Compress — Deployment & Update Notes
 
 ## Files in this delivery
-- `index.html` — the full site (all original tools/design/SEO/AdSense untouched, plus Settings, Image Splitter, Merge Images, and the new update system)
-- `sw.js` — the service worker (versioned caching)
+- `index.html` — the full site (all original tools/design/SEO/AdSense untouched)
+- `sw.js` — the service worker (offline caching + PWA installability)
 - `site.webmanifest` — PWA manifest
-- `offline.html` — offline fallback page
-- `_headers` — Netlify header rules for real `Cache-Control` on HTML/SW (see below if you use a different host)
+- `favicon.ico`, `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png`, `logo-icon.png` — icon assets
+- `api/chat.js` — Vercel Serverless Function powering the AI Chat Assistant (OpenRouter backend)
+- `vercel.json` — deployment config: registers `api/chat.js` as a function and applies `Cache-Control` headers so browsers/CDNs never serve a stale `index.html` or `sw.js`
+- `package.json` — declares the Node.js 20.x runtime for the serverless function
 
-Deploy all five files to your site root (same folder as your existing `favicon.ico`, `logo-icon.png`, etc.). Nothing else needs to move.
+Deploy the whole folder to your project root — nothing needs to move.
 
-## How the "only updates in Incognito" bug was fixed
-That symptom means the **browser's HTTP cache** (not just the service worker) was serving a stale `index.html`. Three layers now work together so this can't happen again:
-
-1. **Real HTTP header** (`_headers` file, or your host's equivalent) tells browsers/CDNs never to cache `index.html` or `sw.js` at the network layer.
-2. **Service worker** uses a network-first strategy for HTML: it always tries the network first and only falls back to cache when offline.
-3. **Versioned cache name**: every deploy that bumps `CACHE_VERSION` in `sw.js` creates a brand-new cache (`smartcompress-v2`, `smartcompress-v3`, …) and the `activate` step deletes every older `smartcompress-*` cache automatically.
-
-## On every future deployment, do this one step
-Open `sw.js` and increment the number:
-
-```js
-const CACHE_VERSION = 1;   // bump to 2, 3, 4… on each deploy
+## Required environment variable
+In Vercel → your project → **Settings → Environment Variables**, add:
 ```
-
-That single-character change is what makes the browser detect the new deployment (browsers byte-compare `sw.js` and treat any change as an update). You don't need to touch anything else — the page will:
-- detect the new service worker in the background,
-- show a small "A new version of Smart Compress is available" toast,
-- unregister/replace the old cache and reload automatically once the user taps **Refresh** (or on their very next visit).
-
-Also update the matching human-readable version string in `index.html` (search for `window.APP_VERSION`) so it stays in sync with what's shown in Settings → About.
-
-## Cache-Control on hosts other than Netlify
-If you're not on Netlify, add the equivalent of `_headers` for your platform:
-
-**Vercel** — create `vercel.json`:
-```json
-{
-  "headers": [
-    {
-      "source": "/(index.html|sw.js|site.webmanifest)",
-      "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
-    }
-  ]
-}
+OPENROUTER_API_KEY = <your OpenRouter API key>
 ```
+Get one at https://openrouter.ai/keys, then **redeploy** — adding an env var does not apply to a deployment that already happened.
 
-**Nginx:**
+Verify the function is live and the key is loading by visiting (GET request):
 ```
-location = /index.html {
-  add_header Cache-Control "no-cache, no-store, must-revalidate";
-}
-location = /sw.js {
-  add_header Cache-Control "no-cache, no-store, must-revalidate";
-}
+https://YOUR-SITE/api/chat
 ```
+It returns small JSON diagnostics — never the key itself.
 
-**Apache (.htaccess):**
-```
-<FilesMatch "^(index\.html|sw\.js|site\.webmanifest)$">
-  Header set Cache-Control "no-cache, no-store, must-revalidate"
-</FilesMatch>
-```
+## GitHub deployment note
+Filenames are case-sensitive on GitHub/Linux builds (unlike macOS/Windows). The serverless
+function must be named exactly `api/chat.js` (lowercase) to match `vercel.json`'s
+`functions` entry and the frontend's `fetch("/api/chat")` call — this has been verified in
+this delivery.
 
-**GitHub Pages** doesn't allow custom headers — the service-worker network-first strategy is what protects you there; it's already handled in `sw.js`.
+## On every future deployment
+Bump `window.APP_VERSION` in `index.html` and the `CACHE_NAME` version suffix in `sw.js`
+(e.g. `smart-compress-v1` → `smart-compress-v2`). Browsers byte-compare `sw.js`, so any
+change to it is what triggers clients to detect and install the update.
 
-## What was added (summary)
-- **Settings** menu item (always visible, desktop + mobile) → slide-out panel with Theme (Light/Dark/OLED/Auto), Accent Color, Font Size, Compact Mode, High Contrast, Reduce Animations, Rounded/Square corners, Background Wallpaper (9 CSS-generated presets + custom image upload), Export/Import/Restore Defaults, App Version, Storage Usage. Everything is stored in one `localStorage` key and applied instantly with no page reload. The wallpaper only affects the empty background areas — every card, button, and tool panel keeps its original opaque background exactly as before.
-- **Image Splitter** (tool #11) — split into 2/3/4/6/8/9/12/16/25 pieces, live grid preview, ZIP download, full original resolution, PNG/JPG, 100% offline (canvas + JSZip, both already used elsewhere in the app).
-- **Merge Images** (tool #12) — horizontal/vertical/grid layouts, adjustable spacing, background color or transparent, live canvas preview, PNG/JPG download, 100% offline.
-- Nothing existing was removed, rebuilt, or restyled — all edits were additive.
+## AI Chat backend
+- Provider: OpenRouter (`https://openrouter.ai/api/v1/chat/completions`)
+- Model fallback chain: `google/gemini-2.5-flash` → `deepseek/deepseek-chat-v3-0324` → `qwen/qwen3-235b-a22b`
+- Each model gets up to 2 attempts before falling through to the next
+- Auth errors (401/403) short-circuit immediately with a clear message pointing at `OPENROUTER_API_KEY`
+
+## Image generation
+Handled entirely client-side via Pollinations AI (`image.pollinations.ai`) — no server
+component or API key required, and unaffected by the chat backend's status.
