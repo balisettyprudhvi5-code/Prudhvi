@@ -1,9 +1,8 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "version": 2,
   "functions": {
-    "api/chat.js": {
-      "maxDuration": 60
+    "api/**/*.js": {
+      "runtime": "@vercel/node"
     }
   }
+}
 }
