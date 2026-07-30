@@ -1,0 +1,24 @@
+# Netlify header rules — real HTTP Cache-Control (meta tags alone can't
+# stop a browser/CDN from caching the HTML at the network layer).
+# If you deploy elsewhere (Vercel, Cloudflare Pages, Apache, Nginx, etc.)
+# see DEPLOYMENT-README.md for the equivalent config.
+
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/site.webmanifest
+  Cache-Control: no-cache
+
+# Static assets can be cached aggressively since their filenames
+# don't change — this list is a starting point, adjust as needed.
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.ico
+  Cache-Control: public, max-age=31536000, immutable
