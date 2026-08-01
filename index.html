@@ -2308,6 +2308,131 @@
       .aichat-tbtn { flex: 1 1 auto; justify-content: center; }
       .aichat-meta-row { justify-content: center; text-align: center; }
     }
+
+    /* ================= Additive: Multi-chat sidebar ================= */
+    .aichat-app { position: relative; overflow: hidden; }
+    .aichat-sidebar-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,.5); z-index: 40; display: none;
+    }
+    .aichat-sidebar-overlay.is-open { display: block; }
+    .aichat-sidebar {
+      position: absolute; top: 0; left: 0; bottom: 0; width: 270px; max-width: 82%;
+      background: var(--surface); border-right: 1px solid var(--border); z-index: 41;
+      transform: translateX(-100%); transition: transform .22s ease; display: flex; flex-direction: column;
+      padding: .9rem;
+    }
+    .aichat-sidebar.is-open { transform: translateX(0); box-shadow: 12px 0 30px rgba(0,0,0,.35); }
+    .aichat-sidebar-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .7rem; }
+    .aichat-sidebar-head h4 { font-size: .95rem; }
+    .aichat-sidebar-newbtn {
+      display: flex; align-items: center; gap: .4rem; justify-content: center; padding: .6rem .8rem;
+      border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text); font-size: .82rem; cursor: pointer; margin-bottom: .7rem;
+    }
+    .aichat-sidebar-newbtn:hover { border-color: var(--accent); color: var(--accent); }
+    .aichat-sidebar-newbtn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+    .aichat-thread-list { overflow-y: auto; display: flex; flex-direction: column; gap: .35rem; flex: 1; }
+    .aichat-thread-item {
+      display: flex; align-items: center; gap: .5rem; padding: .6rem .7rem; border-radius: var(--radius-sm);
+      cursor: pointer; border: 1px solid transparent; font-size: .8rem; color: var(--muted);
+    }
+    .aichat-thread-item:hover { background: var(--surface2); color: var(--text); }
+    .aichat-thread-item.active { background: var(--surface2); border-color: var(--accent); color: var(--text); }
+    .aichat-thread-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .aichat-thread-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: .9rem; line-height: 1; flex-shrink: 0; }
+    .aichat-thread-del:hover { color: #ff9a9a; }
+    .aichat-thread-empty { font-size: .78rem; color: var(--muted); padding: .5rem; text-align: center; }
+
+    /* ================= Additive: Camera capture modal ================= */
+    .aichat-camera-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 9999; display: none;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .aichat-camera-overlay.is-open { display: flex; }
+    .aichat-camera-box {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      max-width: 460px; width: 100%; padding: 1rem; display: flex; flex-direction: column; gap: .7rem;
+    }
+    .aichat-camera-head { display: flex; justify-content: space-between; align-items: center; }
+    .aichat-camera-head h4 { font-size: .95rem; }
+    #aichat-camera-video { width: 100%; border-radius: var(--radius-sm); background: #000; max-height: 60vh; }
+    .aichat-camera-actions { display: flex; justify-content: center; }
+    .aichat-camera-error { font-size: .8rem; color: #ff9a9a; text-align: center; }
+
+    /* ================= Additive: Quick action chips ================= */
+    .aichat-quickrow { display: flex; flex-wrap: wrap; gap: .45rem; padding: 0 .9rem .5rem; }
+    .aichat-quick-chip {
+      font-size: .75rem; padding: .4rem .75rem; border-radius: 999px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--muted); cursor: pointer; transition: all .15s;
+    }
+    .aichat-quick-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .aichat-messages.aichat-drag-active { outline: 2px dashed var(--accent); outline-offset: -6px; background: rgba(127,255,110,.05); }
+
+    /* ================= Additive: Mobile "Home" nav dropdown ================= */
+    .mobile-home-nav { display: none; }
+    @media (max-width: 768px) {
+      header .nav-toggle, header nav[aria-label="Main navigation menu"] { display: none !important; }
+      .mobile-home-nav {
+        display: flex; align-items: center; gap: .4rem; position: relative; margin-left: auto;
+      }
+      .mobile-home-trigger {
+        display: flex; align-items: center; gap: .3rem; background: var(--surface2); border: 1px solid var(--border);
+        color: var(--text); padding: .5rem .8rem; border-radius: var(--radius-sm); font-size: .85rem; cursor: pointer;
+      }
+      .mobile-home-trigger svg { width: 12px; height: 12px; stroke: currentColor; fill: none; transition: transform .18s; }
+      .mobile-home-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+      .mobile-home-dropdown {
+        position: absolute; top: calc(100% + 8px); left: 0; min-width: 220px; background: var(--surface);
+        border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 16px 40px rgba(0,0,0,.4);
+        padding: .5rem; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(-8px);
+        transition: all .18s ease; z-index: 200;
+      }
+      .mobile-home-dropdown.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
+      .mobile-home-dropdown a {
+        padding: .65rem .8rem; border-radius: var(--radius-sm); color: var(--text); font-size: .88rem; text-decoration: none;
+      }
+      .mobile-home-dropdown a:hover { background: var(--surface2); color: var(--accent); }
+      .mobile-settings-fixed {
+        display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px;
+        border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2);
+        color: var(--text); font-size: 1rem; cursor: pointer; flex-shrink: 0;
+      }
+    }
+    @media (min-width: 769px) { .mobile-settings-fixed { display: none; } }
+
+    /* ================= Additive: Global tool search ================= */
+    .site-search-wrap { position: relative; margin-left: .9rem; }
+    .site-search-input {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 999px;
+      padding: .5rem .9rem .5rem 2.1rem; font-size: .82rem; width: 190px; transition: width .18s, border-color .18s;
+    }
+    .site-search-input:focus { outline: none; border-color: var(--accent); width: 240px; }
+    .site-search-wrap::before {
+      content: "🔍"; position: absolute; left: .7rem; top: 50%; transform: translateY(-50%); font-size: .8rem; opacity: .7; pointer-events: none;
+    }
+    .site-search-results {
+      position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); box-shadow: 0 16px 40px rgba(0,0,0,.4); max-height: 320px; overflow-y: auto;
+      z-index: 300; display: none;
+    }
+    .site-search-results.is-open { display: block; }
+    .site-search-result {
+      display: flex; flex-direction: column; padding: .6rem .8rem; cursor: pointer; border-bottom: 1px solid var(--border);
+    }
+    .site-search-result:last-child { border-bottom: none; }
+    .site-search-result:hover, .site-search-result.is-active { background: var(--surface2); }
+    .site-search-result strong { font-size: .85rem; color: var(--text); }
+    .site-search-result span { font-size: .72rem; color: var(--muted); }
+    .site-search-empty { padding: .8rem; font-size: .8rem; color: var(--muted); text-align: center; }
+    @media (max-width: 768px) {
+      .site-search-wrap { margin-left: .5rem; }
+      .site-search-input { width: 120px; }
+      .site-search-input:focus { width: 150px; }
+    }
+    @media (max-width: 480px) {
+      .site-search-input { width: 88px; font-size: .76rem; padding-right: .5rem; }
+      .site-search-input:focus { width: 130px; }
+    }
   </style>
 
   <!-- Google Analytics -->
@@ -2352,6 +2477,31 @@
         <li><a href="#" id="nav-settings-link">⚙ Settings</a></li>
       </ul>
     </nav>
+
+    <!-- Additive: premium global search (desktop + mobile, beside Home) -->
+    <div class="site-search-wrap">
+      <input type="search" class="site-search-input" id="site-search-input" placeholder="Search tools…" aria-label="Search all tools" autocomplete="off" />
+      <div class="site-search-results" id="site-search-results"></div>
+    </div>
+
+    <!-- Additive: mobile-only "Home ▼" dropdown nav (desktop nav above is unchanged) -->
+    <div class="mobile-home-nav" id="mobile-home-nav">
+      <button type="button" class="mobile-home-trigger" id="mobile-home-trigger" aria-haspopup="true" aria-expanded="false">
+        🏠 Home <svg viewBox="0 0 24 24" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="mobile-home-dropdown" id="mobile-home-dropdown" role="menu">
+        <a href="#home" role="menuitem">Home</a>
+        <a href="#tools-suite" role="menuitem">Tools</a>
+        <a href="#pro-tools" role="menuitem">AI Tools</a>
+        <a href="#tools-suite" role="menuitem">Browser Tools</a>
+        <a href="#blog" role="menuitem">Blog</a>
+        <a href="#about" role="menuitem">About Us</a>
+        <a href="#contact" role="menuitem">Contact Us</a>
+        <a href="#privacy" role="menuitem">Privacy Policy</a>
+        <a href="#terms" role="menuitem">Terms &amp; Conditions</a>
+      </div>
+      <button type="button" class="mobile-settings-fixed" id="mobile-settings-fixed" aria-label="Open settings">⚙</button>
+    </div>
   </header>
 
   <div id="app-wallpaper-layer" data-preset="none" aria-hidden="true"></div>
@@ -2877,7 +3027,43 @@
           </div>
 
           <div class="aichat-app" id="aichat-app">
+            <!-- Multi-chat sidebar (additive) -->
+            <div class="aichat-sidebar-overlay" id="aichat-sidebar-overlay"></div>
+            <aside class="aichat-sidebar" id="aichat-sidebar" aria-label="Saved chats">
+              <div class="aichat-sidebar-head">
+                <h4>Your Chats</h4>
+                <button type="button" class="aichat-icon-btn" id="aichat-sidebar-close" aria-label="Close chats">
+                  <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <button type="button" class="aichat-sidebar-newbtn" id="aichat-sidebar-new">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> New Chat
+              </button>
+              <div class="aichat-thread-list" id="aichat-thread-list"></div>
+            </aside>
+
+            <!-- Camera capture modal (additive) -->
+            <div class="aichat-camera-overlay" id="aichat-camera-overlay">
+              <div class="aichat-camera-box">
+                <div class="aichat-camera-head">
+                  <h4>Camera Capture</h4>
+                  <button type="button" class="aichat-icon-btn" id="aichat-camera-close" aria-label="Close camera">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                  </button>
+                </div>
+                <video id="aichat-camera-video" autoplay playsinline muted></video>
+                <canvas id="aichat-camera-canvas" style="display:none;"></canvas>
+                <p class="aichat-camera-error" id="aichat-camera-error" style="display:none;"></p>
+                <div class="aichat-camera-actions">
+                  <button type="button" class="btn-secondary" id="aichat-camera-shoot">📸 Capture Photo</button>
+                </div>
+              </div>
+            </div>
+
             <div class="aichat-toolbar">
+              <button type="button" class="btn-secondary aichat-tbtn" id="aichat-chats-btn">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg> Chats
+              </button>
               <button type="button" class="btn-secondary aichat-tbtn" id="aichat-new-btn">
                 <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> New Chat
               </button>
@@ -2919,7 +3105,17 @@
 
             <div class="aichat-attach-preview" id="aichat-attach-preview"></div>
 
+            <div class="aichat-quickrow" id="aichat-quickrow">
+              <button type="button" class="aichat-quick-chip" id="aichat-quick-ocr" data-quick="ocr">🔎 OCR (extract text)</button>
+              <button type="button" class="aichat-quick-chip" id="aichat-quick-describe" data-quick="describe">🖼️ Describe Image</button>
+              <button type="button" class="aichat-quick-chip" id="aichat-quick-reverse" data-quick="reverse">🔄 Reverse Prompt</button>
+              <button type="button" class="aichat-quick-chip" id="aichat-quick-enhance" data-quick="enhance">✨ Enhance My Prompt</button>
+            </div>
+
             <div class="aichat-inputbar">
+              <button type="button" class="aichat-icon-btn" id="aichat-camera-btn" title="Use camera" aria-label="Use camera">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </button>
               <button type="button" class="aichat-icon-btn" id="aichat-attach-btn" title="Attach a file" aria-label="Attach a file">
                 <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21.44 11.05 12.25 20.24a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.67 3.67 0 0 1 5.19 5.19l-9.2 9.19a1.83 1.83 0 0 1-2.59-2.59l8.49-8.48"/></svg>
               </button>
@@ -11506,11 +11702,435 @@
         saveSettings(s);
       });
 
+      // ---------- Public API (additive — used by multi-chat sidebar / camera / quick actions) ----------
+      window.SmartCompressAIChat = {
+        getMessages: function () { return state.messages.slice(); },
+        loadMessages: function (arr) {
+          resetChat();
+          (Array.isArray(arr) ? arr : []).forEach(function (m) {
+            if (m.type === "image" && m.imageUrl) {
+              state.messages.push({ role: m.role, type: "image", text: m.text, imageUrl: m.imageUrl, files: [], error: false });
+              renderImageMessage(m.role, m.text, m.imageUrl, { skipActions: false });
+            } else {
+              state.messages.push({ role: m.role, text: m.text, files: m.files || [], error: !!m.error });
+              renderMessage(m.role, m.text, m.files || [], { skipActions: false, isError: !!m.error });
+            }
+          });
+          if (arr && arr.length) toggleEmptyState(false);
+          persistHistory();
+          forceScrollToBottom();
+        },
+        newChat: function () { resetChat(); },
+        insertPrompt: function (text) {
+          inputEl.value = text;
+          updateCounter();
+          autoResizeTextarea();
+          inputEl.focus();
+        },
+        sendNow: function () { sendBtn.click(); },
+        attachFileList: function (fileList) {
+          fileInput.files = fileList;
+          fileInput.dispatchEvent(new Event("change"));
+        },
+        hasPendingImage: function () {
+          return state.pendingFiles.some(function (f) { return f.kind === "image" || (f.mimeType && f.mimeType.indexOf("image/") === 0); });
+        }
+      };
+
       // ---------- Init ----------
       loadHistory();
       showServiceBanner(false);
       updateCounter();
       modelSelect.value = getTier();
+    })();
+  </script>
+
+  <!-- ================= Additive: Mobile Home dropdown + fixed settings icon ================= -->
+  <script>
+    (function initMobileHomeNav() {
+      "use strict";
+      var trigger = document.getElementById("mobile-home-trigger");
+      var dropdown = document.getElementById("mobile-home-dropdown");
+      var settingsFixedBtn = document.getElementById("mobile-settings-fixed");
+      var navSettingsLink = document.getElementById("nav-settings-link");
+      if (!trigger || !dropdown) return;
+
+      function close() {
+        dropdown.classList.remove("is-open");
+        trigger.setAttribute("aria-expanded", "false");
+      }
+      trigger.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var open = dropdown.classList.toggle("is-open");
+        trigger.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+      dropdown.querySelectorAll("a").forEach(function (a) {
+        a.addEventListener("click", close);
+      });
+      document.addEventListener("click", function (e) {
+        if (!dropdown.contains(e.target) && e.target !== trigger) close();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") close();
+      });
+      if (settingsFixedBtn && navSettingsLink) {
+        settingsFixedBtn.addEventListener("click", function () { navSettingsLink.click(); });
+      }
+    })();
+  </script>
+
+  <!-- ================= Additive: Global tool search ================= -->
+  <script>
+    (function initGlobalSearch() {
+      "use strict";
+      var input = document.getElementById("site-search-input");
+      var resultsEl = document.getElementById("site-search-results");
+      if (!input || !resultsEl) return;
+
+      // Registry of every tool on the site. type "tab" = Browser Toolkit tab,
+      // "pro" = Pro Tools card panel, "info" = not directly clickable (Coming Soon).
+      var TOOLS = [
+        { name: "Image Compressor", type: "tab", id: "compressor", group: "Browser Tools" },
+        { name: "Image Resizer", type: "tab", id: "resizer", group: "Browser Tools" },
+        { name: "Crop Image", type: "tab", id: "crop", group: "Browser Tools" },
+        { name: "Rotate Image", type: "tab", id: "rotate", group: "Browser Tools" },
+        { name: "Image Format Converter", type: "tab", id: "converter", group: "Browser Tools" },
+        { name: "Image to PDF", type: "tab", id: "pdf", group: "Browser Tools" },
+        { name: "PDF to Image", type: "tab", id: "pdf2img", group: "Browser Tools" },
+        { name: "AI Prompt Studio / Prompt Generator", type: "tab", id: "promptstudio", group: "Browser Tools" },
+        { name: "Image Layout Tools", type: "tab", id: "layout", group: "Browser Tools" },
+        { name: "Smart Document Editor", type: "tab", id: "doceditor", group: "Browser Tools" },
+        { name: "PDF Toolkit", type: "tab", id: "pdftoolkit", group: "Browser Tools" },
+        { name: "Document Converter", type: "tab", id: "docconverter", group: "Browser Tools" },
+        { name: "JSON Tools", type: "tab", id: "jsontools", group: "Browser Tools" },
+        { name: "Code Minifier", type: "tab", id: "codeminifier", group: "Browser Tools" },
+        { name: "OCR Image to Text", type: "tab", id: "ocr", group: "Browser Tools" },
+        { name: "QR Code Generator", type: "tab", id: "qrgen", group: "Browser Tools" },
+        { name: "Password Generator", type: "tab", id: "pwgen", group: "Browser Tools" },
+        { name: "URL Encoder / Decoder", type: "tab", id: "urlcodec", group: "Browser Tools" },
+        { name: "AI Chat Assistant", type: "pro", id: "panel-aichat", group: "AI Tools" },
+        { name: "Meme Generator", type: "pro", id: "panel-meme", group: "AI Tools" },
+        { name: "AI Image Cleaner / Background Remover", type: "pro", id: "panel-aicleaner", group: "AI Tools" },
+        { name: "Favicon Generator", type: "pro", id: "panel-favicon", group: "AI Tools" },
+        { name: "Mesh Gradient Generator", type: "pro", id: "panel-meshgen", group: "AI Tools" },
+        { name: "AI Image Generator", type: "info", id: "pro-tools", group: "AI Tools (Coming Soon)" },
+        { name: "Blog", type: "hash", id: "blog", group: "Site" },
+        { name: "About Us", type: "hash", id: "about", group: "Site" },
+        { name: "Contact Us", type: "hash", id: "contact", group: "Site" },
+        { name: "Privacy Policy", type: "hash", id: "privacy", group: "Site" },
+        { name: "Terms & Conditions", type: "hash", id: "terms", group: "Site" }
+      ];
+
+      function openTool(t) {
+        if (t.type === "tab") {
+          var section = document.getElementById("tools-suite");
+          if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+          var tabBtn = document.getElementById("tab-" + t.id);
+          if (tabBtn) setTimeout(function () { tabBtn.click(); }, 250);
+        } else if (t.type === "pro") {
+          var proSection = document.getElementById("pro-tools");
+          if (proSection) proSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          var card = document.querySelector('[data-pt-open="' + t.id + '"]');
+          if (card) setTimeout(function () { card.click(); }, 250);
+        } else if (t.type === "info") {
+          var infoSection = document.getElementById(t.id);
+          if (infoSection) infoSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          var hashSection = document.getElementById(t.id);
+          if (hashSection) hashSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        resultsEl.classList.remove("is-open");
+        input.value = "";
+      }
+
+      function render(list) {
+        resultsEl.innerHTML = "";
+        if (!list.length) {
+          resultsEl.innerHTML = '<div class="site-search-empty">No matching tools</div>';
+          resultsEl.classList.add("is-open");
+          return;
+        }
+        list.forEach(function (t) {
+          var row = document.createElement("div");
+          row.className = "site-search-result";
+          row.innerHTML = "<strong></strong><span></span>";
+          row.querySelector("strong").textContent = t.name;
+          row.querySelector("span").textContent = t.group;
+          row.addEventListener("click", function () { openTool(t); });
+          resultsEl.appendChild(row);
+        });
+        resultsEl.classList.add("is-open");
+      }
+
+      input.addEventListener("input", function () {
+        var q = input.value.trim().toLowerCase();
+        if (!q) { resultsEl.classList.remove("is-open"); resultsEl.innerHTML = ""; return; }
+        var matches = TOOLS.filter(function (t) { return t.name.toLowerCase().indexOf(q) !== -1; });
+        render(matches);
+      });
+      input.addEventListener("focus", function () {
+        if (input.value.trim()) resultsEl.classList.add("is-open");
+      });
+      document.addEventListener("click", function (e) {
+        if (!resultsEl.contains(e.target) && e.target !== input) resultsEl.classList.remove("is-open");
+      });
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") { resultsEl.classList.remove("is-open"); input.blur(); }
+      });
+    })();
+  </script>
+
+  <!-- ================= Additive: AI Chat multi-chat sidebar, camera capture, drag&drop, quick actions ================= -->
+  <script>
+    (function initAIChatExtras() {
+      "use strict";
+      var app = document.getElementById("aichat-app");
+      if (!app || !window.SmartCompressAIChat) return;
+      var AC = window.SmartCompressAIChat;
+
+      var THREADS_KEY = "aichat_threads_v2";
+      var ACTIVE_KEY = "aichat_active_thread_v2";
+
+      function getThreads() {
+        try { var raw = localStorage.getItem(THREADS_KEY); var arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; }
+        catch (e) { return []; }
+      }
+      function saveThreads(arr) {
+        try { localStorage.setItem(THREADS_KEY, JSON.stringify(arr)); } catch (e) { /* ignore */ }
+      }
+      function getActiveId() { try { return localStorage.getItem(ACTIVE_KEY) || ""; } catch (e) { return ""; } }
+      function setActiveId(id) { try { localStorage.setItem(ACTIVE_KEY, id); } catch (e) { /* ignore */ } }
+      function makeId() { return "t_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7); }
+      function titleFromMessages(msgs) {
+        var firstUser = (msgs || []).find(function (m) { return m.role === "user" && m.text; });
+        if (!firstUser) return "New Chat";
+        var t = firstUser.text.trim().slice(0, 40);
+        return t.length ? t : "New Chat";
+      }
+
+      function ensureInit() {
+        var threads = getThreads();
+        if (!threads.length) {
+          var existing = AC.getMessages();
+          var t = { id: makeId(), title: titleFromMessages(existing), messages: existing, updatedAt: Date.now() };
+          threads = [t];
+          saveThreads(threads);
+          setActiveId(t.id);
+        } else if (!getActiveId() || !threads.some(function (t) { return t.id === getActiveId(); })) {
+          setActiveId(threads[0].id);
+        }
+      }
+      ensureInit();
+
+      function syncActiveThread() {
+        var id = getActiveId();
+        if (!id) return;
+        var threads = getThreads();
+        var idx = threads.findIndex(function (t) { return t.id === id; });
+        if (idx === -1) return;
+        var msgs = AC.getMessages();
+        threads[idx].messages = msgs;
+        threads[idx].title = titleFromMessages(msgs);
+        threads[idx].updatedAt = Date.now();
+        saveThreads(threads);
+      }
+
+      function createFreshThreadRecord(resetUI) {
+        var t = { id: makeId(), title: "New Chat", messages: [], updatedAt: Date.now() };
+        var threads = getThreads();
+        threads.unshift(t);
+        saveThreads(threads);
+        setActiveId(t.id);
+        if (resetUI) AC.newChat();
+      }
+
+      var sidebar = document.getElementById("aichat-sidebar");
+      var sidebarOverlay = document.getElementById("aichat-sidebar-overlay");
+      var threadListEl = document.getElementById("aichat-thread-list");
+      var chatsBtn = document.getElementById("aichat-chats-btn");
+      var sidebarClose = document.getElementById("aichat-sidebar-close");
+      var sidebarNewBtn = document.getElementById("aichat-sidebar-new");
+      var nativeNewBtn = document.getElementById("aichat-new-btn");
+
+      function openSidebar() {
+        sidebar.classList.add("is-open");
+        sidebarOverlay.classList.add("is-open");
+      }
+      function closeSidebar() {
+        sidebar.classList.remove("is-open");
+        sidebarOverlay.classList.remove("is-open");
+      }
+
+      function renderThreadList() {
+        var threads = getThreads().slice().sort(function (a, b) { return b.updatedAt - a.updatedAt; });
+        var activeId = getActiveId();
+        threadListEl.innerHTML = "";
+        if (!threads.length) {
+          threadListEl.innerHTML = '<div class="aichat-thread-empty">No saved chats yet</div>';
+          return;
+        }
+        threads.forEach(function (t) {
+          var item = document.createElement("div");
+          item.className = "aichat-thread-item" + (t.id === activeId ? " active" : "");
+          item.innerHTML = '<span class="aichat-thread-title"></span><button type="button" class="aichat-thread-del" aria-label="Delete chat">✕</button>';
+          item.querySelector(".aichat-thread-title").textContent = t.title || "New Chat";
+          item.addEventListener("click", function () { switchThread(t.id); });
+          item.querySelector(".aichat-thread-del").addEventListener("click", function (e) {
+            e.stopPropagation();
+            deleteThread(t.id);
+          });
+          threadListEl.appendChild(item);
+        });
+      }
+
+      function switchThread(id) {
+        if (id === getActiveId()) { closeSidebar(); return; }
+        syncActiveThread();
+        var threads = getThreads();
+        var t = threads.find(function (x) { return x.id === id; });
+        if (!t) return;
+        setActiveId(id);
+        AC.loadMessages(t.messages || []);
+        renderThreadList();
+        closeSidebar();
+      }
+
+      function deleteThread(id) {
+        if (!window.confirm("Delete this chat? This cannot be undone.")) return;
+        var threads = getThreads().filter(function (t) { return t.id !== id; });
+        saveThreads(threads);
+        if (id === getActiveId()) {
+          if (threads.length) {
+            setActiveId(threads[0].id);
+            AC.loadMessages(threads[0].messages || []);
+          } else {
+            createFreshThreadRecord(true);
+          }
+        }
+        renderThreadList();
+      }
+
+      if (chatsBtn) chatsBtn.addEventListener("click", function () { syncActiveThread(); renderThreadList(); openSidebar(); });
+      if (sidebarClose) sidebarClose.addEventListener("click", closeSidebar);
+      if (sidebarOverlay) sidebarOverlay.addEventListener("click", closeSidebar);
+      if (sidebarNewBtn) sidebarNewBtn.addEventListener("click", function () { syncActiveThread(); createFreshThreadRecord(true); renderThreadList(); closeSidebar(); });
+      if (nativeNewBtn) nativeNewBtn.addEventListener("click", function () { createFreshThreadRecord(false); renderThreadList(); });
+
+      window.addEventListener("beforeunload", syncActiveThread);
+      document.addEventListener("visibilitychange", function () { if (document.hidden) syncActiveThread(); });
+      setInterval(syncActiveThread, 4000);
+
+      // ---------- Camera capture ----------
+      var cameraBtn = document.getElementById("aichat-camera-btn");
+      var cameraOverlay = document.getElementById("aichat-camera-overlay");
+      var cameraVideo = document.getElementById("aichat-camera-video");
+      var cameraCanvas = document.getElementById("aichat-camera-canvas");
+      var cameraClose = document.getElementById("aichat-camera-close");
+      var cameraShoot = document.getElementById("aichat-camera-shoot");
+      var cameraError = document.getElementById("aichat-camera-error");
+      var cameraStream = null;
+
+      function stopCamera() {
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(function (tr) { tr.stop(); });
+          cameraStream = null;
+        }
+        cameraOverlay.classList.remove("is-open");
+      }
+
+      if (cameraBtn) {
+        cameraBtn.addEventListener("click", function () {
+          cameraError.style.display = "none";
+          cameraOverlay.classList.add("is-open");
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            cameraError.textContent = "Camera access isn't supported in this browser.";
+            cameraError.style.display = "block";
+            return;
+          }
+          navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
+            .then(function (stream) {
+              cameraStream = stream;
+              cameraVideo.srcObject = stream;
+            })
+            .catch(function () {
+              cameraError.textContent = "Couldn't access the camera. Check permissions and try again.";
+              cameraError.style.display = "block";
+            });
+        });
+      }
+      if (cameraClose) cameraClose.addEventListener("click", stopCamera);
+      if (cameraOverlay) cameraOverlay.addEventListener("click", function (e) { if (e.target === cameraOverlay) stopCamera(); });
+
+      if (cameraShoot) {
+        cameraShoot.addEventListener("click", function () {
+          if (!cameraStream || !cameraVideo.videoWidth) return;
+          cameraCanvas.width = cameraVideo.videoWidth;
+          cameraCanvas.height = cameraVideo.videoHeight;
+          var ctx = cameraCanvas.getContext("2d");
+          ctx.drawImage(cameraVideo, 0, 0, cameraCanvas.width, cameraCanvas.height);
+          cameraCanvas.toBlob(function (blob) {
+            if (!blob) return;
+            var file = new File([blob], "camera-capture-" + Date.now() + ".jpg", { type: "image/jpeg" });
+            var dt = new DataTransfer();
+            dt.items.add(file);
+            AC.attachFileList(dt.files);
+            stopCamera();
+          }, "image/jpeg", 0.92);
+        });
+      }
+
+      // ---------- Drag & drop onto the chat window ----------
+      var messagesEl = document.getElementById("aichat-messages");
+      if (messagesEl) {
+        ["dragenter", "dragover"].forEach(function (evt) {
+          messagesEl.addEventListener(evt, function (e) {
+            e.preventDefault();
+            messagesEl.classList.add("aichat-drag-active");
+          });
+        });
+        ["dragleave", "drop"].forEach(function (evt) {
+          messagesEl.addEventListener(evt, function (e) {
+            e.preventDefault();
+            messagesEl.classList.remove("aichat-drag-active");
+          });
+        });
+        messagesEl.addEventListener("drop", function (e) {
+          if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+            AC.attachFileList(e.dataTransfer.files);
+          }
+        });
+      }
+
+      // ---------- Quick-action chips ----------
+      function needsImageAlert() {
+        window.alert("Attach or capture an image first, then use this quick action.");
+      }
+      var quickActions = {
+        ocr: "Please extract and transcribe all readable text from the attached image as accurately as possible (OCR), preserving line breaks where it makes sense.",
+        describe: "Please describe the attached image in rich detail — subject, setting, colors, mood, composition, and any notable elements.",
+        reverse: "Based on the attached image, write a single detailed AI image-generation prompt that could recreate a very similar image. Include subject, style, lighting, composition, and camera/art details."
+      };
+      Object.keys(quickActions).forEach(function (key) {
+        var btn = document.getElementById("aichat-quick-" + key);
+        if (!btn) return;
+        btn.addEventListener("click", function () {
+          if (!AC.hasPendingImage()) { needsImageAlert(); return; }
+          AC.insertPrompt(quickActions[key]);
+          AC.sendNow();
+        });
+      });
+      var enhanceBtn = document.getElementById("aichat-quick-enhance");
+      if (enhanceBtn) {
+        enhanceBtn.addEventListener("click", function () {
+          var inputEl = document.getElementById("aichat-input");
+          var current = inputEl ? inputEl.value.trim() : "";
+          if (!current) { window.alert("Type a prompt in the box first, then tap Enhance."); return; }
+          AC.insertPrompt("Rewrite and enhance the following prompt so it's more detailed, vivid, and effective, while keeping the original intent. Reply with only the improved prompt:\n\n" + current);
+          AC.sendNow();
+        });
+      }
+
+      renderThreadList();
     })();
   </script>
 
