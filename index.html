@@ -224,6 +224,19 @@
     .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
     .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
+    /* Nav redesign: only "🏠 Home ▼", Search, and Settings remain visible in the header
+       (see .header-controls below). The old hamburger + long link list are kept in the
+       DOM only so existing JS bindings don't error, and are hidden at every breakpoint. */
+    .nav-toggle,
+    .legacy-nav-hidden { display: none !important; }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-left: auto;
+    }
+
     .hero {
       text-align: center;
       padding: 5rem 1.5rem 3rem;
@@ -2368,43 +2381,40 @@
     .aichat-quick-chip:hover { border-color: var(--accent); color: var(--accent); }
     .aichat-messages.aichat-drag-active { outline: 2px dashed var(--accent); outline-offset: -6px; background: rgba(127,255,110,.05); }
 
-    /* ================= Additive: Mobile "Home" nav dropdown ================= */
-    .mobile-home-nav { display: none; }
-    @media (max-width: 768px) {
-      header .nav-toggle, header nav[aria-label="Main navigation menu"] { display: none !important; }
-      .mobile-home-nav {
-        display: flex; align-items: center; gap: .4rem; position: relative; margin-left: auto;
-      }
-      .mobile-home-trigger {
-        display: flex; align-items: center; gap: .3rem; background: var(--surface2); border: 1px solid var(--border);
-        color: var(--text); padding: .5rem .8rem; border-radius: var(--radius-sm); font-size: .85rem; cursor: pointer;
-      }
-      .mobile-home-trigger svg { width: 12px; height: 12px; stroke: currentColor; fill: none; transition: transform .18s; }
-      .mobile-home-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
-      .mobile-home-dropdown {
-        position: absolute; top: calc(100% + 8px); left: 0; min-width: 220px; background: var(--surface);
-        border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 16px 40px rgba(0,0,0,.4);
-        padding: .5rem; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(-8px);
-        transition: all .18s ease; z-index: 200;
-      }
-      .mobile-home-dropdown.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
-      .mobile-home-dropdown a {
-        padding: .65rem .8rem; border-radius: var(--radius-sm); color: var(--text); font-size: .88rem; text-decoration: none;
-      }
-      .mobile-home-dropdown a:hover { background: var(--surface2); color: var(--accent); }
-      .mobile-settings-fixed {
-        display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px;
-        border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2);
-        color: var(--text); font-size: 1rem; cursor: pointer; flex-shrink: 0;
-      }
+    /* ================= "🏠 Home ▼" dropdown nav — identical on mobile + desktop ================= */
+    .mobile-home-nav { display: flex; align-items: center; gap: .4rem; position: relative; }
+    .mobile-home-trigger {
+      display: flex; align-items: center; gap: .3rem; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: .5rem .8rem; border-radius: var(--radius-sm); font-size: .85rem; cursor: pointer;
+      font-family: inherit; white-space: nowrap;
     }
-    @media (min-width: 769px) { .mobile-settings-fixed { display: none; } }
+    .mobile-home-trigger:hover, .mobile-home-trigger[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+    .mobile-home-trigger svg { width: 12px; height: 12px; stroke: currentColor; fill: none; transition: transform .18s; }
+    .mobile-home-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+    .mobile-home-dropdown {
+      position: absolute; top: calc(100% + 8px); left: 0; min-width: 220px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 16px 40px rgba(0,0,0,.4);
+      padding: .5rem; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(-8px);
+      transition: opacity .18s ease, transform .18s ease, visibility .18s ease; z-index: 250;
+    }
+    .mobile-home-dropdown.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
+    .mobile-home-dropdown a {
+      padding: .65rem .8rem; border-radius: var(--radius-sm); color: var(--text); font-size: .88rem; text-decoration: none;
+    }
+    .mobile-home-dropdown a:hover { background: var(--surface2); color: var(--accent); }
+    .mobile-settings-fixed {
+      display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px;
+      border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text); font-size: 1rem; cursor: pointer; flex-shrink: 0;
+    }
+    .mobile-settings-fixed:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* ================= Additive: Global tool search ================= */
-    .site-search-wrap { position: relative; margin-left: .9rem; }
+    /* ================= Global tool search / app launcher ================= */
+    .site-search-wrap { position: relative; }
     .site-search-input {
       background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 999px;
       padding: .5rem .9rem .5rem 2.1rem; font-size: .82rem; width: 190px; transition: width .18s, border-color .18s;
+      font-family: inherit;
     }
     .site-search-input:focus { outline: none; border-color: var(--accent); width: 240px; }
     .site-search-wrap::before {
@@ -2425,13 +2435,14 @@
     .site-search-result span { font-size: .72rem; color: var(--muted); }
     .site-search-empty { padding: .8rem; font-size: .8rem; color: var(--muted); text-align: center; }
     @media (max-width: 768px) {
-      .site-search-wrap { margin-left: .5rem; }
+      .header-controls { gap: .4rem; }
       .site-search-input { width: 120px; }
       .site-search-input:focus { width: 150px; }
     }
     @media (max-width: 480px) {
-      .site-search-input { width: 88px; font-size: .76rem; padding-right: .5rem; }
-      .site-search-input:focus { width: 130px; }
+      .mobile-home-trigger { padding: .5rem .55rem; font-size: .78rem; }
+      .site-search-input { width: 84px; font-size: .76rem; padding-right: .5rem; }
+      .site-search-input:focus { width: 128px; }
     }
   </style>
 
@@ -2462,10 +2473,14 @@
       <img src="logo-icon.png" alt="" aria-hidden="true" style="height:22px;width:22px;display:block;" />
       Smart Compress
     </a>
+    <!-- Legacy nav elements kept in the DOM (permanently hidden) so existing JS bindings
+         (#nav-toggle, #main-nav, #nav-settings-link) keep working without any errors.
+         They are never shown — the visible navigation is entirely the header-controls
+         group below. -->
     <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="main-nav" id="nav-toggle" type="button">
       <span></span><span></span><span></span>
     </button>
-    <nav aria-label="Main navigation menu">
+    <nav aria-label="Main navigation menu" class="legacy-nav-hidden">
       <ul class="nav-links" id="main-nav" role="list">
         <li><a href="#home">Home</a></li>
         <li><a href="#tools-suite">Tools</a></li>
@@ -2478,28 +2493,32 @@
       </ul>
     </nav>
 
-    <!-- Additive: premium global search (desktop + mobile, beside Home) -->
-    <div class="site-search-wrap">
-      <input type="search" class="site-search-input" id="site-search-input" placeholder="Search tools…" aria-label="Search all tools" autocomplete="off" />
-      <div class="site-search-results" id="site-search-results"></div>
-    </div>
-
-    <!-- Additive: mobile-only "Home ▼" dropdown nav (desktop nav above is unchanged) -->
-    <div class="mobile-home-nav" id="mobile-home-nav">
-      <button type="button" class="mobile-home-trigger" id="mobile-home-trigger" aria-haspopup="true" aria-expanded="false">
-        🏠 Home <svg viewBox="0 0 24 24" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="mobile-home-dropdown" id="mobile-home-dropdown" role="menu">
-        <a href="#home" role="menuitem">Home</a>
-        <a href="#tools-suite" role="menuitem">Tools</a>
-        <a href="#pro-tools" role="menuitem">AI Tools</a>
-        <a href="#tools-suite" role="menuitem">Browser Tools</a>
-        <a href="#blog" role="menuitem">Blog</a>
-        <a href="#about" role="menuitem">About Us</a>
-        <a href="#contact" role="menuitem">Contact Us</a>
-        <a href="#privacy" role="menuitem">Privacy Policy</a>
-        <a href="#terms" role="menuitem">Terms &amp; Conditions</a>
+    <!-- Visible navigation: Home ▼ dropdown + Search + Settings, grouped tightly together,
+         identical on mobile and desktop. -->
+    <div class="header-controls" id="header-controls">
+      <div class="mobile-home-nav" id="mobile-home-nav">
+        <button type="button" class="mobile-home-trigger" id="mobile-home-trigger" aria-haspopup="true" aria-expanded="false">
+          🏠 Home <svg viewBox="0 0 24 24" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="mobile-home-dropdown" id="mobile-home-dropdown" role="menu">
+          <a href="#home" role="menuitem">🏠 Home</a>
+          <a href="#tools-suite" role="menuitem">🛠 Tools</a>
+          <a href="#pro-tools" role="menuitem">🤖 AI Tools</a>
+          <a href="#tools-suite" role="menuitem">🌐 Browser Tools</a>
+          <a href="#blog" role="menuitem">📰 Blog</a>
+          <a href="#about" role="menuitem">ℹ️ About Us</a>
+          <a href="#contact" role="menuitem">📞 Contact Us</a>
+          <a href="#privacy" role="menuitem">🔒 Privacy Policy</a>
+          <a href="#terms" role="menuitem">📄 Terms &amp; Conditions</a>
+        </div>
       </div>
+
+      <!-- Global search / app launcher (desktop + mobile, beside Home) -->
+      <div class="site-search-wrap">
+        <input type="search" class="site-search-input" id="site-search-input" placeholder="Search tools…" aria-label="Search all tools" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="site-search-results" aria-autocomplete="list" />
+        <div class="site-search-results" id="site-search-results" role="listbox"></div>
+      </div>
+
       <button type="button" class="mobile-settings-fixed" id="mobile-settings-fixed" aria-label="Open settings">⚙</button>
     </div>
   </header>
@@ -11779,7 +11798,7 @@
     })();
   </script>
 
-  <!-- ================= Additive: Global tool search ================= -->
+  <!-- ================= Global tool search — application launcher ================= -->
   <script>
     (function initGlobalSearch() {
       "use strict";
@@ -11787,95 +11806,183 @@
       var resultsEl = document.getElementById("site-search-results");
       if (!input || !resultsEl) return;
 
-      // Registry of every tool on the site. type "tab" = Browser Toolkit tab,
-      // "pro" = Pro Tools card panel, "info" = not directly clickable (Coming Soon).
+      // Registry of every tool on the site.
+      //   type "tab"  = a tab inside the Browser Toolkit Processing Suite (#tools-suite)
+      //   type "pro"  = a card inside the Pro Tools grid (#pro-tools) that opens a panel
+      //   type "info" = a section with no click target (e.g. "Coming Soon")
+      //   type "hash" = a plain page section (About, Blog, etc.)
+      // `aliases` let partial/synonym queries ("remove", "chat", "qr"...) resolve to the
+      // right tool even when that word isn't literally in the display name.
       var TOOLS = [
-        { name: "Image Compressor", type: "tab", id: "compressor", group: "Browser Tools" },
-        { name: "Image Resizer", type: "tab", id: "resizer", group: "Browser Tools" },
-        { name: "Crop Image", type: "tab", id: "crop", group: "Browser Tools" },
-        { name: "Rotate Image", type: "tab", id: "rotate", group: "Browser Tools" },
-        { name: "Image Format Converter", type: "tab", id: "converter", group: "Browser Tools" },
-        { name: "Image to PDF", type: "tab", id: "pdf", group: "Browser Tools" },
-        { name: "PDF to Image", type: "tab", id: "pdf2img", group: "Browser Tools" },
-        { name: "AI Prompt Studio / Prompt Generator", type: "tab", id: "promptstudio", group: "Browser Tools" },
-        { name: "Image Layout Tools", type: "tab", id: "layout", group: "Browser Tools" },
-        { name: "Smart Document Editor", type: "tab", id: "doceditor", group: "Browser Tools" },
-        { name: "PDF Toolkit", type: "tab", id: "pdftoolkit", group: "Browser Tools" },
-        { name: "Document Converter", type: "tab", id: "docconverter", group: "Browser Tools" },
-        { name: "JSON Tools", type: "tab", id: "jsontools", group: "Browser Tools" },
-        { name: "Code Minifier", type: "tab", id: "codeminifier", group: "Browser Tools" },
-        { name: "OCR Image to Text", type: "tab", id: "ocr", group: "Browser Tools" },
-        { name: "QR Code Generator", type: "tab", id: "qrgen", group: "Browser Tools" },
-        { name: "Password Generator", type: "tab", id: "pwgen", group: "Browser Tools" },
-        { name: "URL Encoder / Decoder", type: "tab", id: "urlcodec", group: "Browser Tools" },
-        { name: "AI Chat Assistant", type: "pro", id: "panel-aichat", group: "AI Tools" },
-        { name: "Meme Generator", type: "pro", id: "panel-meme", group: "AI Tools" },
-        { name: "AI Image Cleaner / Background Remover", type: "pro", id: "panel-aicleaner", group: "AI Tools" },
-        { name: "Favicon Generator", type: "pro", id: "panel-favicon", group: "AI Tools" },
-        { name: "Mesh Gradient Generator", type: "pro", id: "panel-meshgen", group: "AI Tools" },
-        { name: "AI Image Generator", type: "info", id: "pro-tools", group: "AI Tools (Coming Soon)" },
-        { name: "Blog", type: "hash", id: "blog", group: "Site" },
-        { name: "About Us", type: "hash", id: "about", group: "Site" },
-        { name: "Contact Us", type: "hash", id: "contact", group: "Site" },
-        { name: "Privacy Policy", type: "hash", id: "privacy", group: "Site" },
-        { name: "Terms & Conditions", type: "hash", id: "terms", group: "Site" }
+        { name: "Image Compressor", type: "tab", id: "compressor", group: "Browser Tools", aliases: ["compress", "shrink", "reduce size", "optimize image"] },
+        { name: "Image Resizer", type: "tab", id: "resizer", group: "Browser Tools", aliases: ["resize", "dimensions", "scale image"] },
+        { name: "Crop Image", type: "tab", id: "crop", group: "Browser Tools", aliases: ["cut", "trim"] },
+        { name: "Rotate Image", type: "tab", id: "rotate", group: "Browser Tools", aliases: ["flip", "orientation"] },
+        { name: "Image Format Converter", type: "tab", id: "converter", group: "Browser Tools", aliases: ["convert", "jpg", "png", "webp", "format"] },
+        { name: "Image to PDF", type: "tab", id: "pdf", group: "Browser Tools", aliases: ["pdf", "img to pdf", "photos to pdf"] },
+        { name: "PDF to Image", type: "tab", id: "pdf2img", group: "Browser Tools", aliases: ["pdf", "pdf to jpg", "pdf to png"] },
+        { name: "AI Prompt Studio / Prompt Generator", type: "tab", id: "promptstudio", group: "Browser Tools", aliases: ["prompt", "prompt generator", "image to prompt", "ai prompt"] },
+        { name: "Image Layout Tools", type: "tab", id: "layout", group: "Browser Tools", aliases: ["split image", "merge image", "layout"] },
+        { name: "Smart Document Editor", type: "tab", id: "doceditor", group: "Browser Tools", aliases: ["edit document", "edit pdf", "word editor"] },
+        { name: "PDF Toolkit", type: "tab", id: "pdftoolkit", group: "Browser Tools", aliases: ["pdf", "merge pdf", "split pdf", "compress pdf", "rotate pdf", "extract pages"] },
+        { name: "Document Converter", type: "tab", id: "docconverter", group: "Browser Tools", aliases: ["word to pdf", "pdf to word", "doc converter"] },
+        { name: "JSON Tools", type: "tab", id: "jsontools", group: "Browser Tools", aliases: ["json formatter", "json validator"] },
+        { name: "Code Minifier", type: "tab", id: "codeminifier", group: "Browser Tools", aliases: ["minify", "html minifier", "css minifier", "js minifier"] },
+        { name: "OCR Image to Text", type: "tab", id: "ocr", group: "Browser Tools", aliases: ["ocr", "text extraction", "image to text", "scan text"] },
+        { name: "QR Code Generator", type: "tab", id: "qrgen", group: "Browser Tools", aliases: ["qr", "qr code", "barcode"] },
+        { name: "Password Generator", type: "tab", id: "pwgen", group: "Browser Tools", aliases: ["password", "passphrase"] },
+        { name: "URL Encoder / Decoder", type: "tab", id: "urlcodec", group: "Browser Tools", aliases: ["url encode", "url decode", "uri"] },
+        { name: "AI Chat Assistant", type: "pro", id: "panel-aichat", group: "AI Tools", aliases: ["chat", "assistant", "ai chat", "chatbot"] },
+        { name: "Meme Generator", type: "pro", id: "panel-meme", group: "AI Tools", aliases: ["meme"] },
+        { name: "AI Image Cleaner / Background Remover", type: "pro", id: "panel-aicleaner", group: "AI Tools", aliases: ["remove", "remove background", "background remover", "object removal", "image cleaner", "inpaint"] },
+        { name: "Favicon Generator", type: "pro", id: "panel-favicon", group: "AI Tools", aliases: ["favicon", "site icon"] },
+        { name: "Mesh Gradient Generator", type: "pro", id: "panel-meshgen", group: "AI Tools", aliases: ["gradient", "mesh", "background generator"] },
+        { name: "AI Image Generator", type: "info", id: "pro-tools", group: "AI Tools (Coming Soon)", aliases: ["text to image", "image generator"] },
+        { name: "Blog", type: "hash", id: "blog", group: "Site", aliases: ["articles", "posts"] },
+        { name: "About Us", type: "hash", id: "about", group: "Site", aliases: ["about"] },
+        { name: "Contact Us", type: "hash", id: "contact", group: "Site", aliases: ["contact", "support", "help"] },
+        { name: "Privacy Policy", type: "hash", id: "privacy", group: "Site", aliases: ["privacy"] },
+        { name: "Terms & Conditions", type: "hash", id: "terms", group: "Site", aliases: ["terms", "tos"] }
       ];
 
+      var MAX_RESULTS = 8;
+      var currentMatches = [];
+      var activeIndex = -1;
+
+      // ---- Ranking: exact/prefix matches on the name outrank mid-word matches,
+      // matches on the name outrank alias-only matches, so the most relevant tool
+      // is always first (and is what Enter opens). ----
+      function scoreTool(t, q) {
+        var name = t.name.toLowerCase();
+        var best = -1;
+        var idx = name.indexOf(q);
+        if (idx === 0) best = 100;
+        else if (idx > -1) best = /[\s/]/.test(name.charAt(idx - 1)) ? 80 : 55;
+
+        (t.aliases || []).forEach(function (alias) {
+          var ai = alias.toLowerCase().indexOf(q);
+          if (ai === -1) return;
+          var s = ai === 0 ? 90 : 45;
+          if (s > best) best = s;
+        });
+
+        if (best === -1 && t.group.toLowerCase().indexOf(q) !== -1) best = 10;
+        return best;
+      }
+
+      function search(q) {
+        return TOOLS
+          .map(function (t) { return { tool: t, score: scoreTool(t, q) }; })
+          .filter(function (r) { return r.score > -1; })
+          .sort(function (a, b) { return b.score - a.score; })
+          .slice(0, MAX_RESULTS)
+          .map(function (r) { return r.tool; });
+      }
+
+      // ---- Opens the tool as a launcher would: switches to the right tab / panel
+      // first, then snaps the view straight to it in one motion — never a generic
+      // "scroll to the Tools section and hope you find it" jump. ----
       function openTool(t) {
+        if (!t) return;
+
         if (t.type === "tab") {
-          var section = document.getElementById("tools-suite");
-          if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
           var tabBtn = document.getElementById("tab-" + t.id);
-          if (tabBtn) setTimeout(function () { tabBtn.click(); }, 250);
+          if (tabBtn) tabBtn.click();
+          var panel = document.getElementById("panel-" + t.id) || (tabBtn && document.getElementById(tabBtn.getAttribute("aria-controls")));
+          if (panel) panel.scrollIntoView({ behavior: "auto", block: "start" });
         } else if (t.type === "pro") {
-          var proSection = document.getElementById("pro-tools");
-          if (proSection) proSection.scrollIntoView({ behavior: "smooth", block: "start" });
           var card = document.querySelector('[data-pt-open="' + t.id + '"]');
-          if (card) setTimeout(function () { card.click(); }, 250);
-        } else if (t.type === "info") {
-          var infoSection = document.getElementById(t.id);
-          if (infoSection) infoSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          if (card) card.click();
+          var proPanel = document.getElementById(t.id);
+          if (proPanel) proPanel.scrollIntoView({ behavior: "auto", block: "start" });
         } else {
-          var hashSection = document.getElementById(t.id);
-          if (hashSection) hashSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          var section = document.getElementById(t.id);
+          if (section) section.scrollIntoView({ behavior: "auto", block: "start" });
         }
-        resultsEl.classList.remove("is-open");
+
+        closeResults();
         input.value = "";
+        input.focus();
+      }
+
+      function closeResults() {
+        resultsEl.classList.remove("is-open");
+        input.setAttribute("aria-expanded", "false");
+        activeIndex = -1;
+      }
+
+      function setActive(i) {
+        var rows = resultsEl.querySelectorAll(".site-search-result");
+        rows.forEach(function (row, idx) {
+          row.classList.toggle("is-active", idx === i);
+          row.setAttribute("aria-selected", idx === i ? "true" : "false");
+          if (idx === i) row.scrollIntoView({ block: "nearest" });
+        });
+        activeIndex = i;
       }
 
       function render(list) {
+        currentMatches = list;
+        activeIndex = -1;
         resultsEl.innerHTML = "";
         if (!list.length) {
           resultsEl.innerHTML = '<div class="site-search-empty">No matching tools</div>';
           resultsEl.classList.add("is-open");
+          input.setAttribute("aria-expanded", "true");
           return;
         }
-        list.forEach(function (t) {
+        list.forEach(function (t, i) {
           var row = document.createElement("div");
           row.className = "site-search-result";
+          row.setAttribute("role", "option");
+          row.setAttribute("aria-selected", "false");
           row.innerHTML = "<strong></strong><span></span>";
           row.querySelector("strong").textContent = t.name;
           row.querySelector("span").textContent = t.group;
+          row.addEventListener("mouseenter", function () { setActive(i); });
           row.addEventListener("click", function () { openTool(t); });
           resultsEl.appendChild(row);
         });
         resultsEl.classList.add("is-open");
+        input.setAttribute("aria-expanded", "true");
       }
 
-      input.addEventListener("input", function () {
+      function runSearch() {
         var q = input.value.trim().toLowerCase();
-        if (!q) { resultsEl.classList.remove("is-open"); resultsEl.innerHTML = ""; return; }
-        var matches = TOOLS.filter(function (t) { return t.name.toLowerCase().indexOf(q) !== -1; });
-        render(matches);
-      });
+        if (!q) { closeResults(); resultsEl.innerHTML = ""; currentMatches = []; return; }
+        render(search(q));
+      }
+
+      input.addEventListener("input", runSearch);
+
       input.addEventListener("focus", function () {
-        if (input.value.trim()) resultsEl.classList.add("is-open");
+        if (input.value.trim()) runSearch();
       });
+
       document.addEventListener("click", function (e) {
-        if (!resultsEl.contains(e.target) && e.target !== input) resultsEl.classList.remove("is-open");
+        if (!resultsEl.contains(e.target) && e.target !== input) closeResults();
       });
+
       input.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") { resultsEl.classList.remove("is-open"); input.blur(); }
+        if (e.key === "Escape") { closeResults(); input.blur(); return; }
+
+        if (e.key === "ArrowDown") {
+          if (!currentMatches.length) return;
+          e.preventDefault();
+          setActive(activeIndex < currentMatches.length - 1 ? activeIndex + 1 : 0);
+          return;
+        }
+        if (e.key === "ArrowUp") {
+          if (!currentMatches.length) return;
+          e.preventDefault();
+          setActive(activeIndex > 0 ? activeIndex - 1 : currentMatches.length - 1);
+          return;
+        }
+        if (e.key === "Enter") {
+          if (!currentMatches.length) return;
+          e.preventDefault();
+          openTool(currentMatches[activeIndex > -1 ? activeIndex : 0]);
+        }
       });
     })();
   </script>
