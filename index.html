@@ -2441,6 +2441,27 @@
     }
     .cp-stdin:focus { outline: none; border-color: var(--accent); }
 
+    /* ---- Mobile-only fix: prevent Chrome/Safari/Samsung Internet/Edge Mobile from
+       auto-zooming the page when the editor or stdin box is focused. Those browsers
+       zoom in whenever a focused editable element renders below 16px — so on touch
+       devices we simply guarantee 16px there. Desktop is untouched: this block only
+       matches (pointer: coarse), i.e. a finger as the primary input, never a mouse/
+       trackpad, so laptop/desktop sizing and behavior are unaffected either way. */
+    @media (pointer: coarse) {
+      .cp-editor-shell, .cp-editor-mount { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+      /* Monaco's hidden input textarea is what actually receives focus/typing; force
+         it (and any textarea inside the editor) to 16px+ so no zoom is triggered. */
+      .cp-editor-shell textarea,
+      .cp-editor-mount textarea.inputarea {
+        font-size: 16px !important;
+      }
+      .cp-stdin {
+        font-size: 16px !important;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+    }
+
     .cp-run-row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
     .cp-run-status { font-family: var(--mono); font-size: .78rem; color: var(--muted); }
 
@@ -9534,16 +9555,24 @@
             });
           })
           .then(function () {
+            var isCoarsePointer = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
             editor = monaco.editor.create(editorMount, {
               value: loadCodeFor(currentLang),
               language: LANGS[currentLang].monacoLang,
               theme: "vs-dark",
-              fontSize: 13,
+              // Mobile-only: 16px+ stops Chrome/Safari/Samsung Internet/Edge Mobile from
+              // auto-zooming the page when the hidden input textarea gets focus while typing.
+              // Desktop (pointer: fine) keeps the original 13px exactly as before.
+              fontSize: isCoarsePointer ? 16 : 13,
               fontFamily: "'Space Mono', monospace",
               minimap: { enabled: false },
               automaticLayout: true,
               scrollBeyondLastLine: false,
               tabSize: 2,
+              smoothScrolling: isCoarsePointer ? true : false,
+              // Mobile-only: keep the touch cursor/handle visible without Monaco's own
+              // ctrl/pinch zoom-editor-content gesture fighting the browser's scroll.
+              mouseWheelZoom: false,
             });
             editorLoading.classList.add("is-hidden");
           })
