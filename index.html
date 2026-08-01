@@ -1747,66 +1747,15 @@
       .pdf-thumb-card { width: 130px; }
     }
 
-    /* ================= Premium: Mesh Gradient Generator (additive) ================= */
+    /* ================= Premium: shared "PRO/LIVE/BETA" badge style (used by several Pro Tools panels) ================= */
     .premium-badge {
       display: inline-block; font-family: var(--mono); font-size: .58rem; font-weight: 700;
       letter-spacing: .06em; color: #0d0d0f; background: linear-gradient(135deg, var(--accent), var(--accent2));
       padding: .12rem .4rem; border-radius: 5px; vertical-align: middle; margin-left: .3rem;
     }
-    .mg-layout { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.6rem; align-items: start; }
-    @media (max-width: 900px) { .mg-layout { grid-template-columns: 1fr; } }
 
-    .mg-preview-col { display: flex; flex-direction: column; gap: 1rem; }
-    .mg-canvas-wrap {
-      position: relative; width: 100%; aspect-ratio: 3 / 2; border-radius: var(--radius);
-      overflow: hidden; border: 1px solid var(--border); background:
-      repeating-conic-gradient(#20202a 0% 25%, #17171b 0% 50%) 50% / 20px 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,.45);
-    }
-    .mg-canvas-wrap.mg-rounded { border-radius: 50% / 38%; }
-    .mg-canvas-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-    #mg-noise-canvas { pointer-events: none; opacity: 0; mix-blend-mode: overlay; transition: opacity .25s ease; }
-    #mg-noise-canvas.mg-active { opacity: .35; }
-    .mg-canvas-wrap.mg-glass::after {
-      content: ""; position: absolute; inset: 0; backdrop-filter: blur(18px) saturate(140%);
-      -webkit-backdrop-filter: blur(18px) saturate(140%);
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-      pointer-events: none;
-    }
-    .mg-canvas-wrap.mg-glow { box-shadow: 0 0 60px 6px rgba(127,255,110,.28), 0 10px 40px rgba(0,0,0,.45); }
-
-    .mg-preset-row { display: flex; flex-wrap: wrap; gap: .5rem; }
-    .mg-preset-chip {
-      font-family: var(--mono); font-size: .72rem; padding: .4rem .75rem; border-radius: 99px;
-      border: 1px solid var(--border); background: var(--surface2); color: var(--muted); cursor: pointer;
-      transition: all .2s ease;
-    }
-    .mg-preset-chip:hover { border-color: var(--accent); color: var(--accent); }
-
-    .mg-controls-col { display: flex; flex-direction: column; gap: 1rem; }
-    .mg-swatch-row { display: flex; flex-wrap: wrap; gap: .6rem; }
-    .mg-swatch-item { display: flex; flex-direction: column; align-items: center; gap: .3rem; }
-    .mg-swatch-item input[type="color"] {
-      width: 42px; height: 42px; border: 2px solid var(--border); border-radius: 50%;
-      background: none; cursor: pointer; padding: 0; overflow: hidden;
-    }
-    .mg-swatch-item input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-    .mg-swatch-item input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
-
-    .mg-toggle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
-    .mg-switch {
-      display: flex; align-items: center; gap: .55rem; font-size: .82rem; color: var(--text);
-      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
-      padding: .55rem .7rem; cursor: pointer; user-select: none;
-    }
-    .mg-switch input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+    /* ================= Premium: Pro Tools Hub, Hero CTA, Favicon Gen, PDF Protect (additive) ================= */
     .range-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: .3rem; }
-    .mg-toast {
-      display: block; font-family: var(--mono); font-size: .78rem; color: var(--accent);
-      background: rgba(127,255,110,.08); border: 1px solid var(--accent); border-radius: var(--radius-sm);
-      padding: .5rem .7rem;
-    }
-    @media (max-width: 480px) { .mg-toggle-grid { grid-template-columns: 1fr; } }
 
     /* ================= Premium: Pro Tools Hub, Hero CTA, Favicon Gen, PDF Protect (additive) ================= */
     .btn-pro {
@@ -2444,6 +2393,121 @@
       .site-search-input { width: 84px; font-size: .76rem; padding-right: .5rem; }
       .site-search-input:focus { width: 128px; }
     }
+
+    /* ================= Code Playground (additive, self-contained) ================= */
+    .cp-toolbar {
+      display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem;
+      padding: 1rem 1.1rem; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); margin-bottom: 1rem;
+    }
+    .cp-toolbar-group { display: flex; flex-direction: column; gap: .3rem; }
+    .cp-field-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-family: var(--mono); }
+    .cp-select {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      border-radius: var(--radius-sm); padding: .5rem .7rem; font-size: .85rem; font-family: var(--sans);
+      cursor: pointer; min-width: 190px;
+    }
+    .cp-select:focus { outline: none; border-color: var(--accent); }
+    .cp-toolbar-spacer { flex: 1 1 auto; }
+    .cp-btn-sm { padding: .5rem .9rem; font-size: .78rem; }
+    .cp-runtime-badge {
+      align-self: center; font-family: var(--mono); font-size: .72rem; color: var(--accent);
+      background: rgba(127,255,110,.08); border: 1px solid var(--accent); border-radius: 999px;
+      padding: .35rem .8rem; white-space: nowrap;
+    }
+    .cp-runtime-badge.is-busy { color: var(--accent2); border-color: var(--accent2); background: rgba(61,255,208,.08); }
+    .cp-runtime-badge.is-error { color: var(--danger); border-color: var(--danger); background: rgba(255,92,92,.08); }
+
+    .cp-layout { display: grid; grid-template-columns: 1.35fr 1fr; gap: 1.3rem; align-items: start; }
+    @media (max-width: 980px) { .cp-layout { grid-template-columns: 1fr; } }
+
+    .cp-editor-col { display: flex; flex-direction: column; gap: .9rem; min-width: 0; }
+    .cp-editor-shell {
+      position: relative; height: 420px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      overflow: hidden; background: #1e1e1e;
+    }
+    .cp-editor-mount { position: absolute; inset: 0; }
+    .cp-editor-loading {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: .85rem; color: var(--muted); background: #1e1e1e; z-index: 2;
+    }
+    .cp-editor-loading.is-hidden { display: none; }
+
+    .cp-stdin-block { display: flex; flex-direction: column; gap: .4rem; }
+    .cp-stdin {
+      width: 100%; min-height: 84px; resize: vertical; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text); padding: .7rem .8rem; font-family: var(--mono);
+      font-size: .82rem; line-height: 1.5;
+    }
+    .cp-stdin:focus { outline: none; border-color: var(--accent); }
+
+    .cp-run-row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+    .cp-run-status { font-family: var(--mono); font-size: .78rem; color: var(--muted); }
+
+    .cp-output-col { display: flex; flex-direction: column; min-width: 0; }
+    .cp-output-tabs { display: flex; gap: .3rem; border-bottom: 1px solid var(--border); margin-bottom: .8rem; }
+    .cp-output-tab {
+      background: none; border: none; color: var(--muted); font-family: var(--sans); font-size: .82rem;
+      font-weight: 600; padding: .6rem .9rem; cursor: pointer; border-bottom: 2px solid transparent;
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .cp-output-tab:hover { color: var(--text); }
+    .cp-output-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .cp-tab-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--danger); display: inline-block; }
+    .cp-tab-count {
+      font-family: var(--mono); font-size: .68rem; background: var(--surface2); border-radius: 999px;
+      padding: .05rem .45rem; color: var(--muted);
+    }
+
+    .cp-output-panel { display: none; }
+    .cp-output-panel.active { display: block; }
+    .cp-output-meta {
+      display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .6rem; font-family: var(--mono); font-size: .72rem;
+    }
+    .cp-output-meta span {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; padding: .25rem .65rem; color: var(--muted);
+    }
+    .cp-output-meta span.cp-meta-ok { color: var(--accent); border-color: var(--accent); }
+    .cp-output-meta span.cp-meta-error { color: var(--danger); border-color: var(--danger); }
+
+    .cp-output-pre {
+      background: #0f0f12; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 1rem; font-family: var(--mono); font-size: .8rem; line-height: 1.6; color: var(--text);
+      min-height: 340px; max-height: 480px; overflow: auto; white-space: pre-wrap; word-break: break-word;
+    }
+    .cp-output-pre-error { color: #ff9d9d; }
+
+    .cp-sql-result { margin-top: .8rem; display: flex; flex-direction: column; gap: 1rem; }
+    .cp-sql-table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); max-height: 320px; }
+    .cp-sql-table { border-collapse: collapse; width: 100%; font-family: var(--mono); font-size: .76rem; }
+    .cp-sql-table th, .cp-sql-table td { padding: .5rem .7rem; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+    .cp-sql-table th { background: var(--surface2); color: var(--accent); position: sticky; top: 0; }
+    .cp-sql-table tr:hover td { background: rgba(255,255,255,.02); }
+    .cp-sql-statement-label { font-family: var(--mono); font-size: .72rem; color: var(--muted); margin-bottom: .35rem; }
+
+    .cp-history-list { display: flex; flex-direction: column; gap: .5rem; max-height: 480px; overflow: auto; }
+    .cp-history-empty { font-size: .82rem; color: var(--muted); padding: .5rem; }
+    .cp-history-item {
+      display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: .6rem .8rem; cursor: pointer; font-size: .78rem;
+    }
+    .cp-history-item:hover { border-color: var(--accent); }
+    .cp-history-item .cp-hi-lang { font-family: var(--mono); color: var(--text); font-weight: 700; }
+    .cp-history-item .cp-hi-time { color: var(--muted); font-size: .7rem; }
+    .cp-history-item .cp-hi-status { font-family: var(--mono); font-size: .7rem; padding: .15rem .5rem; border-radius: 999px; }
+    .cp-history-item .cp-hi-status.cp-meta-ok { color: var(--accent); border: 1px solid var(--accent); }
+    .cp-history-item .cp-hi-status.cp-meta-error { color: var(--danger); border: 1px solid var(--danger); }
+
+    .cp-footnote { margin-top: 1.1rem; font-size: .76rem; color: var(--muted); line-height: 1.6; }
+    .cp-footnote code { font-family: var(--mono); background: var(--surface2); padding: .1rem .35rem; border-radius: 4px; }
+
+    @media (max-width: 640px) {
+      .cp-toolbar { flex-direction: column; align-items: stretch; }
+      .cp-select { min-width: 0; width: 100%; }
+      .cp-runtime-badge { align-self: flex-start; }
+      .cp-editor-shell { height: 320px; }
+    }
   </style>
 
   <!-- Google Analytics -->
@@ -2718,16 +2782,16 @@
           <p>Generate high-quality favicon files from any image.</p>
         </div>
 
-        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-meshgen" tabindex="0" role="button" aria-label="Open Mesh Gradient Generator">
-          <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="7" cy="8" r="4"/><circle cx="16" cy="9" r="5"/><circle cx="11" cy="17" r="4"/></svg></div>
-          <h3>Mesh Gradient Generator <span class="pro-tool-badge is-live">Live</span></h3>
-          <p>Design glassmorphic multi-color gradient backgrounds and wallpapers.</p>
-        </div>
-
         <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-aichat" tabindex="0" role="button" aria-label="Open AI Chat Assistant">
           <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M12 7V3"/><circle cx="12" cy="2.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="8.5" cy="13.5" r="1.3" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13.5" r="1.3" fill="currentColor" stroke="none"/><path d="M8.5 17h7"/><path d="M3 12H1M23 12h-2"/></svg></div>
           <h3>AI Chat Assistant <span class="pro-tool-badge is-live">LIVE</span></h3>
           <p>Chat with AI instantly.</p>
+        </div>
+
+        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-codeplayground" tabindex="0" role="button" aria-label="Open Code Playground">
+          <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/></svg></div>
+          <h3>Code Playground <span class="pro-tool-badge is-live">Live</span></h3>
+          <p>Write and run real code — 12 languages, stdin, compiler errors, and a SQL runner.</p>
         </div>
 
       </div>
@@ -2963,77 +3027,6 @@
         </div>
       </div>
 
-      <!-- ============== Mesh Gradient Generator panel ============== -->
-      <div class="pro-tool-panel" id="panel-meshgen">
-        <button type="button" class="pro-tool-back-btn" data-pt-back>
-          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Back to Pro Tools
-        </button>
-        <div class="tool-workspace-standalone">
-            <div class="tool-title-row">
-              <h2>Mesh Gradient Generator <span class="premium-badge">PRO</span> <span>Glassmorphic Multi-Color Backgrounds &amp; Wallpapers</span></h2>
-            </div>
-
-            <div class="mg-layout">
-              <div class="mg-preview-col">
-                <div class="mg-canvas-wrap" id="mg-canvas-wrap">
-                  <canvas id="mg-canvas" width="900" height="600"></canvas>
-                  <canvas id="mg-noise-canvas" width="900" height="600"></canvas>
-                </div>
-                <div class="mg-preset-row" id="mg-preset-row"></div>
-              </div>
-
-              <div class="mg-controls-col">
-                <div class="control-group">
-                  <label>Colors</label>
-                  <div class="mg-swatch-row" id="mg-swatch-row"></div>
-                  <div class="action-row" style="margin-top:.6rem;">
-                    <button type="button" class="btn-secondary" id="mg-add-color">+ Add Color</button>
-                    <button type="button" class="btn-secondary" id="mg-remove-color">− Remove Color</button>
-                    <button type="button" class="btn-secondary" id="mg-random-colors">🎲 Random Colors</button>
-                    <button type="button" class="btn-secondary" id="mg-random-layout">🔀 Random Layout</button>
-                  </div>
-                </div>
-
-                <div class="mg-toggle-grid">
-                  <label class="mg-switch"><input type="checkbox" id="mg-toggle-animate"><span>Animated Gradient</span></label>
-                  <label class="mg-switch"><input type="checkbox" id="mg-toggle-noise"><span>Noise Texture</span></label>
-                  <label class="mg-switch"><input type="checkbox" id="mg-toggle-glass"><span>Glass Effect</span></label>
-                  <label class="mg-switch"><input type="checkbox" id="mg-toggle-blob" checked><span>Blob Shapes</span></label>
-                  <label class="mg-switch"><input type="checkbox" id="mg-toggle-glow"><span>Glow</span></label>
-                  <label class="mg-switch"><input type="checkbox" id="mg-toggle-rounded"><span>Rounded Canvas</span></label>
-                  <label class="mg-switch"><input type="checkbox" id="mg-toggle-transparent"><span>Transparent BG</span></label>
-                </div>
-
-                <div class="control-group">
-                  <div class="range-row"><label for="mg-density">Mesh Density</label><span class="range-val-lbl" id="mg-density-lbl">5</span></div>
-                  <input type="range" id="mg-density" min="2" max="10" step="1" value="5">
-                </div>
-                <div class="control-group">
-                  <div class="range-row"><label for="mg-speed">Animation Speed</label><span class="range-val-lbl" id="mg-speed-lbl">50%</span></div>
-                  <input type="range" id="mg-speed" min="5" max="100" step="1" value="50">
-                </div>
-                <div class="control-group">
-                  <div class="range-row"><label for="mg-size">Gradient Size</label><span class="range-val-lbl" id="mg-size-lbl">100%</span></div>
-                  <input type="range" id="mg-size" min="40" max="180" step="1" value="100">
-                </div>
-
-                <div class="action-row" style="margin-top:.8rem;">
-                  <button type="button" class="btn-primary" id="mg-download-png">Download PNG</button>
-                  <button type="button" class="btn-secondary" id="mg-download-svg">Download SVG</button>
-                  <button type="button" class="btn-secondary" id="mg-copy-css">Copy CSS</button>
-                </div>
-                <div class="control-group" style="margin-top:.8rem;">
-                  <label>CSS Output</label>
-                  <textarea id="mg-css-output" readonly style="width:100%;min-height:110px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent2);padding:.8rem;font-family:var(--mono);font-size:.76rem;resize:vertical;"></textarea>
-                </div>
-                <span id="mg-toast" class="mg-toast" style="display:none;"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- ============== AI Chat Assistant panel ============== -->
       <div class="pro-tool-panel" id="panel-aichat">
         <button type="button" class="pro-tool-back-btn" data-pt-back>
@@ -3169,6 +3162,103 @@
               <option value="lite">GPT OSS 20B (OpenRouter, free)</option>
             </select>
           </div>
+        </div>
+      </div>
+
+      <!-- ============== Code Playground panel ============== -->
+      <div class="pro-tool-panel" id="panel-codeplayground">
+        <button type="button" class="pro-tool-back-btn" data-pt-back>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Pro Tools
+        </button>
+        <div class="tool-workspace-standalone">
+          <div class="tool-title-row">
+            <h2>Code Playground <span class="premium-badge">PRO</span> <span>Write and run real code — 12 languages, live stdin, real compiler/runtime errors.</span></h2>
+          </div>
+
+          <div class="cp-toolbar">
+            <div class="cp-toolbar-group">
+              <label class="cp-field-label" for="cp-language">Language</label>
+              <select id="cp-language" class="cp-select">
+                <option value="python">Python 3</option>
+                <option value="javascript">JavaScript (Node.js)</option>
+                <option value="typescript">TypeScript</option>
+                <option value="java">Java</option>
+                <option value="c">C</option>
+                <option value="cpp">C++</option>
+                <option value="go">Go</option>
+                <option value="rust">Rust</option>
+                <option value="php">PHP</option>
+                <option value="kotlin">Kotlin</option>
+                <option value="swift">Swift</option>
+                <option value="sql">SQL (SQLite)</option>
+              </select>
+            </div>
+
+            <div class="cp-toolbar-group" id="cp-mode-group" style="display:none;">
+              <label class="cp-field-label" for="cp-exec-mode">Run</label>
+              <select id="cp-exec-mode" class="cp-select">
+                <option value="browser">⚡ In Browser (Pyodide)</option>
+                <option value="server">☁ Server (Judge0)</option>
+              </select>
+            </div>
+
+            <span class="cp-runtime-badge" id="cp-runtime-badge">Ready</span>
+
+            <div class="cp-toolbar-spacer"></div>
+
+            <button type="button" class="btn-secondary cp-btn-sm" id="cp-upload-btn" title="Upload a source file into the editor">⬆ Upload</button>
+            <input type="file" id="cp-upload-input" style="display:none;" accept=".py,.js,.mjs,.ts,.java,.c,.h,.cpp,.hpp,.cc,.go,.rs,.php,.kt,.swift,.sql,.txt" />
+            <button type="button" class="btn-secondary cp-btn-sm" id="cp-download-btn" title="Download current code as a file">⬇ Download</button>
+            <button type="button" class="btn-secondary cp-btn-sm" id="cp-save-btn" title="Save this code in your browser (per language)">💾 Save</button>
+            <button type="button" class="btn-secondary cp-btn-sm" id="cp-reset-btn" title="Reset to the starter template for this language">↺ Reset</button>
+          </div>
+
+          <div class="cp-layout">
+            <div class="cp-editor-col">
+              <div class="cp-editor-shell">
+                <div class="cp-editor-mount" id="cp-editor-mount"></div>
+                <div class="cp-editor-loading" id="cp-editor-loading">Loading editor…</div>
+              </div>
+
+              <div class="cp-stdin-block" id="cp-stdin-block">
+                <label class="cp-field-label" for="cp-stdin">Custom Input (stdin)</label>
+                <textarea id="cp-stdin" class="cp-stdin" placeholder="Type input your program will read from stdin, one value per line…" spellcheck="false"></textarea>
+              </div>
+
+              <div class="cp-run-row">
+                <button type="button" class="btn-primary" id="cp-run-btn">▶ Run</button>
+                <button type="button" class="btn-secondary" id="cp-run-again-btn" disabled>↻ Run Again</button>
+                <span class="cp-run-status" id="cp-run-status"></span>
+              </div>
+            </div>
+
+            <div class="cp-output-col">
+              <div class="cp-output-tabs" role="tablist">
+                <button type="button" class="cp-output-tab active" id="cp-tab-output" role="tab" aria-selected="true">Output</button>
+                <button type="button" class="cp-output-tab" id="cp-tab-errors" role="tab" aria-selected="false">Errors <span class="cp-tab-dot" id="cp-errors-dot" style="display:none;"></span></button>
+                <button type="button" class="cp-output-tab" id="cp-tab-history" role="tab" aria-selected="false">Runs <span class="cp-tab-count" id="cp-history-count">0</span></button>
+              </div>
+
+              <div class="cp-output-panel active" id="cp-panel-output">
+                <div class="cp-output-meta" id="cp-output-meta"></div>
+                <pre class="cp-output-pre" id="cp-stdout-pre">Run your code to see output here.</pre>
+                <div class="cp-sql-result" id="cp-sql-result" style="display:none;"></div>
+              </div>
+
+              <div class="cp-output-panel" id="cp-panel-errors">
+                <pre class="cp-output-pre cp-output-pre-error" id="cp-stderr-pre">No errors yet.</pre>
+              </div>
+
+              <div class="cp-output-panel" id="cp-panel-history">
+                <div class="cp-history-list" id="cp-history-list">
+                  <p class="cp-history-empty">Your last few runs in this session will show up here.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="cp-footnote">Python runs instantly in your browser (Pyodide) by default — no server needed. Every other language (and the server mode for Python) executes on a real Judge0 CE compiler/interpreter through <code>/api/execute</code>. SQL runs 100% in your browser on a real SQLite engine (sql.js) — nothing is simulated; compiler and runtime errors shown here are the actual output of the toolchain.</p>
         </div>
       </div>
   </section>
@@ -9025,350 +9115,6 @@
     })();
   </script>
 
-  <!-- ================= Premium: Mesh Gradient Generator (additive, self-contained) ================= -->
-  <script>
-    (function () {
-      "use strict";
-      var canvas = document.getElementById("mg-canvas");
-      if (!canvas) return; // panel not present, do nothing
-
-      var ctx = canvas.getContext("2d");
-      var noiseCanvas = document.getElementById("mg-noise-canvas");
-      var noiseCtx = noiseCanvas.getContext("2d");
-      var wrap = document.getElementById("mg-canvas-wrap");
-      var swatchRow = document.getElementById("mg-swatch-row");
-      var presetRow = document.getElementById("mg-preset-row");
-      var cssOutput = document.getElementById("mg-css-output");
-      var toast = document.getElementById("mg-toast");
-
-      var els = {
-        density: document.getElementById("mg-density"),
-        densityLbl: document.getElementById("mg-density-lbl"),
-        speed: document.getElementById("mg-speed"),
-        speedLbl: document.getElementById("mg-speed-lbl"),
-        size: document.getElementById("mg-size"),
-        sizeLbl: document.getElementById("mg-size-lbl"),
-        animate: document.getElementById("mg-toggle-animate"),
-        noise: document.getElementById("mg-toggle-noise"),
-        glass: document.getElementById("mg-toggle-glass"),
-        blob: document.getElementById("mg-toggle-blob"),
-        glow: document.getElementById("mg-toggle-glow"),
-        rounded: document.getElementById("mg-toggle-rounded"),
-        transparent: document.getElementById("mg-toggle-transparent"),
-        addColor: document.getElementById("mg-add-color"),
-        removeColor: document.getElementById("mg-remove-color"),
-        randomColors: document.getElementById("mg-random-colors"),
-        randomLayout: document.getElementById("mg-random-layout"),
-        downloadPng: document.getElementById("mg-download-png"),
-        downloadSvg: document.getElementById("mg-download-svg"),
-        copyCss: document.getElementById("mg-copy-css")
-      };
-
-      var W = canvas.width, H = canvas.height;
-
-      var PRESETS = {
-        "Aurora": ["#0bffb0", "#4d7fff", "#8a2be2", "#0d0d2b"],
-        "Cyber Green": ["#0d1f12", "#39ff14", "#0aff9d", "#012a1c"],
-        "Ocean": ["#001f3f", "#0074d9", "#39cccc", "#7fdbff"],
-        "Sunset": ["#ff512f", "#f09819", "#ff8c42", "#3d0e40"],
-        "Purple Neon": ["#7000ff", "#e100ff", "#2b003d", "#ff00c8"],
-        "AI Glow": ["#00f5ff", "#7fff6e", "#001220", "#3dffd0"],
-        "Dark Glass": ["#1c1c24", "#3a3a4a", "#0d0d0f", "#55556b"],
-        "Royal Blue": ["#001489", "#0038a8", "#4169e1", "#0a0a2a"],
-        "Mint": ["#0fffc1", "#7effd6", "#004d40", "#c8ffe8"],
-        "Rainbow": ["#ff004c", "#ff9900", "#faff00", "#22ff00", "#00e5ff", "#7000ff"]
-      };
-
-      function randHex() {
-        var h = Math.floor(Math.random() * 16777215).toString(16);
-        while (h.length < 6) h = "0" + h;
-        return "#" + h;
-      }
-
-      var state = {
-        colors: ["#7fff6e", "#3dffd0", "#7000ff", "#001220", "#ff00c8"],
-        blobs: [],
-        density: 5,
-        speed: 50,
-        size: 100,
-        animate: false,
-        noise: false,
-        glass: false,
-        blobMode: true,
-        glow: false,
-        rounded: false,
-        transparent: false
-      };
-
-      function regenerateBlobs() {
-        var count = Math.max(state.colors.length, state.density);
-        var blobs = [];
-        for (var i = 0; i < count; i++) {
-          blobs.push({
-            colorIdx: i % state.colors.length,
-            x: 10 + Math.random() * 80,
-            y: 10 + Math.random() * 80,
-            r: 28 + Math.random() * 26,
-            phase: Math.random() * Math.PI * 2,
-            speedMul: 0.6 + Math.random() * 0.8
-          });
-        }
-        state.blobs = blobs;
-      }
-
-      function renderSwatches() {
-        swatchRow.innerHTML = "";
-        state.colors.forEach(function (c, i) {
-          var item = document.createElement("div");
-          item.className = "mg-swatch-item";
-          var input = document.createElement("input");
-          input.type = "color";
-          input.value = c;
-          input.setAttribute("aria-label", "Mesh color " + (i + 1));
-          input.addEventListener("input", function () {
-            state.colors[i] = input.value;
-            draw();
-            updateCssOutput();
-          });
-          item.appendChild(input);
-          swatchRow.appendChild(item);
-        });
-      }
-
-      function renderPresets() {
-        presetRow.innerHTML = "";
-        Object.keys(PRESETS).forEach(function (name) {
-          var chip = document.createElement("button");
-          chip.type = "button";
-          chip.className = "mg-preset-chip";
-          chip.textContent = name;
-          chip.addEventListener("click", function () {
-            state.colors = PRESETS[name].slice();
-            regenerateBlobs();
-            renderSwatches();
-            draw();
-            updateCssOutput();
-          });
-          presetRow.appendChild(chip);
-        });
-      }
-
-      function hexToRgb(hex) {
-        var v = hex.replace("#", "");
-        if (v.length === 3) v = v.split("").map(function (ch) { return ch + ch; }).join("");
-        var num = parseInt(v, 16);
-        return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
-      }
-
-      function draw(timeMs) {
-        var t = state.animate ? (timeMs || 0) / 1000 : 0;
-
-        if (state.transparent) {
-          ctx.clearRect(0, 0, W, H);
-        } else {
-          ctx.globalCompositeOperation = "source-over";
-          ctx.fillStyle = "#0d0d0f";
-          ctx.fillRect(0, 0, W, H);
-        }
-
-        var sizeScale = state.size / 100;
-        var radiusBase = state.blobMode ? 1 : 2.1;
-
-        ctx.globalCompositeOperation = "lighter";
-        state.blobs.forEach(function (b) {
-          var wob = state.animate ? Math.sin(t * state.speed * 0.03 * b.speedMul + b.phase) : 0;
-          var wobX = state.animate ? Math.cos(t * state.speed * 0.025 * b.speedMul + b.phase) : 0;
-          var cx = ((b.x + wobX * 6) / 100) * W;
-          var cy = ((b.y + wob * 6) / 100) * H;
-          var r = (b.r / 100) * Math.max(W, H) * sizeScale * radiusBase;
-          var color = hexToRgb(state.colors[b.colorIdx] || "#7fff6e");
-          var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(r, 1));
-          grad.addColorStop(0, "rgba(" + color.r + "," + color.g + "," + color.b + ",0.85)");
-          grad.addColorStop(1, "rgba(" + color.r + "," + color.g + "," + color.b + ",0)");
-          ctx.fillStyle = grad;
-          ctx.beginPath();
-          ctx.arc(cx, cy, Math.max(r, 1), 0, Math.PI * 2);
-          ctx.fill();
-        });
-        ctx.globalCompositeOperation = "source-over";
-
-        if (state.animate) requestAnimationFrame(draw);
-      }
-
-      var rafRunning = false;
-      function ensureAnimationLoop() {
-        if (state.animate && !rafRunning) {
-          rafRunning = true;
-          requestAnimationFrame(function loop(ts) {
-            draw(ts);
-            if (state.animate) requestAnimationFrame(loop);
-            else rafRunning = false;
-          });
-        }
-      }
-
-      function buildNoise() {
-        var nW = 220, nH = 150;
-        noiseCanvas.width = nW; noiseCanvas.height = nH;
-        var imgData = noiseCtx.createImageData(nW, nH);
-        for (var i = 0; i < imgData.data.length; i += 4) {
-          var v = Math.floor(Math.random() * 255);
-          imgData.data[i] = v; imgData.data[i + 1] = v; imgData.data[i + 2] = v; imgData.data[i + 3] = 255;
-        }
-        noiseCtx.putImageData(imgData, 0, 0);
-      }
-
-      function updateCssOutput() {
-        var parts = state.blobs.map(function (b) {
-          var color = state.colors[b.colorIdx] || "#7fff6e";
-          return "radial-gradient(circle at " + b.x.toFixed(0) + "% " + b.y.toFixed(0) + "%, " + color + " 0%, transparent " + Math.min(90, (b.r * (state.size / 100) * 1.3)).toFixed(0) + "%)";
-        });
-        var css = "background: " + parts.join(",\n            ") + (state.transparent ? "" : ",\n            #0d0d0f") + ";";
-        cssOutput.value = css;
-      }
-
-      function showToast(msg) {
-        toast.textContent = msg;
-        toast.style.display = "block";
-        clearTimeout(showToast._t);
-        showToast._t = setTimeout(function () { toast.style.display = "none"; }, 2200);
-      }
-
-      function applyToggleClasses() {
-        wrap.classList.toggle("mg-glass", state.glass);
-        wrap.classList.toggle("mg-glow", state.glow);
-        wrap.classList.toggle("mg-rounded", state.rounded);
-        noiseCanvas.classList.toggle("mg-active", state.noise);
-      }
-
-      // ---- Event wiring ----
-      els.density.addEventListener("input", function () {
-        state.density = parseInt(els.density.value, 10);
-        els.densityLbl.textContent = state.density;
-        regenerateBlobs();
-        draw();
-        updateCssOutput();
-      });
-      els.speed.addEventListener("input", function () {
-        state.speed = parseInt(els.speed.value, 10);
-        els.speedLbl.textContent = state.speed + "%";
-      });
-      els.size.addEventListener("input", function () {
-        state.size = parseInt(els.size.value, 10);
-        els.sizeLbl.textContent = state.size + "%";
-        draw();
-        updateCssOutput();
-      });
-      els.animate.addEventListener("change", function () {
-        state.animate = els.animate.checked;
-        if (state.animate) ensureAnimationLoop(); else draw();
-      });
-      els.noise.addEventListener("change", function () {
-        state.noise = els.noise.checked;
-        applyToggleClasses();
-      });
-      els.glass.addEventListener("change", function () {
-        state.glass = els.glass.checked;
-        applyToggleClasses();
-      });
-      els.blob.addEventListener("change", function () {
-        state.blobMode = els.blob.checked;
-        draw();
-      });
-      els.glow.addEventListener("change", function () {
-        state.glow = els.glow.checked;
-        applyToggleClasses();
-      });
-      els.rounded.addEventListener("change", function () {
-        state.rounded = els.rounded.checked;
-        applyToggleClasses();
-      });
-      els.transparent.addEventListener("change", function () {
-        state.transparent = els.transparent.checked;
-        draw();
-        updateCssOutput();
-      });
-      els.addColor.addEventListener("click", function () {
-        if (state.colors.length >= 8) { showToast("Maximum of 8 colors reached"); return; }
-        state.colors.push(randHex());
-        regenerateBlobs();
-        renderSwatches();
-        draw();
-        updateCssOutput();
-      });
-      els.removeColor.addEventListener("click", function () {
-        if (state.colors.length <= 2) { showToast("Minimum of 2 colors required"); return; }
-        state.colors.pop();
-        regenerateBlobs();
-        renderSwatches();
-        draw();
-        updateCssOutput();
-      });
-      els.randomColors.addEventListener("click", function () {
-        state.colors = state.colors.map(function () { return randHex(); });
-        renderSwatches();
-        draw();
-        updateCssOutput();
-      });
-      els.randomLayout.addEventListener("click", function () {
-        regenerateBlobs();
-        draw();
-        updateCssOutput();
-      });
-
-      els.downloadPng.addEventListener("click", function () {
-        var link = document.createElement("a");
-        link.download = "mesh-gradient.png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-      });
-
-      els.downloadSvg.addEventListener("click", function () {
-        var defs = "", rects = "";
-        state.blobs.forEach(function (b, i) {
-          var color = state.colors[b.colorIdx] || "#7fff6e";
-          var id = "mgGrad" + i;
-          defs += '<radialGradient id="' + id + '" cx="' + b.x.toFixed(1) + '%" cy="' + b.y.toFixed(1) + '%" r="' + Math.min(95, b.r * (state.size / 100)).toFixed(1) + '%">' +
-            '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.85"/>' +
-            '<stop offset="100%" stop-color="' + color + '" stop-opacity="0"/>' +
-            '</radialGradient>';
-          rects += '<rect width="100%" height="100%" fill="url(#' + id + ')"/>';
-        });
-        var bg = state.transparent ? "" : '<rect width="100%" height="100%" fill="#0d0d0f"/>';
-        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
-          '<defs>' + defs + '</defs>' + bg + rects + '</svg>';
-        var blob = new Blob([svg], { type: "image/svg+xml" });
-        var url = URL.createObjectURL(blob);
-        var link = document.createElement("a");
-        link.download = "mesh-gradient.svg";
-        link.href = url;
-        link.click();
-        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-      });
-
-      els.copyCss.addEventListener("click", function () {
-        cssOutput.select();
-        var done = function () { showToast("CSS copied to clipboard"); };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(cssOutput.value).then(done).catch(function () {
-            try { document.execCommand("copy"); done(); } catch (e) { showToast("Copy failed — select and copy manually"); }
-          });
-        } else {
-          try { document.execCommand("copy"); done(); } catch (e) { showToast("Copy failed — select and copy manually"); }
-        }
-      });
-
-      // ---- Init ----
-      regenerateBlobs();
-      renderSwatches();
-      renderPresets();
-      buildNoise();
-      applyToggleClasses();
-      draw();
-      updateCssOutput();
-    })();
-  </script>
-
   <!-- ================= Premium: Favicon Generator (additive, self-contained) ================= -->
   <script>
     (function () {
@@ -9529,6 +9275,753 @@
           a.addEventListener("click", showGrid);
         });
       }
+    })();
+  </script>
+
+  <!-- ================= Premium: Code Playground (additive, self-contained) ================= -->
+  <!-- Real execution only. Python + SQL run entirely in the browser (Pyodide / sql.js). -->
+  <!-- Every other language executes on a real Judge0 CE compiler/interpreter via /api/execute. -->
+  <script>
+    (function initCodePlayground() {
+      "use strict";
+      var panel = document.getElementById("panel-codeplayground");
+      if (!panel) return;
+
+      // ---------------------------------------------------------------
+      // DOM refs
+      // ---------------------------------------------------------------
+      var languageSelect = document.getElementById("cp-language");
+      var modeGroup = document.getElementById("cp-mode-group");
+      var modeSelect = document.getElementById("cp-exec-mode");
+      var runtimeBadge = document.getElementById("cp-runtime-badge");
+      var editorMount = document.getElementById("cp-editor-mount");
+      var editorLoading = document.getElementById("cp-editor-loading");
+      var stdinBlock = document.getElementById("cp-stdin-block");
+      var stdinEl = document.getElementById("cp-stdin");
+      var runBtn = document.getElementById("cp-run-btn");
+      var runAgainBtn = document.getElementById("cp-run-again-btn");
+      var runStatusEl = document.getElementById("cp-run-status");
+      var uploadBtn = document.getElementById("cp-upload-btn");
+      var uploadInput = document.getElementById("cp-upload-input");
+      var downloadBtn = document.getElementById("cp-download-btn");
+      var saveBtn = document.getElementById("cp-save-btn");
+      var resetBtn = document.getElementById("cp-reset-btn");
+
+      var tabOutput = document.getElementById("cp-tab-output");
+      var tabErrors = document.getElementById("cp-tab-errors");
+      var tabHistory = document.getElementById("cp-tab-history");
+      var errorsDot = document.getElementById("cp-errors-dot");
+      var historyCountEl = document.getElementById("cp-history-count");
+      var panelOutput = document.getElementById("cp-panel-output");
+      var panelErrors = document.getElementById("cp-panel-errors");
+      var panelHistory = document.getElementById("cp-panel-history");
+      var outputMeta = document.getElementById("cp-output-meta");
+      var stdoutPre = document.getElementById("cp-stdout-pre");
+      var stderrPre = document.getElementById("cp-stderr-pre");
+      var sqlResultEl = document.getElementById("cp-sql-result");
+      var historyListEl = document.getElementById("cp-history-list");
+
+      // ---------------------------------------------------------------
+      // Language registry
+      // ---------------------------------------------------------------
+      var LANGS = {
+        python: {
+          label: "Python 3", monacoLang: "python", ext: "py", apiLanguage: "python", supportsStdin: true,
+          boilerplate:
+            "# Reads a name from stdin and greets it.\n" +
+            "name = input().strip()\n" +
+            "print(f\"Hello, {name}!\")\n",
+        },
+        javascript: {
+          label: "JavaScript (Node.js)", monacoLang: "javascript", ext: "js", apiLanguage: "javascript", supportsStdin: true,
+          boilerplate:
+            "const readline = require(\"readline\").createInterface({ input: process.stdin });\n" +
+            "readline.on(\"line\", (name) => {\n" +
+            "  console.log(`Hello, ${name}!`);\n" +
+            "  readline.close();\n" +
+            "});\n",
+        },
+        typescript: {
+          label: "TypeScript", monacoLang: "typescript", ext: "ts", apiLanguage: "typescript", supportsStdin: true,
+          boilerplate:
+            "import * as readline from \"readline\";\n\n" +
+            "const rl = readline.createInterface({ input: process.stdin });\n" +
+            "rl.on(\"line\", (name: string) => {\n" +
+            "  console.log(`Hello, ${name}!`);\n" +
+            "  rl.close();\n" +
+            "});\n",
+        },
+        java: {
+          label: "Java", monacoLang: "java", ext: "java", apiLanguage: "java", supportsStdin: true,
+          boilerplate:
+            "import java.util.Scanner;\n\n" +
+            "public class Main {\n" +
+            "    public static void main(String[] args) {\n" +
+            "        Scanner sc = new Scanner(System.in);\n" +
+            "        String name = sc.nextLine();\n" +
+            "        System.out.println(\"Hello, \" + name + \"!\");\n" +
+            "    }\n" +
+            "}\n",
+        },
+        c: {
+          label: "C", monacoLang: "c", ext: "c", apiLanguage: "c", supportsStdin: true,
+          boilerplate:
+            "#include <stdio.h>\n\n" +
+            "int main() {\n" +
+            "    char name[256];\n" +
+            "    if (fgets(name, sizeof(name), stdin)) {\n" +
+            "        name[strcspn(name, \"\\n\")] = 0;\n" +
+            "        printf(\"Hello, %s!\\n\", name);\n" +
+            "    }\n" +
+            "    return 0;\n" +
+            "}\n",
+        },
+        cpp: {
+          label: "C++", monacoLang: "cpp", ext: "cpp", apiLanguage: "cpp", supportsStdin: true,
+          boilerplate:
+            "#include <iostream>\n#include <string>\nusing namespace std;\n\n" +
+            "int main() {\n" +
+            "    string name;\n" +
+            "    getline(cin, name);\n" +
+            "    cout << \"Hello, \" << name << \"!\" << endl;\n" +
+            "    return 0;\n" +
+            "}\n",
+        },
+        go: {
+          label: "Go", monacoLang: "go", ext: "go", apiLanguage: "go", supportsStdin: true,
+          boilerplate:
+            "package main\n\n" +
+            "import (\n\t\"bufio\"\n\t\"fmt\"\n\t\"os\"\n\t\"strings\"\n)\n\n" +
+            "func main() {\n" +
+            "\treader := bufio.NewReader(os.Stdin)\n" +
+            "\tname, _ := reader.ReadString('\\n')\n" +
+            "\tfmt.Printf(\"Hello, %s!\\n\", strings.TrimSpace(name))\n" +
+            "}\n",
+        },
+        rust: {
+          label: "Rust", monacoLang: "rust", ext: "rs", apiLanguage: "rust", supportsStdin: true,
+          boilerplate:
+            "use std::io;\n\n" +
+            "fn main() {\n" +
+            "    let mut name = String::new();\n" +
+            "    io::stdin().read_line(&mut name).expect(\"Failed to read line\");\n" +
+            "    println!(\"Hello, {}!\", name.trim());\n" +
+            "}\n",
+        },
+        php: {
+          label: "PHP", monacoLang: "php", ext: "php", apiLanguage: "php", supportsStdin: true,
+          boilerplate: "<?php\n$name = trim(fgets(STDIN));\necho \"Hello, $name!\\n\";\n",
+        },
+        kotlin: {
+          label: "Kotlin", monacoLang: "kotlin", ext: "kt", apiLanguage: "kotlin", supportsStdin: true,
+          boilerplate: "fun main() {\n    val name = readLine()\n    println(\"Hello, $name!\")\n}\n",
+        },
+        swift: {
+          label: "Swift", monacoLang: "swift", ext: "swift", apiLanguage: "swift", supportsStdin: true,
+          boilerplate: "if let name = readLine() {\n    print(\"Hello, \\(name)!\")\n}\n",
+        },
+        sql: {
+          label: "SQL (SQLite)", monacoLang: "sql", ext: "sql", apiLanguage: null, supportsStdin: false,
+          boilerplate:
+            "-- Runs on a real in-browser SQLite engine (sql.js) — nothing is simulated.\n" +
+            "CREATE TABLE IF NOT EXISTS products (\n" +
+            "  id INTEGER PRIMARY KEY,\n" +
+            "  name TEXT NOT NULL,\n" +
+            "  price REAL NOT NULL\n" +
+            ");\n\n" +
+            "INSERT INTO products (name, price) VALUES ('Widget', 9.99), ('Gadget', 19.99);\n\n" +
+            "SELECT * FROM products ORDER BY price DESC;\n",
+        },
+      };
+
+      var CDN = {
+        monacoLoader: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.js",
+        monacoBase: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs",
+        pyodide: "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js",
+        pyodideIndexUrl: "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/",
+        sqlJs: "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js",
+        sqlJsBase: "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/",
+      };
+
+      var STORAGE_PREFIX = "cp_code_";
+      var SQL_DB_STORAGE_KEY = "cp_sql_db_v1";
+      var MAX_HISTORY = 25;
+
+      // ---------------------------------------------------------------
+      // State
+      // ---------------------------------------------------------------
+      var currentLang = "python";
+      var editor = null;
+      var monacoReady = null; // promise
+      var pyodideReady = null; // promise -> pyodide instance
+      var sqlJsReady = null; // promise -> SQL (module)
+      var sqlDb = null;
+      var sessionCache = {}; // in-memory unsaved edits per language, kept while panel stays open
+      var lastRunSnapshot = null; // { language, code, stdin } frozen at the moment "Run" was clicked
+      var runHistory = []; // { id, language, timestamp, statusLabel, statusState, stdout, stderr, compileOutput, time, memory, code, stdin }
+      var isRunning = false;
+      var historyIdCounter = 0;
+
+      // ---------------------------------------------------------------
+      // Small utilities
+      // ---------------------------------------------------------------
+      function loadScriptOnce(src) {
+        return new Promise(function (resolve, reject) {
+          var existing = document.querySelector('script[data-cp-src="' + src + '"]');
+          if (existing) {
+            if (existing.getAttribute("data-loaded") === "true") { resolve(); return; }
+            existing.addEventListener("load", function () { resolve(); });
+            existing.addEventListener("error", function () { reject(new Error("Failed to load " + src)); });
+            return;
+          }
+          var s = document.createElement("script");
+          s.src = src;
+          s.async = true;
+          s.setAttribute("data-cp-src", src);
+          s.addEventListener("load", function () {
+            s.setAttribute("data-loaded", "true");
+            resolve();
+          });
+          s.addEventListener("error", function () { reject(new Error("Failed to load " + src)); });
+          document.head.appendChild(s);
+        });
+      }
+
+      function escapeHtml(str) {
+        return String(str == null ? "" : str)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      }
+
+      function setRuntimeBadge(text, state) {
+        runtimeBadge.textContent = text;
+        runtimeBadge.classList.remove("is-busy", "is-error");
+        if (state) runtimeBadge.classList.add(state);
+      }
+
+      function setRunning(running) {
+        isRunning = running;
+        runBtn.disabled = running;
+        runBtn.textContent = running ? "⏳ Running…" : "▶ Run";
+        runStatusEl.textContent = running ? "Executing…" : "";
+      }
+
+      function switchOutputTab(which) {
+        [tabOutput, tabErrors, tabHistory].forEach(function (t) { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
+        [panelOutput, panelErrors, panelHistory].forEach(function (p) { p.classList.remove("active"); });
+        if (which === "errors") { tabErrors.classList.add("active"); tabErrors.setAttribute("aria-selected", "true"); panelErrors.classList.add("active"); }
+        else if (which === "history") { tabHistory.classList.add("active"); tabHistory.setAttribute("aria-selected", "true"); panelHistory.classList.add("active"); }
+        else { tabOutput.classList.add("active"); tabOutput.setAttribute("aria-selected", "true"); panelOutput.classList.add("active"); }
+      }
+      tabOutput.addEventListener("click", function () { switchOutputTab("output"); });
+      tabErrors.addEventListener("click", function () { switchOutputTab("errors"); });
+      tabHistory.addEventListener("click", function () { switchOutputTab("history"); });
+
+      // ---------------------------------------------------------------
+      // Monaco editor (lazy-loaded on first panel open)
+      // ---------------------------------------------------------------
+      function ensureMonaco() {
+        if (monacoReady) return monacoReady;
+        editorLoading.classList.remove("is-hidden");
+        editorLoading.textContent = "Loading editor…";
+        monacoReady = loadScriptOnce(CDN.monacoLoader)
+          .then(function () {
+            return new Promise(function (resolve, reject) {
+              try {
+                window.require.config({ paths: { vs: CDN.monacoBase } });
+                window.require(["vs/editor/editor.main"], function () { resolve(); }, function (err) { reject(err); });
+              } catch (e) { reject(e); }
+            });
+          })
+          .then(function () {
+            editor = monaco.editor.create(editorMount, {
+              value: loadCodeFor(currentLang),
+              language: LANGS[currentLang].monacoLang,
+              theme: "vs-dark",
+              fontSize: 13,
+              fontFamily: "'Space Mono', monospace",
+              minimap: { enabled: false },
+              automaticLayout: true,
+              scrollBeyondLastLine: false,
+              tabSize: 2,
+            });
+            editorLoading.classList.add("is-hidden");
+          })
+          .catch(function (err) {
+            editorLoading.textContent = "Editor failed to load (" + (err && err.message ? err.message : "network error") + "). Check your connection and reopen this tool.";
+            throw err;
+          });
+        return monacoReady;
+      }
+
+      // ---------------------------------------------------------------
+      // Pyodide (lazy-loaded only when Python/browser mode actually runs)
+      // ---------------------------------------------------------------
+      function ensurePyodide() {
+        if (pyodideReady) return pyodideReady;
+        pyodideReady = loadScriptOnce(CDN.pyodide).then(function () {
+          return window.loadPyodide({ indexURL: CDN.pyodideIndexUrl });
+        });
+        return pyodideReady;
+      }
+
+      // ---------------------------------------------------------------
+      // sql.js (lazy-loaded only when SQL is selected)
+      // ---------------------------------------------------------------
+      function ensureSqlJs() {
+        if (sqlJsReady) return sqlJsReady;
+        sqlJsReady = loadScriptOnce(CDN.sqlJs).then(function () {
+          return window.initSqlJs({ locateFile: function (file) { return CDN.sqlJsBase + file; } });
+        });
+        return sqlJsReady;
+      }
+
+      function ensureSqlDb() {
+        return ensureSqlJs().then(function (SQL) {
+          if (sqlDb) return sqlDb;
+          var saved = null;
+          try { saved = localStorage.getItem(SQL_DB_STORAGE_KEY); } catch (e) { /* ignore */ }
+          if (saved) {
+            try {
+              var binary = atob(saved);
+              var bytes = new Uint8Array(binary.length);
+              for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+              sqlDb = new SQL.Database(bytes);
+            } catch (e) {
+              sqlDb = new SQL.Database();
+            }
+          } else {
+            sqlDb = new SQL.Database();
+          }
+          return sqlDb;
+        });
+      }
+
+      function persistSqlDb() {
+        if (!sqlDb) return;
+        try {
+          var data = sqlDb.export();
+          var binary = "";
+          for (var i = 0; i < data.length; i++) binary += String.fromCharCode(data[i]);
+          localStorage.setItem(SQL_DB_STORAGE_KEY, btoa(binary));
+        } catch (e) { /* storage full or unavailable — non-fatal */ }
+      }
+
+      // ---------------------------------------------------------------
+      // Code persistence (per language)
+      // ---------------------------------------------------------------
+      function loadCodeFor(lang) {
+        if (sessionCache.hasOwnProperty(lang)) return sessionCache[lang];
+        try {
+          var saved = localStorage.getItem(STORAGE_PREFIX + lang);
+          if (saved != null) return saved;
+        } catch (e) { /* ignore */ }
+        return LANGS[lang].boilerplate;
+      }
+
+      function saveCodeFor(lang, code) {
+        try { localStorage.setItem(STORAGE_PREFIX + lang, code); } catch (e) { /* ignore */ }
+      }
+
+      // ---------------------------------------------------------------
+      // Language switching
+      // ---------------------------------------------------------------
+      function applyLanguageUI(lang) {
+        var cfg = LANGS[lang];
+        modeGroup.style.display = lang === "python" ? "flex" : "none";
+        stdinBlock.style.display = cfg.supportsStdin ? "flex" : "none";
+        runAgainBtn.disabled = true;
+        lastRunSnapshot = null;
+
+        if (lang === "sql") {
+          setRuntimeBadge("SQLite (sql.js) · in your browser");
+        } else if (lang === "python") {
+          setRuntimeBadge(modeSelect.value === "browser" ? "Pyodide · in your browser" : "Judge0 CE · server");
+        } else {
+          setRuntimeBadge("Judge0 CE · server");
+        }
+      }
+
+      function switchLanguage(newLang) {
+        if (editor) sessionCache[currentLang] = editor.getValue();
+        currentLang = newLang;
+        var code = loadCodeFor(newLang);
+        sessionCache[newLang] = code;
+        if (editor) {
+          monaco.editor.setModelLanguage(editor.getModel(), LANGS[newLang].monacoLang);
+          editor.setValue(code);
+        }
+        applyLanguageUI(newLang);
+      }
+
+      languageSelect.addEventListener("change", function () {
+        ensureMonaco().then(function () { switchLanguage(languageSelect.value); });
+      });
+      modeSelect.addEventListener("change", function () {
+        applyLanguageUI(currentLang);
+      });
+
+      // ---------------------------------------------------------------
+      // Output rendering
+      // ---------------------------------------------------------------
+      function metaChip(text, cls) {
+        return '<span class="' + (cls || "") + '">' + escapeHtml(text) + "</span>";
+      }
+
+      function renderRunResult(run) {
+        sqlResultEl.style.display = "none";
+        sqlResultEl.innerHTML = "";
+        stdoutPre.style.display = "block";
+
+        var chips = [];
+        chips.push(metaChip(run.statusLabel, run.statusState === "ok" ? "cp-meta-ok" : "cp-meta-error"));
+        if (run.time != null) chips.push(metaChip(run.time + "s"));
+        if (run.memory != null) chips.push(metaChip((run.memory / 1024).toFixed(1) + " MB"));
+        if (run.exitCode != null) chips.push(metaChip("exit " + run.exitCode));
+        outputMeta.innerHTML = chips.join("");
+
+        stdoutPre.textContent = run.stdout && run.stdout.length ? run.stdout : (run.statusState === "ok" ? "(no output)" : "(no stdout)");
+
+        var errorText = "";
+        if (run.compileOutput) errorText += run.compileOutput;
+        if (run.stderr) errorText += (errorText ? "\n\n" : "") + run.stderr;
+        if (!errorText && run.statusState !== "ok") errorText = run.statusLabel;
+        stderrPre.textContent = errorText || "No errors.";
+        errorsDot.style.display = errorText ? "inline-block" : "none";
+
+        switchOutputTab(run.statusState === "ok" ? "output" : "errors");
+      }
+
+      function renderSqlResult(run) {
+        outputMeta.innerHTML = metaChip(run.statusLabel, run.statusState === "ok" ? "cp-meta-ok" : "cp-meta-error");
+        stdoutPre.style.display = "none";
+        sqlResultEl.style.display = "flex";
+        sqlResultEl.innerHTML = "";
+
+        if (run.statusState !== "ok") {
+          stderrPre.textContent = run.stderr || run.statusLabel;
+          errorsDot.style.display = "inline-block";
+          switchOutputTab("errors");
+          return;
+        }
+
+        stderrPre.textContent = "No errors.";
+        errorsDot.style.display = "none";
+
+        if (!run.sqlResults || !run.sqlResults.length) {
+          sqlResultEl.innerHTML = '<p style="color:var(--muted);font-size:.82rem;">Query executed successfully. No rows returned' +
+            (run.rowsModified ? " (" + run.rowsModified + " row(s) affected)." : ".") + "</p>";
+        } else {
+          run.sqlResults.forEach(function (res, idx) {
+            var wrap = document.createElement("div");
+            var label = document.createElement("div");
+            label.className = "cp-sql-statement-label";
+            label.textContent = "Result set " + (idx + 1) + " — " + res.values.length + " row(s)";
+            wrap.appendChild(label);
+
+            var tableWrap = document.createElement("div");
+            tableWrap.className = "cp-sql-table-wrap";
+            var table = document.createElement("table");
+            table.className = "cp-sql-table";
+            var thead = document.createElement("thead");
+            var headRow = document.createElement("tr");
+            res.columns.forEach(function (col) {
+              var th = document.createElement("th");
+              th.textContent = col;
+              headRow.appendChild(th);
+            });
+            thead.appendChild(headRow);
+            table.appendChild(thead);
+            var tbody = document.createElement("tbody");
+            res.values.forEach(function (row) {
+              var tr = document.createElement("tr");
+              row.forEach(function (cell) {
+                var td = document.createElement("td");
+                td.textContent = cell === null ? "NULL" : String(cell);
+                tr.appendChild(td);
+              });
+              tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            tableWrap.appendChild(table);
+            wrap.appendChild(tableWrap);
+            sqlResultEl.appendChild(wrap);
+          });
+        }
+        switchOutputTab("output");
+      }
+
+      // ---------------------------------------------------------------
+      // History
+      // ---------------------------------------------------------------
+      function pushHistory(run) {
+        run.id = ++historyIdCounter;
+        run.timestamp = new Date();
+        runHistory.unshift(run);
+        if (runHistory.length > MAX_HISTORY) runHistory.length = MAX_HISTORY;
+        renderHistoryList();
+      }
+
+      function renderHistoryList() {
+        historyCountEl.textContent = String(runHistory.length);
+        if (!runHistory.length) {
+          historyListEl.innerHTML = '<p class="cp-history-empty">Your last few runs in this session will show up here.</p>';
+          return;
+        }
+        historyListEl.innerHTML = "";
+        runHistory.forEach(function (run) {
+          var item = document.createElement("div");
+          item.className = "cp-history-item";
+          var hh = String(run.timestamp.getHours()).padStart(2, "0");
+          var mm = String(run.timestamp.getMinutes()).padStart(2, "0");
+          var ss = String(run.timestamp.getSeconds()).padStart(2, "0");
+          item.innerHTML =
+            '<span><span class="cp-hi-lang">' + escapeHtml(LANGS[run.language] ? LANGS[run.language].label : run.language) +
+            '</span> <span class="cp-hi-time">' + hh + ":" + mm + ":" + ss + "</span></span>" +
+            '<span class="cp-hi-status ' + (run.statusState === "ok" ? "cp-meta-ok" : "cp-meta-error") + '">' + escapeHtml(run.statusLabel) + "</span>";
+          item.addEventListener("click", function () {
+            if (run.language === "sql") renderSqlResult(run); else renderRunResult(run);
+          });
+          historyListEl.appendChild(item);
+        });
+      }
+
+      // ---------------------------------------------------------------
+      // Execution: Python via Pyodide (real interpreter, in-browser)
+      // ---------------------------------------------------------------
+      function runPythonBrowser(code, stdin) {
+        setRuntimeBadge("Loading Python runtime…", "is-busy");
+        return ensurePyodide().then(function (pyodide) {
+          setRuntimeBadge("Pyodide · in your browser", "is-busy");
+          var stdoutChunks = [];
+          var stderrChunks = [];
+          pyodide.setStdout({ batched: function (msg) { stdoutChunks.push(msg); } });
+          pyodide.setStderr({ batched: function (msg) { stderrChunks.push(msg); } });
+          if (typeof pyodide.setStdin === "function") {
+            pyodide.setStdin({ string: stdin || "" });
+          }
+
+          var start = performance.now();
+          return pyodide.runPythonAsync(code)
+            .then(function () {
+              var elapsed = ((performance.now() - start) / 1000).toFixed(3);
+              return {
+                statusLabel: "Accepted", statusState: "ok",
+                stdout: stdoutChunks.join("\n"), stderr: stderrChunks.join("\n"),
+                compileOutput: "", time: elapsed, memory: null, exitCode: 0,
+              };
+            })
+            .catch(function (err) {
+              var elapsed = ((performance.now() - start) / 1000).toFixed(3);
+              var msg = (err && err.message) || String(err);
+              var isSyntax = /SyntaxError/.test(msg);
+              return {
+                statusLabel: isSyntax ? "Compilation Error" : "Runtime Error", statusState: "error",
+                stdout: stdoutChunks.join("\n"), stderr: (stderrChunks.join("\n") + (stderrChunks.length ? "\n\n" : "") + msg).trim(),
+                compileOutput: "", time: elapsed, memory: null, exitCode: 1,
+              };
+            })
+            .finally(function () {
+              pyodide.setStdout({});
+              pyodide.setStderr({});
+            });
+        });
+      }
+
+      // ---------------------------------------------------------------
+      // Execution: Judge0 CE via /api/execute (real compiler/interpreter, server-side)
+      // ---------------------------------------------------------------
+      function runViaJudge0(apiLanguage, code, stdin) {
+        setRuntimeBadge("Judge0 CE · compiling & running…", "is-busy");
+        return fetch("/api/execute", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ language: apiLanguage, source_code: code, stdin: stdin || "" }),
+        })
+          .then(function (res) {
+            return res.text().then(function (text) {
+              var data;
+              try { data = text ? JSON.parse(text) : {}; } catch (e) {
+                throw new Error("Server returned a non-JSON response (HTTP " + res.status + "): " + text.slice(0, 300));
+              }
+              if (!res.ok || data.success === false) {
+                throw new Error(data.error || ("Execution request failed (HTTP " + res.status + ")"));
+              }
+              return data;
+            });
+          })
+          .then(function (data) {
+            return {
+              statusLabel: data.statusLabel, statusState: data.statusState === "ok" ? "ok" : "error",
+              stdout: data.stdout || "", stderr: data.stderr || "", compileOutput: data.compileOutput || "",
+              time: data.time, memory: data.memory, exitCode: data.exitCode,
+              languageUsed: data.languageUsed,
+            };
+          })
+          .catch(function (err) {
+            return {
+              statusLabel: "Request Failed", statusState: "error",
+              stdout: "", stderr: (err && err.message) || "Unknown network error", compileOutput: "",
+              time: null, memory: null, exitCode: null,
+            };
+          });
+      }
+
+      // ---------------------------------------------------------------
+      // Execution: SQL via sql.js (real SQLite engine, in-browser)
+      // ---------------------------------------------------------------
+      function runSql(code) {
+        setRuntimeBadge("Loading SQLite engine…", "is-busy");
+        return ensureSqlDb().then(function (db) {
+          setRuntimeBadge("SQLite (sql.js) · in your browser", "is-busy");
+          try {
+            var results = db.exec(code); // real SQLite execution; throws on real syntax/semantic errors
+            var rowsModified = typeof db.getRowsModified === "function" ? db.getRowsModified() : null;
+            persistSqlDb();
+            return {
+              statusLabel: "Accepted", statusState: "ok",
+              sqlResults: results, rowsModified: rowsModified,
+              stdout: "", stderr: "", time: null, memory: null,
+            };
+          } catch (err) {
+            return {
+              statusLabel: "SQL Error", statusState: "error",
+              stderr: (err && err.message) || String(err),
+              sqlResults: null, rowsModified: null, time: null, memory: null,
+            };
+          }
+        });
+      }
+
+      // ---------------------------------------------------------------
+      // Run orchestration
+      // ---------------------------------------------------------------
+      function executeRun(lang, code, stdin) {
+        if (!code || !code.trim()) {
+          runStatusEl.textContent = "Editor is empty — nothing to run.";
+          return;
+        }
+        setRunning(true);
+
+        var work;
+        if (lang === "sql") {
+          work = runSql(code);
+        } else if (lang === "python" && modeSelect.value === "browser") {
+          work = runPythonBrowser(code, stdin);
+        } else {
+          work = runViaJudge0(LANGS[lang].apiLanguage, code, stdin);
+        }
+
+        work
+          .then(function (result) {
+            result.language = lang;
+            result.code = code;
+            result.stdin = stdin;
+            if (lang === "sql") renderSqlResult(result); else renderRunResult(result);
+            pushHistory(result);
+            applyLanguageUI(lang); // restore the idle runtime badge for this language
+            if (result.statusState === "error") setRuntimeBadge(runtimeBadge.textContent, "is-error");
+          })
+          .catch(function (err) {
+            var result = {
+              language: lang, code: code, stdin: stdin,
+              statusLabel: "Unexpected Error", statusState: "error",
+              stdout: "", stderr: (err && err.message) || String(err), compileOutput: "",
+            };
+            if (lang === "sql") renderSqlResult(result); else renderRunResult(result);
+            pushHistory(result);
+            applyLanguageUI(lang);
+          })
+          .finally(function () {
+            setRunning(false);
+            runAgainBtn.disabled = false;
+          });
+      }
+
+      runBtn.addEventListener("click", function () {
+        if (isRunning) return;
+        ensureMonaco().then(function () {
+          var code = editor.getValue();
+          var stdin = stdinEl.value;
+          lastRunSnapshot = { language: currentLang, code: code, stdin: stdin };
+          executeRun(currentLang, code, stdin);
+        });
+      });
+
+      runAgainBtn.addEventListener("click", function () {
+        if (isRunning || !lastRunSnapshot) return;
+        executeRun(lastRunSnapshot.language, lastRunSnapshot.code, lastRunSnapshot.stdin);
+      });
+
+      // ---------------------------------------------------------------
+      // Upload / Download / Save / Reset
+      // ---------------------------------------------------------------
+      var EXT_TO_LANG = {};
+      Object.keys(LANGS).forEach(function (key) { EXT_TO_LANG[LANGS[key].ext] = key; });
+      EXT_TO_LANG.mjs = "javascript"; EXT_TO_LANG.h = "c"; EXT_TO_LANG.hpp = "cpp"; EXT_TO_LANG.cc = "cpp";
+
+      uploadBtn.addEventListener("click", function () { uploadInput.click(); });
+      uploadInput.addEventListener("change", function () {
+        var file = uploadInput.files && uploadInput.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function () {
+          ensureMonaco().then(function () {
+            var ext = (file.name.split(".").pop() || "").toLowerCase();
+            var detected = EXT_TO_LANG[ext];
+            if (detected && detected !== currentLang) {
+              languageSelect.value = detected;
+              switchLanguage(detected);
+            }
+            editor.setValue(String(reader.result));
+            sessionCache[currentLang] = editor.getValue();
+            runStatusEl.textContent = "Loaded " + file.name;
+          });
+        };
+        reader.onerror = function () { runStatusEl.textContent = "Could not read that file."; };
+        reader.readAsText(file);
+        uploadInput.value = "";
+      });
+
+      downloadBtn.addEventListener("click", function () {
+        if (!editor) return;
+        var cfg = LANGS[currentLang];
+        var blob = new Blob([editor.getValue()], { type: "text/plain;charset=utf-8" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "code." + cfg.ext;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+
+      saveBtn.addEventListener("click", function () {
+        if (!editor) return;
+        saveCodeFor(currentLang, editor.getValue());
+        runStatusEl.textContent = "Saved " + LANGS[currentLang].label + " code to this browser.";
+        setTimeout(function () { if (!isRunning) runStatusEl.textContent = ""; }, 2500);
+      });
+
+      resetBtn.addEventListener("click", function () {
+        if (!editor) return;
+        if (!window.confirm("Reset to the starter template for " + LANGS[currentLang].label + "? Unsaved changes in the editor will be lost.")) return;
+        editor.setValue(LANGS[currentLang].boilerplate);
+        sessionCache[currentLang] = LANGS[currentLang].boilerplate;
+      });
+
+      // ---------------------------------------------------------------
+      // Lazy init: only load Monaco once this panel is actually opened
+      // ---------------------------------------------------------------
+      var card = document.querySelector('[data-pt-open="panel-codeplayground"]');
+      if (card) {
+        card.addEventListener("click", function () { ensureMonaco(); });
+        card.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") ensureMonaco();
+        });
+      }
+      applyLanguageUI(currentLang);
     })();
   </script>
 
@@ -11833,10 +12326,10 @@
         { name: "Password Generator", type: "tab", id: "pwgen", group: "Browser Tools", aliases: ["password", "passphrase"] },
         { name: "URL Encoder / Decoder", type: "tab", id: "urlcodec", group: "Browser Tools", aliases: ["url encode", "url decode", "uri"] },
         { name: "AI Chat Assistant", type: "pro", id: "panel-aichat", group: "AI Tools", aliases: ["chat", "assistant", "ai chat", "chatbot"] },
+        { name: "Code Playground", type: "pro", id: "panel-codeplayground", group: "Developer Tools", aliases: ["compiler", "code runner", "run code", "online ide", "python", "java", "c++", "javascript", "sql", "judge0"] },
         { name: "Meme Generator", type: "pro", id: "panel-meme", group: "AI Tools", aliases: ["meme"] },
         { name: "AI Image Cleaner / Background Remover", type: "pro", id: "panel-aicleaner", group: "AI Tools", aliases: ["remove", "remove background", "background remover", "object removal", "image cleaner", "inpaint"] },
         { name: "Favicon Generator", type: "pro", id: "panel-favicon", group: "AI Tools", aliases: ["favicon", "site icon"] },
-        { name: "Mesh Gradient Generator", type: "pro", id: "panel-meshgen", group: "AI Tools", aliases: ["gradient", "mesh", "background generator"] },
         { name: "AI Image Generator", type: "info", id: "pro-tools", group: "AI Tools (Coming Soon)", aliases: ["text to image", "image generator"] },
         { name: "Blog", type: "hash", id: "blog", group: "Site", aliases: ["articles", "posts"] },
         { name: "About Us", type: "hash", id: "about", group: "Site", aliases: ["about"] },
