@@ -2460,6 +2460,19 @@
         -webkit-text-size-adjust: 100%;
         text-size-adjust: 100%;
       }
+      /* Defensive reset for the "Monaco itself balloons in size" Android bug: nothing
+         in this codebase applies transform/zoom to Monaco, but this guarantees no CSS
+         zoom/scale/rem-em font sizing can ever reach the editor's own container or its
+         internal nodes, regardless of source (Monaco's bundled stylesheet, a UA style,
+         or anything injected later). Fixed px, no transforms, no CSS "zoom" property. */
+      .cp-editor-shell,
+      .cp-editor-mount,
+      .cp-editor-mount .monaco-editor,
+      .cp-editor-mount .monaco-editor * {
+        transform: none !important;
+        zoom: 1 !important;
+      }
+      .cp-editor-mount .monaco-editor { font-size: 14px !important; }
     }
 
     .cp-run-row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
@@ -9555,25 +9568,80 @@
             });
           })
           .then(function () {
+            // Detected ONCE, at creation time only. This value is never re-checked and
+            // never used to mutate the editor later — the branch below is the only place
+            // mobile vs. desktop options are decided, so desktop is byte-for-byte the
+            // config it always had.
             var isCoarsePointer = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
-            editor = monaco.editor.create(editorMount, {
-              value: loadCodeFor(currentLang),
-              language: LANGS[currentLang].monacoLang,
-              theme: "vs-dark",
-              // Mobile-only: 16px+ stops Chrome/Safari/Samsung Internet/Edge Mobile from
-              // auto-zooming the page when the hidden input textarea gets focus while typing.
-              // Desktop (pointer: fine) keeps the original 13px exactly as before.
-              fontSize: isCoarsePointer ? 16 : 13,
-              fontFamily: "'Space Mono', monospace",
-              minimap: { enabled: false },
-              automaticLayout: true,
-              scrollBeyondLastLine: false,
-              tabSize: 2,
-              smoothScrolling: isCoarsePointer ? true : false,
-              // Mobile-only: keep the touch cursor/handle visible without Monaco's own
-              // ctrl/pinch zoom-editor-content gesture fighting the browser's scroll.
-              mouseWheelZoom: false,
-            });
+
+            // ---- Desktop: completely unchanged from before this fix. ----
+            var desktopOptions = {
+              fontSize: 13,
+              smoothScrolling: false,
+            };
+
+            // ---- Mobile (Android Chrome / Samsung Internet / Edge Mobile / iOS Safari):
+            // fixes the "Monaco itself balloons in size while typing" bug. Root cause is
+            // Monaco's own built-in ctrl+wheel / pinch "editor zoom" feature (a global
+            // EditorZoom level shared by every Monaco instance on the page) getting
+            // nudged by Android's synthesized wheel/gesture events — this is NOT the
+            // browser's page zoom, it's Monaco rescaling its own font. We disable the
+            // trigger (mouseWheelZoom: false) AND continuously pin the zoom level itself
+            // to 0 below, so nothing can ever move it regardless of what causes it. ----
+            var mobileOptions = {
+              fontSize: 14,
+              lineHeight: 22,
+              // Not a real Monaco constructor option (Monaco reads window.devicePixelRatio
+              // itself for canvas-based rendering, e.g. the minimap). Included per spec;
+              // Monaco silently ignores unrecognized keys, so this is inert but harmless.
+              pixelRatio: window.devicePixelRatio,
+              smoothScrolling: true,
+              cursorBlinking: "smooth",
+              cursorSmoothCaretAnimation: "on",
+              scrollbar: {
+                vertical: "auto",
+                horizontal: "auto",
+                verticalScrollbarSize: 10,
+                horizontalScrollbarSize: 10,
+                useShadows: false,
+              },
+            };
+
+            editor = monaco.editor.create(editorMount, Object.assign(
+              {
+                value: loadCodeFor(currentLang),
+                language: LANGS[currentLang].monacoLang,
+                theme: "vs-dark",
+                fontFamily: "'Space Mono', monospace",
+                minimap: { enabled: false }, // stays disabled on mobile too
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                tabSize: 2,
+                mouseWheelZoom: false, // disable Monaco's own ctrl/pinch "zoom editor font" feature
+              },
+              isCoarsePointer ? mobileOptions : desktopOptions
+            ));
+
+            // Global editor zoom level (Monaco's ctrl+wheel zoom, shared across every
+            // Monaco instance on the page) — force it to 0 and keep it there on mobile.
+            // fontSize is set once above and is never touched again anywhere in this file.
+            if (isCoarsePointer && monaco.editor.EditorZoom) {
+              monaco.editor.EditorZoom.setZoomLevel(0);
+              monaco.editor.EditorZoom.onDidChangeZoomLevel(function (level) {
+                if (level !== 0) monaco.editor.EditorZoom.setZoomLevel(0);
+              });
+            }
+
+            // When the on-screen keyboard opens/closes, the visual viewport resizes —
+            // re-run layout ONLY (Monaco recalculates its own box from the DOM; nothing
+            // here computes or applies any scale/zoom, and the editor instance itself is
+            // never recreated).
+            if (isCoarsePointer && window.visualViewport) {
+              window.visualViewport.addEventListener("resize", function () {
+                if (editor) editor.layout();
+              });
+            }
+
             editorLoading.classList.add("is-hidden");
           })
           .catch(function (err) {
