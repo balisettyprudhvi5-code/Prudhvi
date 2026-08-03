@@ -2536,6 +2536,40 @@
     .cp-footnote { margin-top: 1.1rem; font-size: .76rem; color: var(--muted); line-height: 1.6; }
     .cp-footnote code { font-family: var(--mono); background: var(--surface2); padding: .1rem .35rem; border-radius: 4px; }
 
+    /* ================= Code Playground: ad system (additive, self-contained) ================= */
+    /* One-time interstitial: shown once per visit to Code Playground, before the editor
+       is touched. Fixed full-viewport overlay so it can never sit "over" the editor
+       during coding — by the time it's dismissed, the editor is the only thing showing. */
+    body.cp-ad-lock-scroll { overflow: hidden; }
+    .cp-ad-interstitial {
+      position: fixed; inset: 0; background: rgba(0,0,0,.78); z-index: 4000;
+      display: flex; align-items: center; justify-content: center; padding: 1rem;
+      opacity: 0; visibility: hidden; transition: opacity .2s ease, visibility .2s ease;
+    }
+    .cp-ad-interstitial.is-open { opacity: 1; visibility: visible; }
+    .cp-ad-interstitial-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.2rem; max-width: 340px; width: 100%; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,.5);
+    }
+    .cp-ad-label {
+      display: block; font-family: var(--mono); font-size: .62rem; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--muted); margin-bottom: .6rem;
+    }
+    .cp-ad-slot {
+      min-height: 250px; display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1rem; background: var(--surface2); border-radius: var(--radius-sm); overflow: hidden;
+    }
+    .cp-ad-continue-btn { width: 100%; }
+    .cp-ad-continue-btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+    /* Small, static, in-flow bottom banner — never fixed/floating, so it cannot ever
+       cover the editor, console, or output; simply sits at the bottom of the page. */
+    .cp-ad-banner {
+      margin-top: 1.2rem; padding: .6rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--surface2); text-align: center;
+    }
+    .cp-ad-banner .cp-ad-label { margin-bottom: .4rem; }
+
     @media (max-width: 640px) {
       .cp-toolbar { flex-direction: column; align-items: stretch; }
       .cp-select { min-width: 0; width: 100%; }
@@ -2553,14 +2587,11 @@
   gtag('config', 'G-JPFTXE7MJ4');
   </script>
 
-  <!-- Monetag Popunder -->
-  <script>(function(s){s.dataset.zone='11260861',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-
-  <!-- Monetag In-Page Push -->
-  <script>(function(s){s.dataset.zone='11260862',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-
-  <!-- Monetag Vignette Banner -->
-  <script>(function(s){s.dataset.zone='11260864',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+  <!-- Monetag Popunder / In-Page Push / Vignette are loaded conditionally, not here.
+       See "Monetag conditional loader" script near the end of <body>: it defers
+       loading until the page is idle and skips/pauses loading entirely whenever
+       Developer Tools (Code Playground) is open, so these intrusive ad formats can
+       never be requested while someone is coding. -->
 </head>
 <body>
 
@@ -3201,6 +3232,25 @@
 
       <!-- ============== Code Playground panel ============== -->
       <div class="pro-tool-panel" id="panel-codeplayground">
+        <!-- One-time interstitial ad: shown once per visit to Code Playground, before the
+             editor is used. Never reappears while the user stays inside — see the
+             initCodePlaygroundAds script below, which drives this purely off the panel's
+             real open/close state. -->
+        <div class="cp-ad-interstitial" id="cp-ad-interstitial" role="dialog" aria-modal="true" aria-label="Advertisement">
+          <div class="cp-ad-interstitial-card">
+            <span class="cp-ad-label">Advertisement</span>
+            <div class="cp-ad-slot" id="cp-ad-interstitial-slot">
+              <ins class="adsbygoogle"
+                   style="display:block; width:300px; height:250px;"
+                   data-ad-client="ca-pub-7807604506939349"
+                   data-ad-slot="REPLACE_WITH_YOUR_INTERSTITIAL_AD_SLOT_ID"></ins>
+            </div>
+            <button type="button" class="btn-primary cp-ad-continue-btn" id="cp-ad-continue-btn" disabled>
+              Continue in <span id="cp-ad-countdown">3</span>s
+            </button>
+          </div>
+        </div>
+
         <button type="button" class="pro-tool-back-btn" data-pt-back>
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           Back to Pro Tools
@@ -3293,6 +3343,18 @@
           </div>
 
           <p class="cp-footnote">Python runs instantly in your browser (Pyodide) by default — no server needed. Every other language (and the server mode for Python) executes on a real Judge0 CE compiler/interpreter through <code>/api/execute</code>. SQL runs 100% in your browser on a real SQLite engine (sql.js) — nothing is simulated; compiler and runtime errors shown here are the actual output of the toolchain.</p>
+
+          <!-- Small, static bottom banner — requested once per visit, never refreshed while
+               coding, never overlapping the editor/output/console. -->
+          <div class="cp-ad-banner" id="cp-ad-banner">
+            <span class="cp-ad-label">Advertisement</span>
+            <ins class="adsbygoogle"
+                 style="display:block; width:100%; min-height:90px;"
+                 data-ad-client="ca-pub-7807604506939349"
+                 data-ad-slot="REPLACE_WITH_YOUR_BANNER_AD_SLOT_ID"
+                 data-ad-format="horizontal"
+                 data-full-width-responsive="true"></ins>
+          </div>
         </div>
       </div>
   </section>
@@ -8844,6 +8906,10 @@
           );
           if (!target) return;
           if (target.hasAttribute("disabled")) return;
+          // Developer Tools / Code Playground must stay completely ad-free — its own
+          // "Download" button also creates an <a download> element, which the generic
+          // selector above would otherwise catch. Explicitly exclude anything inside it.
+          if (target.closest("#panel-codeplayground")) return;
           openMonetagDirectLink();
         }, true);
 
@@ -9312,6 +9378,223 @@
     })();
   </script>
 
+  <!-- ================= Code Playground: ad system (additive, self-contained) ================= -->
+  <!-- Exactly one interstitial per visit to Code Playground, no ad ever during typing,
+       compiling, running, debugging, console/output, input, upload/download, or language
+       switching, and no popup ever over the editor. Timing is derived ONLY from the real
+       "is-open" class on #panel-codeplayground (the same class the existing, unmodified
+       Pro Tools nav script already toggles) — so it can never drift out of sync with what
+       the user actually sees, no matter how they open or close the panel. -->
+  <!--
+    SETUP REQUIRED before this goes live: replace the two placeholder ad slot IDs
+    (search this file for "REPLACE_WITH_YOUR_") with real AdSense ad unit slot IDs from
+    your AdSense dashboard. Until you do, requestAd() below intentionally no-ops instead
+    of calling AdSense with a fake slot — so the UI never breaks, it just won't show a
+    real ad yet.
+  -->
+  <script>
+    (function initCodePlaygroundAds() {
+      "use strict";
+      var panel = document.getElementById("panel-codeplayground");
+      var interstitial = document.getElementById("cp-ad-interstitial");
+      if (!panel || !interstitial) return;
+
+      var continueBtn = document.getElementById("cp-ad-continue-btn");
+      var countdownEl = document.getElementById("cp-ad-countdown");
+      var interstitialAdIns = document.querySelector("#cp-ad-interstitial-slot ins.adsbygoogle");
+      var bannerEl = document.getElementById("cp-ad-banner");
+      var bannerAdIns = bannerEl ? bannerEl.querySelector("ins.adsbygoogle") : null;
+
+      var adShownThisVisit = false; // resets to false only when the panel fully closes
+      var interstitialRequested = false;
+      var bannerRequested = false;
+      var countdownTimer = null;
+
+      function requestAd(insEl) {
+        if (!insEl) return;
+        var slot = insEl.getAttribute("data-ad-slot") || "";
+        if (!slot || slot.indexOf("REPLACE_WITH") === 0) return; // not configured — do nothing, never break the UI
+        try { (window.adsbygoogle = window.adsbygoogle || []).push({}); }
+        catch (e) { /* AdSense unavailable (blocked, offline, etc.) — fail silently, never block the editor */ }
+      }
+
+      function openInterstitial() {
+        interstitial.classList.add("is-open");
+        document.body.classList.add("cp-ad-lock-scroll");
+        continueBtn.disabled = true;
+
+        var seconds = 3;
+        countdownEl.textContent = seconds;
+        continueBtn.textContent = "Continue in " + seconds + "s";
+
+        // Give the overlay a frame to actually become visible/laid out before asking
+        // AdSense to measure and fill it.
+        setTimeout(function () {
+          if (!interstitialRequested) { requestAd(interstitialAdIns); interstitialRequested = true; }
+        }, 50);
+
+        if (countdownTimer) clearInterval(countdownTimer);
+        countdownTimer = setInterval(function () {
+          seconds -= 1;
+          if (seconds <= 0) {
+            clearInterval(countdownTimer);
+            continueBtn.disabled = false;
+            continueBtn.textContent = "Continue to Editor →";
+          } else {
+            countdownEl.textContent = seconds;
+            continueBtn.textContent = "Continue in " + seconds + "s";
+          }
+        }, 1000);
+      }
+
+      function closeInterstitial() {
+        if (countdownTimer) clearInterval(countdownTimer);
+        interstitial.classList.remove("is-open");
+        document.body.classList.remove("cp-ad-lock-scroll");
+      }
+
+      continueBtn.addEventListener("click", function () {
+        if (continueBtn.disabled) return;
+        closeInterstitial();
+      });
+
+      var wasOpen = panel.classList.contains("is-open");
+      var observer = new MutationObserver(function () {
+        var isOpenNow = panel.classList.contains("is-open");
+
+        if (isOpenNow && !wasOpen) {
+          // Panel just opened (a fresh "entry" into Developer Tools).
+          if (!adShownThisVisit) {
+            adShownThisVisit = true;
+            openInterstitial();
+          }
+          if (!bannerRequested && bannerAdIns) {
+            setTimeout(function () { requestAd(bannerAdIns); }, 50);
+            bannerRequested = true;
+          }
+        } else if (!isOpenNow && wasOpen) {
+          // Panel just closed — the user fully exited Developer Tools. Reset so the
+          // NEXT open shows exactly one interstitial again, per spec; nothing shows
+          // again while they stay away, and nothing shows mid-session on return trips
+          // that don't actually leave (e.g. switching languages never closes the panel).
+          adShownThisVisit = false;
+          bannerRequested = false;
+          closeInterstitial();
+        }
+        wasOpen = isOpenNow;
+      });
+      observer.observe(panel, { attributes: true, attributeFilter: ["class"] });
+    })();
+  </script>
+
+  <!-- ================= Monetag conditional loader (additive, self-contained) ================= -->
+  <!-- This site is a single HTML document (no real per-page routing), so "route-based"
+       exclusion is implemented as panel-state-based exclusion: the same reliable
+       "#panel-codeplayground.is-open" signal used by the ad system above.
+       Strategy (two independent layers, so Developer Tools stays ad-free even if
+       Monetag already loaded before the user got there):
+        1) DEFERRED, GUARDED LOADING — Popunder / In-Page Push / Vignette are not
+           requested at all until the page has been idle for a moment, and the
+           request is skipped (and retried later) for as long as Code Playground is
+           open. On a normal visit (Home, AI Tools, Browser Tools, Blog, etc.) this
+           is invisible — the scripts load a couple seconds after the page is ready,
+           exactly as before, just no longer render-blocking in <head>.
+        2) CLICK CIRCUIT-BREAKER — a bubble-phase click listener attached directly to
+           #panel-codeplayground. Popunder/In-Page Push vendors trigger off a
+           listener on document/window in the bubble phase (so they observe a click
+           only after the page's own buttons/handlers already ran) — that's the
+           standard pattern for these tags. Stopping propagation at the panel level,
+           after the click's own target handler has already fired, means the click
+           never reaches document at all, so Monetag's listener never sees it —
+           regardless of whether the scripts happened to load earlier in the visit —
+           while every button inside Code Playground keeps working normally. -->
+  <script>
+    (function initMonetagConditionalLoader() {
+      "use strict";
+
+      var SCRIPTS = [
+        { name: "Popunder", zone: "11260861", src: "https://al5sm.com/tag.min.js" },
+        { name: "In-Page Push", zone: "11260862", src: "https://nap5k.com/tag.min.js" },
+        { name: "Vignette", zone: "11260864", src: "https://n6wxm.com/vignette.min.js" },
+      ];
+      var INITIAL_DEFER_MS = 2500; // let the real page (Home/etc.) finish loading first
+      var RETRY_DELAY_MS = 1500; // how soon to re-check after Developer Tools closes
+
+      var devToolsPanel = document.getElementById("panel-codeplayground");
+      var devToolsActive = devToolsPanel ? devToolsPanel.classList.contains("is-open") : false;
+      var monetagLoaded = false;
+      var loadTimer = null;
+
+      function isDevToolsActive() {
+        return !!(devToolsPanel && devToolsPanel.classList.contains("is-open"));
+      }
+
+      function injectMonetagScripts() {
+        if (monetagLoaded) return;
+        if (isDevToolsActive()) { scheduleLoad(RETRY_DELAY_MS); return; } // still inside — keep deferring
+        monetagLoaded = true;
+        SCRIPTS.forEach(function (cfg) {
+          try {
+            var host = [document.documentElement, document.body].filter(Boolean).pop();
+            var s = host.appendChild(document.createElement("script"));
+            s.dataset.zone = cfg.zone;
+            s.src = cfg.src;
+          } catch (e) { /* never let ad loading break the page */ }
+        });
+      }
+
+      function scheduleLoad(delayMs) {
+        if (monetagLoaded) return;
+        if (loadTimer) clearTimeout(loadTimer);
+        loadTimer = setTimeout(injectMonetagScripts, delayMs);
+      }
+
+      // ---- Layer 1: deferred, panel-state-guarded initial load ----
+      if (document.readyState === "complete") {
+        scheduleLoad(INITIAL_DEFER_MS);
+      } else {
+        window.addEventListener("load", function () { scheduleLoad(INITIAL_DEFER_MS); });
+      }
+
+      if (devToolsPanel) {
+        var observer = new MutationObserver(function () {
+          var isOpenNow = devToolsPanel.classList.contains("is-open");
+          if (isOpenNow === devToolsActive) return;
+          devToolsActive = isOpenNow;
+          if (isOpenNow) {
+            // Entered Developer Tools — cancel any pending load outright.
+            if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
+          } else if (!monetagLoaded) {
+            // Left Developer Tools and Monetag never got a chance to load yet —
+            // resume normal deferred loading for the rest of the site.
+            scheduleLoad(RETRY_DELAY_MS);
+          }
+        });
+        observer.observe(devToolsPanel, { attributes: true, attributeFilter: ["class"] });
+      }
+
+      // ---- Layer 2: click circuit-breaker (works even if Monetag already loaded
+      // before this visit reached Developer Tools). Popunder/In-Page Push vendors
+      // implement their trigger as a listener on document/window in the BUBBLE
+      // phase (so it observes a click only after the page's own interactive
+      // elements have already handled it) — that is the standard, near-universal
+      // pattern for these tags. This guard is attached directly on the panel
+      // itself, also in the bubble phase, so the dispatch order for any click
+      // inside Developer Tools is:
+      //   target button's own click handler (Run/Download/Upload/etc.) → fires normally
+      //   → bubbles up to #panel-codeplayground → this guard calls stopPropagation()
+      //   → the click never reaches document, so Monetag's listener never sees it.
+      // (Using capture phase + document here instead would stop the event before it
+      // ever reached the target, breaking the editor's own buttons — deliberately
+      // not done.) ----
+      if (devToolsPanel) {
+        devToolsPanel.addEventListener("click", function (evt) {
+          evt.stopPropagation();
+        }); // bubble phase (default) — runs after the click's own target handler
+      }
+    })();
+  </script>
+
   <!-- ================= Premium: Code Playground (additive, self-contained) ================= -->
   <!-- Real execution only. Python + SQL run entirely in the browser (Pyodide / sql.js). -->
   <!-- Every other language executes on a real Judge0 CE compiler/interpreter via /api/execute. -->
@@ -9621,6 +9904,7 @@
               },
               isCoarsePointer ? mobileOptions : desktopOptions
             ));
+            window.__cpEditorInstance = editor; // diagnostic hook only — read-only access, never mutated by the harness
 
             // Global editor zoom level (Monaco's ctrl+wheel zoom, shared across every
             // Monaco instance on the page) — force it to 0 and keep it there on mobile.
@@ -10119,6 +10403,202 @@
         });
       }
       applyLanguageUI(currentLang);
+    })();
+  </script>
+
+  <!-- ================= Code Playground: Android zoom-bug DIAGNOSTICS (temporary) ================= -->
+  <!-- Inert for every normal visitor. Enable it explicitly with either:
+         • add ?cpdebug=1 to the URL, or
+         • run  localStorage.setItem('cp_debug','1')  in the console, then reload.
+       Open the panel, tap into the editor, type a few characters, then copy the
+       full console output (or screenshot it) back — that's the real before/after
+       data needed to identify the exact property that changes. This script only
+       reads values; it never mutates the editor, so it cannot itself cause or
+       hide the bug. Safe to delete once the root cause is found and fixed. -->
+  <script>
+    (function initCodePlaygroundDiagnostics() {
+      "use strict";
+      var panel = document.getElementById("panel-codeplayground");
+      if (!panel) return;
+
+      var DEBUG_ENABLED = (function () {
+        try {
+          if (/[?&]cpdebug=1\b/.test(window.location.search)) return true;
+          if (window.localStorage && localStorage.getItem("cp_debug") === "1") return true;
+        } catch (e) { /* ignore */ }
+        return false;
+      })();
+      if (!DEBUG_ENABLED) return;
+
+      console.log(
+        "%c[CP-DEBUG] Code Playground diagnostics ENABLED — open the editor and start typing.\nDisable with: localStorage.removeItem('cp_debug')",
+        "color:#7fff6e;font-weight:bold;"
+      );
+
+      function styleSummary(el) {
+        if (!el) return null;
+        var cs = window.getComputedStyle(el);
+        var rect = el.getBoundingClientRect();
+        var out = {
+          tag: el.tagName,
+          className: typeof el.className === "string" ? el.className : String(el.className),
+          fontSize: cs.fontSize,
+          lineHeight: cs.lineHeight,
+          transform: cs.transform,
+          zoom: cs.zoom,
+          styleWidth: cs.width,
+          styleHeight: cs.height,
+          boundingRectWidth: rect.width,
+          boundingRectHeight: rect.height,
+        };
+        if (el.tagName === "CANVAS") {
+          // The two numbers that matter for a canvas: the CSS box size (style/rect
+          // above) vs. the actual backing-store resolution (attributes below). If
+          // the backing store scales but style width/height doesn't, the canvas
+          // renders blurry/small. If style width/height itself grows, THAT is a
+          // visible "the canvas got physically bigger" bug.
+          out.backingStoreWidthAttr = el.width;
+          out.backingStoreHeightAttr = el.height;
+          out.impliedDevicePixelRatio = rect.width ? (el.width / rect.width).toFixed(3) : "n/a";
+        }
+        return out;
+      }
+
+      function snapshot(label) {
+        var mount = document.getElementById("cp-editor-mount");
+        if (!mount) { console.log("[CP-DEBUG] " + label + ": editor mount not in DOM yet."); return null; }
+
+        var editorEl = mount.querySelector(".monaco-editor");
+        var overflowGuardEl = mount.querySelector(".overflow-guard");
+        var viewLinesEl = mount.querySelector(".view-lines");
+        var inputAreaEl = mount.querySelector("textarea.inputarea");
+        var canvasEls = mount.querySelectorAll("canvas");
+
+        var data = {
+          label: label,
+          time: new Date().toISOString(),
+          "window.devicePixelRatio": window.devicePixelRatio,
+          "window.innerWidth": window.innerWidth,
+          "window.innerHeight": window.innerHeight,
+          "visualViewport.scale": window.visualViewport ? window.visualViewport.scale : "n/a (no visualViewport)",
+          "visualViewport.width": window.visualViewport ? window.visualViewport.width : "n/a",
+          "visualViewport.height": window.visualViewport ? window.visualViewport.height : "n/a",
+          ".monaco-editor (computed)": styleSummary(editorEl),
+          ".overflow-guard (computed)": styleSummary(overflowGuardEl),
+          ".view-lines (computed)": styleSummary(viewLinesEl),
+          "textarea.inputarea (computed)": styleSummary(inputAreaEl),
+          "canvas elements (computed, one per match)": Array.prototype.map.call(canvasEls, function (c, i) {
+            var s = styleSummary(c);
+            s._index = i;
+            return s;
+          }),
+        };
+
+        var ed = window.__cpEditorInstance;
+        if (ed && window.monaco) {
+          try { data["editor.getOption(EditorOption.fontSize)"] = ed.getOption(monaco.editor.EditorOption.fontSize); }
+          catch (e) { data["editor.getOption(EditorOption.fontSize)"] = "ERROR: " + e.message; }
+
+          try { data["editor.getOption(EditorOption.lineHeight)"] = ed.getOption(monaco.editor.EditorOption.lineHeight); }
+          catch (e) { data["editor.getOption(EditorOption.lineHeight)"] = "ERROR: " + e.message; }
+
+          try {
+            var pxOpt = monaco.editor.EditorOption.pixelRatio;
+            data["EditorOption.pixelRatio exists in this build?"] = pxOpt !== undefined;
+            data["editor.getOption(EditorOption.pixelRatio)"] = pxOpt !== undefined
+              ? ed.getOption(pxOpt)
+              : "N/A — 'pixelRatio' is not a member of monaco.editor.EditorOption in this Monaco version";
+          } catch (e) { data["editor.getOption(EditorOption.pixelRatio)"] = "ERROR: " + e.message; }
+
+          try { data["editor.getLayoutInfo()"] = ed.getLayoutInfo(); }
+          catch (e) { data["editor.getLayoutInfo()"] = "ERROR: " + e.message; }
+
+          try { data["monaco.editor.EditorZoom.getZoomLevel()"] = monaco.editor.EditorZoom.getZoomLevel(); }
+          catch (e) { data["monaco.editor.EditorZoom.getZoomLevel()"] = "ERROR: " + e.message; }
+        } else {
+          data["editor instance"] = "window.__cpEditorInstance not available yet";
+        }
+
+        console.log("%c[CP-DEBUG] " + label, "color:#3dffd0;font-weight:bold;", data);
+        return data;
+      }
+
+      function diff(before, after) {
+        if (!before || !after) return;
+        console.log("%c[CP-DEBUG] ==== DIFF: BEFORE → AFTER (only changed values) ====", "color:#ffd23d;font-weight:bold;");
+        var changedAny = false;
+        function walk(path, a, b) {
+          if (a === b) return;
+          var aIsObj = a && typeof a === "object";
+          var bIsObj = b && typeof b === "object";
+          if (aIsObj && bIsObj) {
+            var keys = Object.keys(Object.assign({}, a, b));
+            keys.forEach(function (k) { walk(path + "." + k, a[k], b[k]); });
+            return;
+          }
+          if (JSON.stringify(a) !== JSON.stringify(b)) {
+            changedAny = true;
+            console.log("  " + path + ":", a, " →  ", b);
+          }
+        }
+        walk("", before, after);
+        if (!changedAny) console.log("  (no differences detected between these two snapshots)");
+      }
+
+      // Manual trigger available from the console at any time: __cpDebugSnapshot('label')
+      window.__cpDebugSnapshot = snapshot;
+
+      var beforeSnap = null;
+
+      function attach(inputAreaEl) {
+        if (inputAreaEl.__cpDebugAttached) return;
+        inputAreaEl.__cpDebugAttached = true;
+
+        inputAreaEl.addEventListener("focus", function () {
+          beforeSnap = snapshot("BEFORE focus (tap into editor)");
+        });
+        inputAreaEl.addEventListener("input", function () {
+          var afterSnap = snapshot("AFTER input (first keystroke)");
+          diff(beforeSnap, afterSnap);
+        });
+
+        // Independent of focus/input timing: fires the instant ANY of these elements
+        // actually changes size on screen, and reports exactly which one and by how
+        // much. This is what pinpoints the element truly responsible, rather than
+        // inferring it indirectly from before/after option values.
+        var mount = document.getElementById("cp-editor-mount");
+        var watchTargets = [
+          mount.querySelector(".monaco-editor"),
+          mount.querySelector(".overflow-guard"),
+          mount.querySelector(".view-lines"),
+          inputAreaEl,
+        ].concat(Array.prototype.slice.call(mount.querySelectorAll("canvas")));
+
+        if (window.ResizeObserver) {
+          var ro = new ResizeObserver(function (entries) {
+            entries.forEach(function (entry) {
+              console.log(
+                "%c[CP-DEBUG] RESIZE detected on <" + entry.target.tagName.toLowerCase() +
+                  (entry.target.className ? "." + String(entry.target.className).replace(/\s+/g, ".") : "") + ">",
+                "color:#ff9d9d;font-weight:bold;",
+                { newContentRect: entry.contentRect, target: entry.target }
+              );
+            });
+            snapshot("AFTER ResizeObserver fire");
+          });
+          watchTargets.forEach(function (t) { if (t) ro.observe(t); });
+        } else {
+          console.log("[CP-DEBUG] ResizeObserver not supported — relying on focus/input snapshots only.");
+        }
+      }
+
+      function waitForEditor() {
+        var mount = document.getElementById("cp-editor-mount");
+        var inputAreaEl = mount && mount.querySelector("textarea.inputarea");
+        if (inputAreaEl) { attach(inputAreaEl); return; }
+        setTimeout(waitForEditor, 400);
+      }
+      waitForEditor();
     })();
   </script>
 
