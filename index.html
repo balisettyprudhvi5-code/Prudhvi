@@ -44,6 +44,8 @@
   <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="48x48" />
   <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
   <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="/favicon-48x48.png" type="image/png" sizes="48x48" />
+  <link rel="icon" href="/favicon-64x64.png" type="image/png" sizes="64x64" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
   <link rel="manifest" href="/site.webmanifest" />
 
@@ -2577,167 +2579,79 @@
       .cp-editor-shell { height: 320px; }
     }
 
-    /* ================= Code Playground: Professional IDE upgrade (additive) ================= */
-    /* Breaks the panel out of the site's normal 1000px content column on desktop/laptop
-       screens so it reads as a real IDE workspace, not a small centered card. Every other
-       section on the site is completely untouched — this rule targets only the open
-       Code Playground panel. */
-    @media (min-width: 1024px) {
-      #panel-codeplayground.is-open {
-        width: 98vw;
-        max-width: 2400px; /* generous cap so ultra/4K monitors don't stretch line-length absurdly */
-        margin-left: calc(50% - 49vw);
-        margin-right: calc(50% - 49vw);
-      }
-      #panel-codeplayground .tool-workspace-standalone {
-        padding: 1.4rem 1.6rem 1.8rem;
-      }
-      /* Editor : Output ≈ 70 : 30, side by side, using nearly the full panel width */
-      .cp-layout {
-        grid-template-columns: 7fr 3fr;
-        gap: 1.1rem;
-        height: 80vh;
-        min-height: 560px;
-      }
-      .cp-layout.cp-ai-open {
-        grid-template-columns: 5fr 2.1fr 2.4fr;
-      }
-      .cp-editor-col,
-      .cp-output-col,
-      .cp-ai-col { height: 100%; min-height: 0; }
-      .cp-editor-col { display: flex; flex-direction: column; }
-      .cp-editor-shell { flex: 1 1 auto; height: auto; min-height: 0; }
-      .cp-output-col { display: flex; flex-direction: column; min-height: 0; }
-      .cp-output-panel-scroll { flex: 1 1 auto; overflow: auto; min-height: 0; }
+    /* ================= Premium Splash Screen (additive, self-contained) =================
+       Fixed full-viewport overlay drawn on top of the already-rendering page, so nothing
+       about the real layout, scripts, or ad system underneath is touched. It removes
+       itself once real initialization work finishes (see inline script right after the
+       markup). Every size below uses clamp()/vw so it scales on any device with no
+       fixed-pixel breakpoints. */
+    #sc-splash {
+      position: fixed; inset: 0; z-index: 99999;
+      display: flex; align-items: center; justify-content: center;
+      background:
+        radial-gradient(ellipse 60% 46% at 50% 40%, rgba(127,255,110,.14), transparent 65%),
+        radial-gradient(ellipse 90% 70% at 50% 100%, rgba(61,255,208,.05), transparent 70%),
+        #060a07;
+      opacity: 1; transition: opacity .6s ease;
+      -webkit-font-smoothing: antialiased;
     }
-    @media (min-width: 1600px) {
-      .cp-layout { grid-template-columns: 7.5fr 2.5fr; }
-      .cp-layout.cp-ai-open { grid-template-columns: 5.2fr 2fr 2.4fr; }
+    #sc-splash.is-done { opacity: 0; pointer-events: none; }
+    .sc-splash-content {
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      padding: 6vh 1.5rem; width: 100%; max-width: 480px;
     }
-
-    /* ---- VS Code-style toolbar: Run promoted to a primary action, AI toggle added ---- */
-    .cp-toolbar { position: relative; }
-    .cp-run-btn-toolbar { display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap; }
-    .cp-ai-toggle-btn {
-      display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap;
-      background: linear-gradient(135deg, rgba(127,255,110,.14), rgba(61,255,208,.08));
-      border: 1px solid var(--accent); color: var(--accent);
+    .sc-splash-logo-wrap {
+      display: flex; align-items: center; justify-content: center; margin-bottom: clamp(1rem, 3vh, 1.6rem);
     }
-    .cp-ai-toggle-btn:hover { background: rgba(127,255,110,.2); }
-    .cp-ai-toggle-btn.is-active { background: var(--accent); color: #06120a; }
-
-    /* ---- Editor: premium font stack + comfortable sizing (desktop) ---- */
-    @media (min-width: 1024px) {
-      .cp-editor-mount .monaco-editor,
-      .cp-editor-mount .monaco-editor * { font-size: 15.5px !important; }
+    .sc-splash-logo {
+      width: clamp(84px, 20vw, 168px); height: clamp(84px, 20vw, 168px);
+      object-fit: contain; border-radius: 22%;
+      filter: drop-shadow(0 0 22px rgba(127,255,110,.35));
+      animation: scLogoFloat 2.8s ease-in-out infinite;
+      will-change: transform;
+      backface-visibility: hidden;
     }
-
-    /* ---- Output stats bar (execution time / memory) made prominent, alongside tabs ---- */
-    .cp-stats-bar {
-      display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .7rem;
+    @keyframes scLogoFloat {
+      0%, 100% { transform: translateZ(0) translateY(0) scale(1); }
+      50% { transform: translateZ(0) translateY(-5px) scale(1.03); }
     }
-    .cp-stat-chip {
-      display: inline-flex; align-items: center; gap: .35rem; font-family: var(--mono); font-size: .72rem;
-      color: var(--muted); background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 999px; padding: .3rem .7rem;
+    #sc-splash.is-success .sc-splash-logo {
+      animation: none;
+      transform: translateZ(0) scale(1.09);
+      filter: drop-shadow(0 0 34px rgba(127,255,110,.85));
+      transition: transform .45s cubic-bezier(.2,.8,.3,1.3), filter .45s ease;
     }
-    .cp-stat-chip strong { color: var(--text); font-weight: 700; }
-    .cp-stat-chip.cp-stat-time strong { color: var(--accent2); }
-    .cp-stat-chip.cp-stat-memory strong { color: var(--accent); }
-
-    /* ================= Code Playground: AI Coding Assistant (additive, self-contained) ================= */
-    .cp-ai-col {
-      display: none; flex-direction: column; min-width: 0;
-      border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2);
-      overflow: hidden;
+    .sc-splash-wordmark {
+      font-family: var(--sans); font-weight: 800; letter-spacing: -.01em;
+      font-size: clamp(1.4rem, 4.6vw, 2.15rem); color: #fff; margin-bottom: .5rem;
     }
-    .cp-layout.cp-ai-open .cp-ai-col { display: flex; }
-    .cp-ai-header {
-      display: flex; align-items: center; justify-content: space-between; gap: .5rem;
-      padding: .7rem .9rem; border-bottom: 1px solid var(--border); background: var(--surface);
-      font-weight: 700; font-size: .88rem;
+    .sc-splash-wordmark .sc-accent { color: var(--accent, #7fff6e); }
+    .sc-splash-tagline {
+      font-family: var(--sans); color: var(--muted, #9a9aa2);
+      font-size: clamp(.82rem, 2.4vw, .98rem); margin-bottom: clamp(1.6rem, 5vh, 2.6rem);
     }
-    .cp-ai-header span.cp-ai-title { display: flex; align-items: center; gap: .4rem; }
-    .cp-ai-close-btn {
-      background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem;
-      padding: .2rem .4rem; line-height: 1; border-radius: 4px;
+    .sc-splash-progress-wrap { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: .9rem; }
+    .sc-splash-ring { width: clamp(54px, 11vw, 78px); height: clamp(54px, 11vw, 78px); transform: rotate(-90deg); }
+    .sc-ring-track { fill: none; stroke: rgba(127,255,110,.14); stroke-width: 7; }
+    .sc-ring-bar {
+      fill: none; stroke: var(--accent, #7fff6e); stroke-width: 7; stroke-linecap: round;
+      filter: drop-shadow(0 0 6px rgba(127,255,110,.65));
+      transition: stroke-dashoffset .45s cubic-bezier(.4,0,.2,1), stroke .3s ease;
     }
-    .cp-ai-close-btn:hover { color: var(--text); background: var(--surface2); }
-    .cp-ai-actions {
-      display: flex; flex-wrap: wrap; gap: .4rem; padding: .7rem .8rem; border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
+    #sc-splash.is-success .sc-ring-bar { stroke: #b9ffab; }
+    .sc-splash-percent {
+      position: absolute; font-family: var(--mono); font-size: clamp(.62rem, 1.8vw, .72rem);
+      color: var(--text, #eee); font-weight: 700;
     }
-    .cp-ai-action-btn {
-      font-family: var(--sans); font-size: .72rem; font-weight: 600; color: var(--text);
-      background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
-      padding: .35rem .75rem; cursor: pointer; transition: all .15s ease;
+    .sc-splash-status {
+      font-family: var(--mono); font-size: clamp(.72rem, 2vw, .82rem); color: var(--muted, #9a9aa2);
+      letter-spacing: .02em; min-height: 1.4em; transition: opacity .22s ease; opacity: 1;
     }
-    .cp-ai-action-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .cp-ai-action-btn:disabled { opacity: .5; cursor: not-allowed; }
-    .cp-ai-convert-row { display: flex; align-items: center; gap: .35rem; }
-    .cp-ai-convert-row select {
-      background: var(--surface); border: 1px solid var(--border); color: var(--text);
-      border-radius: 999px; padding: .35rem .6rem; font-size: .72rem; font-family: var(--sans); cursor: pointer;
-    }
-    .cp-ai-messages {
-      flex: 1 1 auto; overflow-y: auto; padding: .9rem; display: flex; flex-direction: column; gap: .8rem;
-      min-height: 160px;
-    }
-    .cp-ai-empty { color: var(--muted); font-size: .82rem; text-align: center; margin: auto; line-height: 1.6; padding: 1rem; }
-    .cp-ai-msg { display: flex; flex-direction: column; gap: .3rem; max-width: 100%; }
-    .cp-ai-msg-role { font-family: var(--mono); font-size: .65rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
-    .cp-ai-msg.is-user .cp-ai-msg-role { color: var(--accent2); }
-    .cp-ai-msg.is-ai .cp-ai-msg-role { color: var(--accent); }
-    .cp-ai-bubble {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
-      padding: .7rem .85rem; font-size: .85rem; line-height: 1.6; overflow-wrap: anywhere;
-    }
-    .cp-ai-msg.is-user .cp-ai-bubble { background: rgba(61,255,208,.06); border-color: rgba(61,255,208,.25); }
-    .cp-ai-bubble p { margin: 0 0 .6rem; }
-    .cp-ai-bubble p:last-child { margin-bottom: 0; }
-    .cp-ai-bubble ul, .cp-ai-bubble ol { margin: 0 0 .6rem 1.2rem; }
-    .cp-ai-bubble pre {
-      position: relative; background: #1a1a1e; border: 1px solid var(--border); border-radius: 6px;
-      padding: .7rem .8rem; overflow-x: auto; margin: 0 0 .6rem; font-family: var(--mono); font-size: .78rem;
-    }
-    .cp-ai-bubble code { font-family: var(--mono); }
-    .cp-ai-bubble :not(pre) > code { background: var(--surface2); padding: .1rem .3rem; border-radius: 4px; font-size: .82rem; }
-    .cp-ai-bubble table { border-collapse: collapse; width: 100%; margin-bottom: .6rem; font-size: .78rem; }
-    .cp-ai-bubble th, .cp-ai-bubble td { border: 1px solid var(--border); padding: .35rem .5rem; text-align: left; }
-    .cp-ai-cursor {
-      display: inline-block; width: 7px; height: 1em; background: var(--accent); vertical-align: text-bottom;
-      animation: cpAiBlink .85s steps(1) infinite; margin-left: 1px;
-    }
-    @keyframes cpAiBlink { 50% { opacity: 0; } }
-    .cp-ai-code-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin: -.3rem 0 .6rem; }
-    .cp-ai-code-actions button {
-      font-family: var(--sans); font-size: .68rem; font-weight: 600; color: var(--muted);
-      background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
-      padding: .28rem .6rem; cursor: pointer; transition: all .15s ease;
-    }
-    .cp-ai-code-actions button:hover { color: var(--accent); border-color: var(--accent); }
-    .cp-ai-code-actions button.cp-ai-code-copied { color: var(--accent); border-color: var(--accent); }
-    .cp-ai-msg.is-error .cp-ai-bubble { border-color: var(--danger); color: #ff9d9d; }
-    .cp-ai-input-row {
-      display: flex; align-items: flex-end; gap: .5rem; padding: .7rem .8rem; border-top: 1px solid var(--border);
-      background: var(--surface); flex-shrink: 0;
-    }
-    .cp-ai-input {
-      flex: 1 1 auto; resize: none; min-height: 40px; max-height: 120px; background: var(--surface2);
-      border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text);
-      font-family: var(--sans); font-size: .84rem; padding: .55rem .7rem; outline: none;
-    }
-    .cp-ai-input:focus { border-color: var(--accent); }
-    .cp-ai-send-btn, .cp-ai-stop-btn {
-      flex-shrink: 0; height: 40px; padding: 0 1rem; border-radius: var(--radius-sm); cursor: pointer;
-      font-weight: 700; font-size: .85rem; border: 1px solid var(--border);
-    }
-    .cp-ai-send-btn { background: var(--accent); color: #06120a; border-color: var(--accent); }
-    .cp-ai-send-btn:disabled { opacity: .5; cursor: not-allowed; }
-    .cp-ai-stop-btn { background: var(--surface2); color: var(--text); }
-    @media (max-width: 980px) {
-      .cp-ai-col { margin-top: 1rem; max-height: 70vh; }
-      .cp-ai-messages { min-height: 220px; }
+    .sc-splash-status.is-fading { opacity: 0; }
+    @media (prefers-reduced-motion: reduce) {
+      .sc-splash-logo { animation: none; }
+      .sc-ring-bar { transition: none; }
+      #sc-splash { transition: none; }
     }
   </style>
 
@@ -2757,6 +2671,145 @@
        never be requested while someone is coding. -->
 </head>
 <body>
+
+  <!-- ================= Premium Splash Screen (additive) =================
+       Sits on top of the page while it boots, then removes itself. Nothing
+       below this block — layout, scripts, ad system, tools — is touched. -->
+  <div id="sc-splash" role="status" aria-live="polite" aria-label="Loading Smart Compress">
+    <div class="sc-splash-content">
+      <div class="sc-splash-logo-wrap">
+        <img src="logo-icon.png" alt="Smart Compress" class="sc-splash-logo" width="168" height="168" />
+      </div>
+      <h1 class="sc-splash-wordmark"><span class="sc-accent">Smart</span> Compress</h1>
+      <p class="sc-splash-tagline">Compress Smarter. Save Better.</p>
+      <div class="sc-splash-progress-wrap">
+        <svg class="sc-splash-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="sc-ring-track" cx="60" cy="60" r="52"></circle>
+          <circle class="sc-ring-bar" id="sc-ring-bar" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <span class="sc-splash-percent" id="sc-splash-percent">0%</span>
+      </div>
+      <p class="sc-splash-status" id="sc-splash-status">Initializing…</p>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var splash = document.getElementById("sc-splash");
+      if (!splash) return;
+      var ringBar = document.getElementById("sc-ring-bar");
+      var percentEl = document.getElementById("sc-splash-percent");
+      var statusEl = document.getElementById("sc-splash-status");
+
+      var RADIUS = 52;
+      var CIRC = 2 * Math.PI * RADIUS;
+      ringBar.style.strokeDasharray = CIRC.toFixed(2);
+      ringBar.style.strokeDashoffset = CIRC.toFixed(2);
+
+      var MESSAGES = ["Initializing…", "Loading AI…", "Preparing Tools…", "Optimizing Performance…", "Almost Ready…", "Launching Smart Compress…"];
+      var lastMsg = MESSAGES[0];
+      function setStatus(text) {
+        if (text === lastMsg) return;
+        lastMsg = text;
+        statusEl.classList.add("is-fading");
+        setTimeout(function () {
+          statusEl.textContent = text;
+          statusEl.classList.remove("is-fading");
+        }, 220);
+      }
+
+      var progress = 0;
+      function setProgress(pct) {
+        progress = Math.max(progress, Math.min(100, pct));
+        ringBar.style.strokeDashoffset = (CIRC * (1 - progress / 100)).toFixed(2);
+        percentEl.textContent = Math.round(progress) + "%";
+        var stage = Math.min(MESSAGES.length - 1, Math.floor((progress / 100) * (MESSAGES.length - 1)));
+        setStatus(MESSAGES[stage]);
+      }
+
+      // Real initialization steps — progress reflects actual work completing,
+      // not a fake timer. Each step resolves as soon as its real condition is
+      // met, and every step has its own safety timeout so a slow/blocked
+      // resource (e.g. an unreachable service worker) can never trap the splash.
+      function withTimeout(promise, ms) {
+        return new Promise(function (resolve) {
+          var done = false;
+          function finish() { if (!done) { done = true; resolve(); } }
+          promise.then(finish, finish);
+          setTimeout(finish, ms);
+        });
+      }
+      var steps = [
+        { weight: 15, run: function () { // Fonts
+            return withTimeout((document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve(), 2000);
+          } },
+        { weight: 15, run: function () { // Assets / Icons
+            return withTimeout(new Promise(function (resolve) {
+              var img = new Image();
+              img.onload = resolve; img.onerror = resolve;
+              img.src = "logo-icon.png";
+            }), 2000);
+          } },
+        { weight: 10, run: function () { // Theme (paint-ready)
+            return new Promise(function (resolve) { requestAnimationFrame(function () { requestAnimationFrame(resolve); }); });
+          } },
+        { weight: 20, run: function () { // Service Worker
+            return withTimeout(new Promise(function (resolve) {
+              if (!("serviceWorker" in navigator)) return resolve();
+              navigator.serviceWorker.ready.then(resolve, resolve);
+            }), 2500);
+          } },
+        { weight: 10, run: function () { // PWA / manifest
+            return withTimeout(new Promise(function (resolve) {
+              var link = document.querySelector('link[rel="manifest"]');
+              if (!link || !link.href) return resolve();
+              fetch(link.href).then(resolve, resolve);
+            }), 1500);
+          } },
+        { weight: 10, run: function () { // API connections / configuration
+            return withTimeout(new Promise(function (resolve) {
+              try { JSON.parse(localStorage.getItem("smartcompress_settings_v1") || "{}"); } catch (e) { /* ignore corrupt settings */ }
+              resolve();
+            }), 800);
+          } },
+        { weight: 20, run: function () { // AI components (chat libs used elsewhere on the site)
+            return withTimeout(new Promise(function (resolve) {
+              if (document.readyState === "complete") return resolve();
+              window.addEventListener("load", resolve, { once: true });
+            }), 4000);
+          } }
+      ];
+
+      var totalWeight = steps.reduce(function (s, st) { return s + st.weight; }, 0);
+      var completedWeight = 0;
+      var startTime = Date.now();
+      var MIN_VISIBLE_MS = 1500;
+
+      function finish() {
+        setProgress(100);
+        splash.classList.add("is-success");
+        setTimeout(function () {
+          splash.classList.add("is-done");
+          setTimeout(function () {
+            splash.style.display = "none";
+            splash.setAttribute("aria-hidden", "true");
+          }, 650);
+        }, 420);
+      }
+
+      Promise.all(steps.map(function (st) {
+        return st.run().then(function () {
+          completedWeight += st.weight;
+          setProgress((completedWeight / totalWeight) * 96); // hold under 100% until the real finish() call
+        });
+      })).then(function () {
+        var remaining = Math.max(0, MIN_VISIBLE_MS - (Date.now() - startTime));
+        setTimeout(finish, remaining);
+      });
+
+      // Absolute safety net: never leave a visitor stuck on the splash screen.
+      setTimeout(finish, 8000);
+    })();
+  </script>
 
   <a href="#suite-workspace-block" class="skip-link">Skip to operational image tools</a>
 
@@ -3443,7 +3496,7 @@
             </div>
 
             <div class="cp-toolbar-group" id="cp-mode-group" style="display:none;">
-              <label class="cp-field-label" for="cp-exec-mode">Runtime</label>
+              <label class="cp-field-label" for="cp-exec-mode">Run</label>
               <select id="cp-exec-mode" class="cp-select">
                 <option value="browser">⚡ In Browser (Pyodide)</option>
                 <option value="server">☁ Server (Judge0)</option>
@@ -3452,11 +3505,8 @@
 
             <span class="cp-runtime-badge" id="cp-runtime-badge">Ready</span>
 
-            <button type="button" class="btn-primary cp-btn-sm cp-run-btn-toolbar" id="cp-run-btn">▶ Run</button>
-
             <div class="cp-toolbar-spacer"></div>
 
-            <button type="button" class="btn-secondary cp-btn-sm cp-ai-toggle-btn" id="cp-ai-toggle-btn" aria-pressed="false" title="Open the AI coding assistant">🤖 AI Assistant</button>
             <button type="button" class="btn-secondary cp-btn-sm" id="cp-upload-btn" title="Upload a source file into the editor">⬆ Upload</button>
             <input type="file" id="cp-upload-input" style="display:none;" accept=".py,.js,.mjs,.ts,.java,.c,.h,.cpp,.hpp,.cc,.go,.rs,.php,.kt,.swift,.sql,.txt" />
             <button type="button" class="btn-secondary cp-btn-sm" id="cp-download-btn" title="Download current code as a file">⬇ Download</button>
@@ -3464,7 +3514,7 @@
             <button type="button" class="btn-secondary cp-btn-sm" id="cp-reset-btn" title="Reset to the starter template for this language">↺ Reset</button>
           </div>
 
-          <div class="cp-layout" id="cp-layout">
+          <div class="cp-layout">
             <div class="cp-editor-col">
               <div class="cp-editor-shell">
                 <div class="cp-editor-mount" id="cp-editor-mount"></div>
@@ -3477,6 +3527,7 @@
               </div>
 
               <div class="cp-run-row">
+                <button type="button" class="btn-primary" id="cp-run-btn">▶ Run</button>
                 <button type="button" class="btn-secondary" id="cp-run-again-btn" disabled>↻ Run Again</button>
                 <span class="cp-run-status" id="cp-run-status"></span>
               </div>
@@ -3490,7 +3541,6 @@
               </div>
 
               <div class="cp-output-panel active" id="cp-panel-output">
-                <div class="cp-stats-bar" id="cp-stats-bar"></div>
                 <div class="cp-output-meta" id="cp-output-meta"></div>
                 <pre class="cp-output-pre" id="cp-stdout-pre">Run your code to see output here.</pre>
                 <div class="cp-sql-result" id="cp-sql-result" style="display:none;"></div>
@@ -3504,49 +3554,6 @@
                 <div class="cp-history-list" id="cp-history-list">
                   <p class="cp-history-empty">Your last few runs in this session will show up here.</p>
                 </div>
-              </div>
-            </div>
-
-            <div class="cp-ai-col" id="cp-ai-col">
-              <div class="cp-ai-header">
-                <span class="cp-ai-title">🤖 AI Coding Assistant</span>
-                <button type="button" class="cp-ai-close-btn" id="cp-ai-close-btn" aria-label="Close AI Assistant">✕</button>
-              </div>
-              <div class="cp-ai-actions" id="cp-ai-actions">
-                <button type="button" class="cp-ai-action-btn" data-cp-ai-action="explain">Explain this code</button>
-                <button type="button" class="cp-ai-action-btn" data-cp-ai-action="fix">Fix errors</button>
-                <button type="button" class="cp-ai-action-btn" data-cp-ai-action="optimize">Optimize</button>
-                <button type="button" class="cp-ai-action-btn" data-cp-ai-action="complexity">Time/Space complexity</button>
-                <button type="button" class="cp-ai-action-btn" data-cp-ai-action="dryrun">Dry run</button>
-                <button type="button" class="cp-ai-action-btn" data-cp-ai-action="explain-lines">Line-by-line explanation</button>
-                <button type="button" class="cp-ai-action-btn" data-cp-ai-action="tests">Generate test cases</button>
-                <button type="button" class="cp-ai-action-btn" data-cp-ai-action="docs">Generate documentation</button>
-                <button type="button" class="cp-ai-action-btn" data-cp-ai-action="refactor">Refactor</button>
-                <div class="cp-ai-convert-row">
-                  <select id="cp-ai-convert-lang" aria-label="Convert to language">
-                    <option value="Python">Python</option>
-                    <option value="Java">Java</option>
-                    <option value="C">C</option>
-                    <option value="C++">C++</option>
-                    <option value="JavaScript">JavaScript</option>
-                    <option value="TypeScript">TypeScript</option>
-                    <option value="PHP">PHP</option>
-                    <option value="Go">Go</option>
-                    <option value="Rust">Rust</option>
-                    <option value="Swift">Swift</option>
-                    <option value="Kotlin">Kotlin</option>
-                    <option value="SQL">SQL</option>
-                  </select>
-                  <button type="button" class="cp-ai-action-btn" data-cp-ai-action="convert">Convert</button>
-                </div>
-              </div>
-              <div class="cp-ai-messages" id="cp-ai-messages">
-                <p class="cp-ai-empty">Ask about the code in your editor — "Explain this code", "Fix this", "Optimize this", "Convert to Java" — or use a quick action above. I automatically read whatever's currently in the editor, no need to paste it.</p>
-              </div>
-              <div class="cp-ai-input-row">
-                <textarea id="cp-ai-input" class="cp-ai-input" rows="1" placeholder="Ask about your code…"></textarea>
-                <button type="button" class="cp-ai-send-btn" id="cp-ai-send-btn">➤</button>
-                <button type="button" class="cp-ai-stop-btn" id="cp-ai-stop-btn" hidden>■ Stop</button>
               </div>
             </div>
           </div>
@@ -9842,7 +9849,6 @@
       var panelErrors = document.getElementById("cp-panel-errors");
       var panelHistory = document.getElementById("cp-panel-history");
       var outputMeta = document.getElementById("cp-output-meta");
-      var statsBarEl = document.getElementById("cp-stats-bar");
       var stdoutPre = document.getElementById("cp-stdout-pre");
       var stderrPre = document.getElementById("cp-stderr-pre");
       var sqlResultEl = document.getElementById("cp-sql-result");
@@ -10067,14 +10073,10 @@
             // config it always had.
             var isCoarsePointer = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 
-            // ---- Desktop: premium IDE editing experience (minimap, ligature-friendly
-            // monospace stack, comfortable padding, smooth scrolling, bracket/cursor
-            // highlighting). Mobile keeps its own tuned options below, untouched. ----
+            // ---- Desktop: completely unchanged from before this fix. ----
             var desktopOptions = {
-              fontSize: 15.5,
-              smoothScrolling: true,
-              minimap: { enabled: true, scale: 1 },
-              padding: { top: 14, bottom: 14 },
+              fontSize: 13,
+              smoothScrolling: false,
             };
 
             // ---- Mobile (Android Chrome / Samsung Internet / Edge Mobile / iOS Safari):
@@ -10109,22 +10111,12 @@
                 value: loadCodeFor(currentLang),
                 language: LANGS[currentLang].monacoLang,
                 theme: "vs-dark",
-                fontFamily: "'Cascadia Code', 'JetBrains Mono', 'Fira Code', 'Space Mono', monospace",
-                fontLigatures: true,
-                minimap: { enabled: false }, // overridden to enabled on desktop via desktopOptions below
+                fontFamily: "'Space Mono', monospace",
+                minimap: { enabled: false }, // stays disabled on mobile too
                 automaticLayout: true,
                 scrollBeyondLastLine: false,
                 tabSize: 2,
                 mouseWheelZoom: false, // disable Monaco's own ctrl/pinch "zoom editor font" feature
-                matchBrackets: "always",
-                bracketPairColorization: { enabled: true },
-                autoClosingBrackets: "languageDefined",
-                autoClosingQuotes: "languageDefined",
-                autoIndent: "full",
-                folding: true,
-                renderLineHighlight: "all",
-                cursorBlinking: "smooth",
-                wordWrap: "on",
               },
               isCoarsePointer ? mobileOptions : desktopOptions
             ));
@@ -10273,22 +10265,15 @@
         return '<span class="' + (cls || "") + '">' + escapeHtml(text) + "</span>";
       }
 
-      function renderStatsBar(run) {
-        if (!statsBarEl) return;
-        var stats = [];
-        stats.push('<span class="cp-stat-chip cp-stat-time">⏱ Execution Time: <strong>' + (run.time != null ? escapeHtml(run.time + "s") : "—") + "</strong></span>");
-        stats.push('<span class="cp-stat-chip cp-stat-memory">💾 Memory Usage: <strong>' + (run.memory != null ? escapeHtml((run.memory / 1024).toFixed(1) + " MB") : "—") + "</strong></span>");
-        statsBarEl.innerHTML = stats.join("");
-      }
-
       function renderRunResult(run) {
         sqlResultEl.style.display = "none";
         sqlResultEl.innerHTML = "";
         stdoutPre.style.display = "block";
-        renderStatsBar(run);
 
         var chips = [];
         chips.push(metaChip(run.statusLabel, run.statusState === "ok" ? "cp-meta-ok" : "cp-meta-error"));
+        if (run.time != null) chips.push(metaChip(run.time + "s"));
+        if (run.memory != null) chips.push(metaChip((run.memory / 1024).toFixed(1) + " MB"));
         if (run.exitCode != null) chips.push(metaChip("exit " + run.exitCode));
         outputMeta.innerHTML = chips.join("");
 
@@ -10305,7 +10290,6 @@
       }
 
       function renderSqlResult(run) {
-        if (statsBarEl) statsBarEl.innerHTML = "";
         outputMeta.innerHTML = metaChip(run.statusLabel, run.statusState === "ok" ? "cp-meta-ok" : "cp-meta-error");
         stdoutPre.style.display = "none";
         sqlResultEl.style.display = "flex";
@@ -10622,282 +10606,6 @@
         if (!window.confirm("Reset to the starter template for " + LANGS[currentLang].label + "? Unsaved changes in the editor will be lost.")) return;
         editor.setValue(LANGS[currentLang].boilerplate);
         sessionCache[currentLang] = LANGS[currentLang].boilerplate;
-      });
-
-      // ---------------------------------------------------------------
-      // AI Coding Assistant (additive, self-contained — shares the Monaco
-      // `editor` instance and `LANGS`/`currentLang` above, but its own chat
-      // logic is fully independent from the site-wide AI Tools assistant).
-      // Talks to the same /api/chat (OpenRouter) backend that already powers
-      // the AI Tools chat elsewhere on the site.
-      // ---------------------------------------------------------------
-      var cpLayoutEl = document.getElementById("cp-layout");
-      var aiToggleBtn = document.getElementById("cp-ai-toggle-btn");
-      var aiCloseBtn = document.getElementById("cp-ai-close-btn");
-      var aiActionsEl = document.getElementById("cp-ai-actions");
-      var aiMessagesEl = document.getElementById("cp-ai-messages");
-      var aiInputEl = document.getElementById("cp-ai-input");
-      var aiSendBtn = document.getElementById("cp-ai-send-btn");
-      var aiStopBtn = document.getElementById("cp-ai-stop-btn");
-      var aiConvertLangSelect = document.getElementById("cp-ai-convert-lang");
-
-      var cpAiTurns = []; // [{ role: "user"|"model", payloadText: string }]
-      var cpAiGenerating = false;
-      var cpAiCancelled = false;
-
-      function cpAiClientTime() {
-        var now = new Date();
-        var tz = "UTC";
-        try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch (e) { /* fallback */ }
-        return { iso: now.toISOString(), timezone: tz };
-      }
-
-      function cpAiRenderMarkdown(text) {
-        try {
-          if (window.marked) {
-            var raw = typeof window.marked.parse === "function" ? window.marked.parse(text) : window.marked(text);
-            return window.DOMPurify ? window.DOMPurify.sanitize(raw) : raw;
-          }
-        } catch (e) { /* fall through to plain-text rendering below */ }
-        return escapeHtml(text).replace(/\n/g, "<br>");
-      }
-
-      function cpAiAttachCodeActions(container) {
-        var blocks = container.querySelectorAll("pre");
-        blocks.forEach(function (pre) {
-          var prev = pre.previousElementSibling;
-          if (prev && prev.classList && prev.classList.contains("cp-ai-code-actions")) return;
-          var codeEl = pre.querySelector("code") || pre;
-
-          var actions = document.createElement("div");
-          actions.className = "cp-ai-code-actions";
-
-          var copyBtn = document.createElement("button");
-          copyBtn.type = "button";
-          copyBtn.textContent = "Copy";
-          copyBtn.addEventListener("click", function () {
-            var text = codeEl.textContent || "";
-            var done = function () {
-              copyBtn.textContent = "Copied!";
-              copyBtn.classList.add("cp-ai-code-copied");
-              setTimeout(function () { copyBtn.textContent = "Copy"; copyBtn.classList.remove("cp-ai-code-copied"); }, 1500);
-            };
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(text).then(done).catch(function () { cpAiFallbackCopy(text, done); });
-            } else {
-              cpAiFallbackCopy(text, done);
-            }
-          });
-
-          var insertBtn = document.createElement("button");
-          insertBtn.type = "button";
-          insertBtn.textContent = "Insert into Editor";
-          insertBtn.addEventListener("click", function () {
-            if (!editor || !window.monaco) return;
-            var text = codeEl.textContent || "";
-            var pos = editor.getPosition() || { lineNumber: 1, column: 1 };
-            editor.executeEdits("cp-ai-insert", [{ range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column), text: text }]);
-            editor.focus();
-            insertBtn.textContent = "Inserted!";
-            setTimeout(function () { insertBtn.textContent = "Insert into Editor"; }, 1500);
-          });
-
-          var replaceBtn = document.createElement("button");
-          replaceBtn.type = "button";
-          replaceBtn.textContent = "Replace Current Code";
-          replaceBtn.addEventListener("click", function () {
-            if (!editor) return;
-            if (!window.confirm("Replace all code currently in the editor with this AI-generated code?")) return;
-            editor.setValue(codeEl.textContent || "");
-            sessionCache[currentLang] = editor.getValue();
-            replaceBtn.textContent = "Replaced!";
-            setTimeout(function () { replaceBtn.textContent = "Replace Current Code"; }, 1500);
-          });
-
-          actions.appendChild(copyBtn);
-          actions.appendChild(insertBtn);
-          actions.appendChild(replaceBtn);
-          pre.parentNode.insertBefore(actions, pre);
-        });
-      }
-
-      function cpAiFallbackCopy(text, done) {
-        try {
-          var ta = document.createElement("textarea");
-          ta.value = text;
-          ta.style.position = "fixed";
-          ta.style.opacity = "0";
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand("copy");
-          document.body.removeChild(ta);
-          done();
-        } catch (e) { /* clipboard unavailable — silently ignore */ }
-      }
-
-      function cpAiSetGenerating(on) {
-        cpAiGenerating = on;
-        aiSendBtn.disabled = on;
-        aiStopBtn.hidden = !on;
-        Array.prototype.forEach.call(aiActionsEl.querySelectorAll("button"), function (b) { b.disabled = on; });
-      }
-
-      function cpAiAppendMessage(role, displayText) {
-        var emptyMsg = aiMessagesEl.querySelector(".cp-ai-empty");
-        if (emptyMsg) emptyMsg.remove();
-        var wrap = document.createElement("div");
-        wrap.className = "cp-ai-msg is-" + (role === "user" ? "user" : "ai");
-        var roleEl = document.createElement("div");
-        roleEl.className = "cp-ai-msg-role";
-        roleEl.textContent = role === "user" ? "You" : "AI Assistant";
-        var bubble = document.createElement("div");
-        bubble.className = "cp-ai-bubble";
-        if (role === "user") {
-          bubble.textContent = displayText;
-        } else {
-          bubble.innerHTML = '<span class="cp-ai-cursor"></span>';
-        }
-        wrap.appendChild(roleEl);
-        wrap.appendChild(bubble);
-        aiMessagesEl.appendChild(wrap);
-        aiMessagesEl.scrollTop = aiMessagesEl.scrollHeight;
-        return { wrap: wrap, bubble: bubble };
-      }
-
-      function cpAiRevealText(bubble, fullText, onDone) {
-        var words = fullText.split(/(\s+)/);
-        var i = 0, shown = "";
-        function step() {
-          if (cpAiCancelled) {
-            bubble.innerHTML = cpAiRenderMarkdown(fullText);
-            cpAiAttachCodeActions(bubble);
-            onDone();
-            return;
-          }
-          var perTick = fullText.length > 1200 ? 5 : 2;
-          for (var n = 0; n < perTick && i < words.length; n++, i++) shown += words[i];
-          bubble.innerHTML = cpAiRenderMarkdown(shown) + '<span class="cp-ai-cursor"></span>';
-          aiMessagesEl.scrollTop = aiMessagesEl.scrollHeight;
-          if (i < words.length) {
-            setTimeout(step, 16);
-          } else {
-            bubble.innerHTML = cpAiRenderMarkdown(fullText);
-            cpAiAttachCodeActions(bubble);
-            onDone();
-          }
-        }
-        step();
-      }
-
-      function cpAiShowNotice(text) {
-        var refs = cpAiAppendMessage("model", "");
-        refs.bubble.textContent = text;
-      }
-
-      function cpAiSend(promptText, displayLabel) {
-        if (cpAiGenerating) return;
-        if (!editor) { ensureMonaco().then(function () { cpAiSend(promptText, displayLabel); }); return; }
-        var code = editor.getValue();
-        if (!code || !code.trim()) { cpAiShowNotice("The editor is empty — write or paste some code first, then ask me again."); return; }
-
-        var langLabel = LANGS[currentLang] ? LANGS[currentLang].label : currentLang;
-        var monacoLang = LANGS[currentLang] ? LANGS[currentLang].monacoLang : "";
-        var context = "Current code in the editor (language: " + langLabel + "):\n```" + monacoLang + "\n" + code + "\n```";
-        var payloadText = context + "\n\nMy request: " + promptText;
-
-        cpAiAppendMessage("user", displayLabel);
-        var history = cpAiTurns.map(function (t) { return { role: t.role === "user" ? "user" : "model", text: t.payloadText }; });
-        cpAiTurns.push({ role: "user", payloadText: payloadText });
-
-        var refs = cpAiAppendMessage("model", "");
-        cpAiCancelled = false;
-        cpAiSetGenerating(true);
-
-        fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: payloadText, files: [], history: history, tier: "flash", clientTime: cpAiClientTime() })
-        }).then(function (res) {
-          return res.text().then(function (raw) {
-            var data;
-            try { data = raw ? JSON.parse(raw) : {}; } catch (e) {
-              throw new Error("Server returned a non-JSON response (HTTP " + res.status + "). This usually means /api/chat isn't deployed.");
-            }
-            if (!res.ok || data.success === false) {
-              throw new Error(data.error || ("Unable to contact AI (HTTP " + res.status + ")."));
-            }
-            return data.response || "Sorry, no response was returned.";
-          });
-        }).then(function (text) {
-          cpAiTurns.push({ role: "model", payloadText: text });
-          cpAiRevealText(refs.bubble, text, function () { cpAiSetGenerating(false); });
-        }).catch(function (err) {
-          cpAiTurns.pop(); // drop the failed user turn so a retry doesn't compound stale context
-          refs.wrap.classList.add("is-error");
-          refs.bubble.innerHTML = cpAiRenderMarkdown("⚠️ " + ((err && err.message) || "Something went wrong reaching the AI assistant. Please try again."));
-          cpAiSetGenerating(false);
-        });
-      }
-
-      var CP_AI_PROMPTS = {
-        explain: { label: "Explain this code", prompt: "Explain what this code does, in clear plain language, covering its overall purpose and key steps." },
-        fix: { label: "Fix errors", prompt: "Find and fix any bugs, runtime errors, or syntax errors in this code. Return the corrected code in a code block, then briefly explain what was wrong." },
-        optimize: { label: "Optimize this code", prompt: "Optimize this code for performance and readability. Return the optimized code in a code block, then explain the key changes and their impact." },
-        complexity: { label: "Time & space complexity", prompt: "Analyze the time complexity and space complexity of this code, with clear reasoning for each." },
-        dryrun: { label: "Dry run", prompt: "Do a step-by-step dry run of this code with a representative sample input, showing how key variables/state change at each step." },
-        "explain-lines": { label: "Line-by-line explanation", prompt: "Give a line-by-line explanation of this code." },
-        tests: { label: "Generate test cases", prompt: "Generate a thorough set of test cases for this code, including edge cases. Present them as code where practical." },
-        docs: { label: "Generate documentation", prompt: "Generate clear documentation/comments for this code (docstrings, JSDoc, or the idiomatic equivalent for this language). Return the documented code in a code block." },
-        refactor: { label: "Refactor", prompt: "Refactor this code to improve structure, naming, and readability without changing its behavior. Return the refactored code in a code block." }
-      };
-
-      function cpAiHandleQuickAction(action) {
-        if (action === "convert") {
-          var target = aiConvertLangSelect.value;
-          cpAiSend("Convert this code to " + target + ", preserving its behavior exactly. Return the converted code in a code block.", "Convert to " + target);
-          return;
-        }
-        var p = CP_AI_PROMPTS[action];
-        if (!p) return;
-        cpAiSend(p.prompt, p.label);
-      }
-
-      Array.prototype.forEach.call(aiActionsEl.querySelectorAll("[data-cp-ai-action]"), function (btn) {
-        btn.addEventListener("click", function () { cpAiHandleQuickAction(btn.getAttribute("data-cp-ai-action")); });
-      });
-
-      function cpAiSendFromInput() {
-        var text = aiInputEl.value.trim();
-        if (!text) return;
-        aiInputEl.value = "";
-        aiInputEl.style.height = "auto";
-        cpAiSend(text, text);
-      }
-      aiSendBtn.addEventListener("click", cpAiSendFromInput);
-      aiInputEl.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); cpAiSendFromInput(); }
-      });
-      aiInputEl.addEventListener("input", function () {
-        aiInputEl.style.height = "auto";
-        aiInputEl.style.height = Math.min(aiInputEl.scrollHeight, 120) + "px";
-      });
-      aiStopBtn.addEventListener("click", function () { cpAiCancelled = true; });
-
-      function cpAiRelayoutEditor() {
-        ensureMonaco().then(function () { if (editor) setTimeout(function () { editor.layout(); }, 60); });
-      }
-      aiToggleBtn.addEventListener("click", function () {
-        var open = cpLayoutEl.classList.toggle("cp-ai-open");
-        aiToggleBtn.classList.toggle("is-active", open);
-        aiToggleBtn.setAttribute("aria-pressed", open ? "true" : "false");
-        cpAiRelayoutEditor();
-        if (open) setTimeout(function () { aiInputEl.focus(); }, 80);
-      });
-      aiCloseBtn.addEventListener("click", function () {
-        cpLayoutEl.classList.remove("cp-ai-open");
-        aiToggleBtn.classList.remove("is-active");
-        aiToggleBtn.setAttribute("aria-pressed", "false");
-        cpAiRelayoutEditor();
       });
 
       // ---------------------------------------------------------------
