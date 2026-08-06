@@ -2055,18 +2055,25 @@
       height: 72vh;
       min-height: 480px;
       max-height: 780px;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(24,26,24,.72), rgba(14,15,14,.82));
+      backdrop-filter: blur(22px) saturate(140%);
+      -webkit-backdrop-filter: blur(22px) saturate(140%);
+      border: 1px solid rgba(127,255,110,.14);
       border-radius: var(--radius);
       overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+      animation: aichatFadeIn .45s ease both;
     }
+    @keyframes aichatFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     .aichat-toolbar {
       display: flex;
       flex-wrap: wrap;
       gap: .5rem;
       padding: .7rem .9rem;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface2);
+      border-bottom: 1px solid rgba(127,255,110,.1);
+      background: rgba(255,255,255,.02);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     .aichat-tbtn { font-size: .78rem; padding: .5rem .85rem; display: inline-flex; align-items: center; gap: .35rem; }
     .aichat-tbtn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
@@ -2118,7 +2125,8 @@
       font-family: var(--sans);
     }
     .aichat-suggest-chip:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
-    .aichat-msg { display: flex; gap: .6rem; align-items: flex-start; }
+    .aichat-msg { display: flex; gap: .6rem; align-items: flex-start; animation: aichatMsgIn .32s cubic-bezier(.2,.7,.3,1) both; }
+    @keyframes aichatMsgIn { from { opacity: 0; transform: translateY(6px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .aichat-msg.user { flex-direction: row-reverse; }
     .aichat-avatar {
       width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
@@ -2133,8 +2141,8 @@
       padding: .75rem 1rem; border-radius: var(--radius-sm); font-size: .89rem; line-height: 1.65;
       word-wrap: break-word; overflow-wrap: anywhere;
     }
-    .aichat-msg.user .aichat-bubble { background: var(--accent); color: #0d0d0f; border-top-right-radius: 3px; }
-    .aichat-msg.ai .aichat-bubble { background: var(--surface2); border: 1px solid var(--border); border-top-left-radius: 3px; }
+    .aichat-msg.user .aichat-bubble { background: linear-gradient(135deg, var(--accent), #5fe552); color: #0d0d0f; border-top-right-radius: 3px; box-shadow: 0 4px 18px rgba(127,255,110,.25); }
+    .aichat-msg.ai .aichat-bubble { background: rgba(255,255,255,.035); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(127,255,110,.12); border-top-left-radius: 3px; }
     .aichat-msg.ai .aichat-bubble.is-error { border-color: rgba(255,92,92,.4); color: #ff9a9a; }
     .aichat-bubble p { margin-bottom: .55rem; }
     .aichat-bubble p:last-child { margin-bottom: 0; }
@@ -2579,6 +2587,95 @@
       .cp-editor-shell { height: 320px; }
     }
 
+    /* ================= Code Playground: VS Code-inspired IDE upgrade (additive) ================= */
+    /* Sticky toolbar (Language + Run stay visible while scrolling the panel). Offset by
+       the real header height via --site-header-h, set once by a tiny script below so it
+       never overlaps the site's own sticky header. */
+    .cp-toolbar {
+      position: sticky; top: var(--site-header-h, 64px); z-index: 60;
+      box-shadow: 0 8px 20px rgba(0,0,0,.25);
+    }
+    .cp-run-btn-toolbar { white-space: nowrap; }
+    .cp-ai-ask-btn {
+      white-space: nowrap; display: inline-flex; align-items: center; gap: .35rem;
+      background: linear-gradient(135deg, rgba(127,255,110,.14), rgba(61,255,208,.08));
+      border-color: var(--accent); color: var(--accent);
+    }
+    .cp-ai-ask-btn:hover { background: rgba(127,255,110,.22); }
+
+    .cp-stdin-head { display: flex; align-items: center; justify-content: space-between; }
+    .cp-stdin-clear-btn {
+      background: none; border: 1px solid var(--border); color: var(--muted); font-family: var(--mono);
+      font-size: .68rem; border-radius: 999px; padding: .15rem .55rem; cursor: pointer;
+    }
+    .cp-stdin-clear-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    .cp-stats-bar { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .7rem; }
+    .cp-stat-chip {
+      display: inline-flex; align-items: center; gap: .35rem; font-family: var(--mono); font-size: .72rem;
+      color: var(--muted); background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 999px; padding: .3rem .7rem;
+    }
+    .cp-stat-chip strong { color: var(--text); font-weight: 700; }
+    .cp-stat-chip.cp-stat-time strong { color: var(--accent2); }
+    .cp-stat-chip.cp-stat-memory strong { color: var(--accent); }
+
+    .cp-output-pre-error { border-left: 3px solid var(--danger); padding-left: .85rem; }
+
+    /* Draggable resizer between editor and output columns */
+    .cp-resizer {
+      display: none; width: 8px; margin: 0 -1px; cursor: col-resize; position: relative; border-radius: 4px;
+      background: transparent;
+    }
+    .cp-resizer::after {
+      content: ""; position: absolute; top: 8%; bottom: 8%; left: 50%; width: 3px; transform: translateX(-50%);
+      background: var(--border); border-radius: 3px; transition: background .15s ease;
+    }
+    .cp-resizer:hover::after, .cp-resizer.is-dragging::after { background: var(--accent); }
+    .cp-resizer.is-dragging { user-select: none; }
+
+    @media (min-width: 981px) {
+      /* Break the panel out of the site's normal ~1000px content column so the editor
+         gets almost the full screen, and auto-fits laptop through 4K/ultrawide monitors. */
+      #panel-codeplayground.is-open {
+        width: 98vw; max-width: 2400px;
+        margin-left: calc(50% - 49vw); margin-right: calc(50% - 49vw);
+      }
+      #panel-codeplayground .tool-workspace-standalone { padding: 1.4rem 1.6rem 1.8rem; }
+
+      .cp-layout {
+        display: grid;
+        grid-template-columns: var(--cp-editor-w, 68%) auto 1fr;
+        gap: 0 1rem;
+        height: 80vh; min-height: 580px;
+      }
+      .cp-resizer { display: block; }
+      .cp-editor-col, .cp-output-col { height: 100%; min-height: 0; }
+      .cp-editor-col { display: flex; flex-direction: column; gap: .8rem; }
+      .cp-editor-shell { flex: 1 1 auto; height: auto; min-height: 0; }
+      .cp-output-col { display: flex; flex-direction: column; min-height: 0; }
+      .cp-output-panel.active { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+      .cp-output-pre { flex: 1 1 auto; min-height: 0; max-height: none; }
+      .cp-history-list { flex: 1 1 auto; min-height: 0; max-height: none; }
+      .cp-editor-mount .monaco-editor, .cp-editor-mount .monaco-editor * { font-size: 15.5px !important; }
+    }
+    @media (min-width: 1600px) {
+      .cp-layout { grid-template-columns: var(--cp-editor-w, 72%) auto 1fr; }
+    }
+
+    /* ---- Card / button micro-animations used across Pro Tools ---- */
+    .pro-tool-card { transition: transform .25s cubic-bezier(.2,.8,.3,1), border-color .25s ease, box-shadow .25s ease; }
+    .btn-primary, .btn-secondary, .aichat-tbtn, .cp-btn-sm, .zt-btn {
+      position: relative; overflow: hidden; transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    .btn-primary:active, .btn-secondary:active, .cp-btn-sm:active, .zt-btn:active { transform: scale(.97); }
+    .sc-ripple {
+      position: absolute; border-radius: 50%; pointer-events: none;
+      background: rgba(255,255,255,.35); transform: scale(0); opacity: .6;
+      animation: scRippleAnim .55s ease-out forwards;
+    }
+    @keyframes scRippleAnim { to { transform: scale(2.6); opacity: 0; } }
+
     /* ================= Premium Splash Screen (additive, self-contained) =================
        Fixed full-viewport overlay drawn on top of the already-rendering page, so nothing
        about the real layout, scripts, or ad system underneath is touched. It removes
@@ -2652,6 +2749,59 @@
       .sc-splash-logo { animation: none; }
       .sc-ring-bar { transition: none; }
       #sc-splash { transition: none; }
+    }
+
+    /* ================= ZType — Typing Shooter Game (additive, self-contained) ================= */
+    .zt-app { display: flex; flex-direction: column; gap: .7rem; }
+    .zt-hud {
+      display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1.1rem;
+      padding: .7rem 1rem; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .zt-hud-item { display: flex; align-items: baseline; gap: .4rem; font-family: var(--mono); }
+    .zt-hud-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+    .zt-hud-item strong { font-size: 1rem; color: var(--accent); }
+    .zt-hud-spacer { flex: 1 1 auto; }
+    .zt-btn {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      border-radius: var(--radius-sm); padding: .5rem .8rem; font-size: .78rem; font-family: var(--sans);
+      font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+    .zt-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .zt-btn[aria-pressed="false"] { opacity: .55; }
+
+    .zt-stage {
+      position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 78vh;
+      background: radial-gradient(ellipse 80% 60% at 50% 20%, rgba(127,255,110,.07), transparent 65%), #060a07;
+      border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;
+    }
+    .zt-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+    .zt-stage:fullscreen { max-height: 100vh; aspect-ratio: auto; border-radius: 0; }
+    .zt-stage:fullscreen canvas { width: 100vw; height: 100vh; }
+    /* Invisible-but-focusable text field that captures typing on both desktop and
+       mobile (tapping the stage focuses it, which raises the soft keyboard on phones). */
+    .zt-mobile-input {
+      position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: none; padding: 0; margin: 0;
+      background: transparent; color: transparent; caret-color: transparent; cursor: default;
+      font-size: 16px; /* prevents mobile auto-zoom-on-focus */
+    }
+    .zt-overlay {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(4,8,5,.72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      padding: 1.2rem; text-align: center; transition: opacity .25s ease, visibility .25s ease;
+    }
+    .zt-overlay.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .zt-overlay-card { max-width: 420px; }
+    .zt-overlay-card h3 { font-size: clamp(1.3rem, 4vw, 1.8rem); color: var(--accent); margin-bottom: .6rem; text-shadow: 0 0 22px rgba(127,255,110,.5); }
+    .zt-overlay-card p { color: var(--muted); font-size: .88rem; line-height: 1.6; margin-bottom: 1.1rem; }
+    .zt-overlay-stats { display: flex; justify-content: center; gap: 1.4rem; margin-bottom: 1.1rem; font-family: var(--mono); }
+    .zt-overlay-stats div { display: flex; flex-direction: column; gap: .15rem; }
+    .zt-overlay-stats span { font-size: .68rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .zt-overlay-stats strong { font-size: 1.3rem; color: var(--accent); }
+    .zt-hint { font-size: .76rem; color: var(--muted); text-align: center; }
+    @media (max-width: 640px) {
+      .zt-hud { gap: .5rem .8rem; }
+      .zt-btn { padding: .45rem .6rem; font-size: .72rem; }
     }
   </style>
 
@@ -2868,6 +3018,19 @@
     </div>
   </header>
 
+  <script>
+    (function () {
+      var headerEl = document.querySelector("header");
+      if (!headerEl) return;
+      function setHeaderVar() {
+        document.documentElement.style.setProperty("--site-header-h", headerEl.offsetHeight + "px");
+      }
+      setHeaderVar();
+      window.addEventListener("resize", setHeaderVar);
+      if (window.ResizeObserver) new ResizeObserver(setHeaderVar).observe(headerEl);
+    })();
+  </script>
+
   <div id="app-wallpaper-layer" data-preset="none" aria-hidden="true"></div>
 
   <section class="hero" id="home" aria-labelledby="hero-title">
@@ -3039,6 +3202,24 @@
 
       <div class="pro-tools-grid" id="pro-tools-grid">
 
+        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-aichat" tabindex="0" role="button" aria-label="Open AI Chat Assistant">
+          <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M12 7V3"/><circle cx="12" cy="2.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="8.5" cy="13.5" r="1.3" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13.5" r="1.3" fill="currentColor" stroke="none"/><path d="M8.5 17h7"/><path d="M3 12H1M23 12h-2"/></svg></div>
+          <h3>AI Chat Assistant <span class="pro-tool-badge is-live">LIVE</span></h3>
+          <p>Chat with AI instantly.</p>
+        </div>
+
+        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-codeplayground" tabindex="0" role="button" aria-label="Open Code Playground">
+          <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/></svg></div>
+          <h3>Code Playground <span class="pro-tool-badge is-live">Live</span></h3>
+          <p>Write and run real code — 12 languages, stdin, compiler errors, and a SQL runner.</p>
+        </div>
+
+        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-ztype" tabindex="0" role="button" aria-label="Open ZType Typing Game">
+          <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 17l5-10 5 10M6 13h6M15 7l4 10M15 12h5"/></svg></div>
+          <h3>ZType <span class="pro-tool-badge is-live">Live</span></h3>
+          <p>Typing shooter game — destroy incoming words before they reach you. Track WPM &amp; accuracy.</p>
+        </div>
+
         <div class="pro-tool-card is-soon">
           <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
           <h3>AI Image Generator <span class="pro-tool-badge">Coming Soon</span></h3>
@@ -3061,18 +3242,6 @@
           <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg></div>
           <h3>Favicon Generator <span class="pro-tool-badge is-live">Live</span></h3>
           <p>Generate high-quality favicon files from any image.</p>
-        </div>
-
-        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-aichat" tabindex="0" role="button" aria-label="Open AI Chat Assistant">
-          <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M12 7V3"/><circle cx="12" cy="2.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="8.5" cy="13.5" r="1.3" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13.5" r="1.3" fill="currentColor" stroke="none"/><path d="M8.5 17h7"/><path d="M3 12H1M23 12h-2"/></svg></div>
-          <h3>AI Chat Assistant <span class="pro-tool-badge is-live">LIVE</span></h3>
-          <p>Chat with AI instantly.</p>
-        </div>
-
-        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-codeplayground" tabindex="0" role="button" aria-label="Open Code Playground">
-          <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/></svg></div>
-          <h3>Code Playground <span class="pro-tool-badge is-live">Live</span></h3>
-          <p>Write and run real code — 12 languages, stdin, compiler errors, and a SQL runner.</p>
         </div>
 
       </div>
@@ -3476,7 +3645,7 @@
             <h2>Code Playground <span class="premium-badge">PRO</span> <span>Write and run real code — 12 languages, live stdin, real compiler/runtime errors.</span></h2>
           </div>
 
-          <div class="cp-toolbar">
+          <div class="cp-toolbar" id="cp-toolbar">
             <div class="cp-toolbar-group">
               <label class="cp-field-label" for="cp-language">Language</label>
               <select id="cp-language" class="cp-select">
@@ -3496,7 +3665,7 @@
             </div>
 
             <div class="cp-toolbar-group" id="cp-mode-group" style="display:none;">
-              <label class="cp-field-label" for="cp-exec-mode">Run</label>
+              <label class="cp-field-label" for="cp-exec-mode">Runtime</label>
               <select id="cp-exec-mode" class="cp-select">
                 <option value="browser">⚡ In Browser (Pyodide)</option>
                 <option value="server">☁ Server (Judge0)</option>
@@ -3505,8 +3674,12 @@
 
             <span class="cp-runtime-badge" id="cp-runtime-badge">Ready</span>
 
+            <button type="button" class="btn-primary cp-btn-sm cp-run-btn-toolbar" id="cp-run-btn">▶ Run</button>
+            <button type="button" class="btn-secondary cp-btn-sm" id="cp-run-again-btn" disabled>↻ Run Again</button>
+
             <div class="cp-toolbar-spacer"></div>
 
+            <button type="button" class="btn-secondary cp-btn-sm cp-ai-ask-btn" id="cp-ai-ask-btn" title="Send this code to the AI Chat Assistant">🤖 Ask AI</button>
             <button type="button" class="btn-secondary cp-btn-sm" id="cp-upload-btn" title="Upload a source file into the editor">⬆ Upload</button>
             <input type="file" id="cp-upload-input" style="display:none;" accept=".py,.js,.mjs,.ts,.java,.c,.h,.cpp,.hpp,.cc,.go,.rs,.php,.kt,.swift,.sql,.txt" />
             <button type="button" class="btn-secondary cp-btn-sm" id="cp-download-btn" title="Download current code as a file">⬇ Download</button>
@@ -3514,7 +3687,7 @@
             <button type="button" class="btn-secondary cp-btn-sm" id="cp-reset-btn" title="Reset to the starter template for this language">↺ Reset</button>
           </div>
 
-          <div class="cp-layout">
+          <div class="cp-layout" id="cp-layout">
             <div class="cp-editor-col">
               <div class="cp-editor-shell">
                 <div class="cp-editor-mount" id="cp-editor-mount"></div>
@@ -3522,16 +3695,19 @@
               </div>
 
               <div class="cp-stdin-block" id="cp-stdin-block">
-                <label class="cp-field-label" for="cp-stdin">Custom Input (stdin)</label>
+                <div class="cp-stdin-head">
+                  <label class="cp-field-label" for="cp-stdin">Custom Input (stdin)</label>
+                  <button type="button" class="cp-stdin-clear-btn" id="cp-stdin-clear-btn" title="Clear stdin">Clear</button>
+                </div>
                 <textarea id="cp-stdin" class="cp-stdin" placeholder="Type input your program will read from stdin, one value per line…" spellcheck="false"></textarea>
               </div>
 
               <div class="cp-run-row">
-                <button type="button" class="btn-primary" id="cp-run-btn">▶ Run</button>
-                <button type="button" class="btn-secondary" id="cp-run-again-btn" disabled>↻ Run Again</button>
                 <span class="cp-run-status" id="cp-run-status"></span>
               </div>
             </div>
+
+            <div class="cp-resizer" id="cp-resizer" role="separator" aria-orientation="vertical" aria-label="Resize editor and output panels" tabindex="0"></div>
 
             <div class="cp-output-col">
               <div class="cp-output-tabs" role="tablist">
@@ -3541,6 +3717,7 @@
               </div>
 
               <div class="cp-output-panel active" id="cp-panel-output">
+                <div class="cp-stats-bar" id="cp-stats-bar"></div>
                 <div class="cp-output-meta" id="cp-output-meta"></div>
                 <pre class="cp-output-pre" id="cp-stdout-pre">Run your code to see output here.</pre>
                 <div class="cp-sql-result" id="cp-sql-result" style="display:none;"></div>
@@ -3570,6 +3747,49 @@
                  data-ad-slot="REPLACE_WITH_YOUR_BANNER_AD_SLOT_ID"
                  data-ad-format="horizontal"
                  data-full-width-responsive="true"></ins>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============== ZType — Typing Shooter Game panel ============== -->
+      <div class="pro-tool-panel" id="panel-ztype">
+        <button type="button" class="pro-tool-back-btn" data-pt-back>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Pro Tools
+        </button>
+        <div class="tool-workspace-standalone">
+          <div class="tool-title-row">
+            <h2>ZType <span class="premium-badge">LIVE</span> <span>Typing shooter — destroy incoming words before they reach you.</span></h2>
+          </div>
+
+          <div class="zt-app" id="zt-app">
+            <div class="zt-hud">
+              <div class="zt-hud-item"><span class="zt-hud-label">Score</span><strong id="zt-score">0</strong></div>
+              <div class="zt-hud-item"><span class="zt-hud-label">WPM</span><strong id="zt-wpm">0</strong></div>
+              <div class="zt-hud-item"><span class="zt-hud-label">Accuracy</span><strong id="zt-accuracy">100%</strong></div>
+              <div class="zt-hud-item"><span class="zt-hud-label">Lives</span><strong id="zt-lives">3</strong></div>
+              <div class="zt-hud-spacer"></div>
+              <button type="button" class="zt-btn" id="zt-pause-btn" title="Pause">⏸ Pause</button>
+              <button type="button" class="zt-btn" id="zt-restart-btn" title="Restart">↺ Restart</button>
+              <button type="button" class="zt-btn" id="zt-sound-btn" title="Toggle sound" aria-pressed="true">🔊 Sound</button>
+              <button type="button" class="zt-btn" id="zt-fullscreen-btn" title="Fullscreen">⛶ Fullscreen</button>
+            </div>
+
+            <div class="zt-stage" id="zt-stage">
+              <canvas id="zt-canvas"></canvas>
+              <input type="text" id="zt-mobile-input" class="zt-mobile-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Type the falling words here" />
+
+              <div class="zt-overlay" id="zt-overlay">
+                <div class="zt-overlay-card">
+                  <h3 id="zt-overlay-title">ZType</h3>
+                  <p id="zt-overlay-text">Type the falling words to shoot them down before they reach the bottom. Just start typing once the game starts — matching letters highlight automatically.</p>
+                  <div class="zt-overlay-stats" id="zt-overlay-stats" style="display:none;"></div>
+                  <button type="button" class="btn-primary" id="zt-start-btn">▶ Start Game</button>
+                </div>
+              </div>
+            </div>
+
+            <p class="zt-hint">On mobile, tap the game area to bring up your keyboard. Desktop: just start typing.</p>
           </div>
         </div>
       </div>
@@ -9538,7 +9758,453 @@
     })();
   </script>
 
+  <!-- ================= ZType — Typing Shooter Game (additive, self-contained) ================= -->
+  <script>
+    (function () {
+      "use strict";
+      var panel = document.getElementById("panel-ztype");
+      if (!panel) return;
+
+      var stage = document.getElementById("zt-stage");
+      var canvas = document.getElementById("zt-canvas");
+      var input = document.getElementById("zt-mobile-input");
+      var overlay = document.getElementById("zt-overlay");
+      var overlayTitle = document.getElementById("zt-overlay-title");
+      var overlayText = document.getElementById("zt-overlay-text");
+      var overlayStats = document.getElementById("zt-overlay-stats");
+      var startBtn = document.getElementById("zt-start-btn");
+      var pauseBtn = document.getElementById("zt-pause-btn");
+      var restartBtn = document.getElementById("zt-restart-btn");
+      var soundBtn = document.getElementById("zt-sound-btn");
+      var fsBtn = document.getElementById("zt-fullscreen-btn");
+      var scoreEl = document.getElementById("zt-score");
+      var wpmEl = document.getElementById("zt-wpm");
+      var accEl = document.getElementById("zt-accuracy");
+      var livesEl = document.getElementById("zt-lives");
+      if (!canvas) return;
+      var ctx = canvas.getContext("2d");
+
+      var WORD_BANK = ("time year people way day man thing woman life child world school " +
+        "state family student group country problem hand part place case week company system " +
+        "program question work government number night point home water room mother area money " +
+        "story fact month lot right study book eye job word business issue side kind head house " +
+        "service friend father power hour game line end member law car city community name " +
+        "president team minute idea body information back parent face others level office door " +
+        "health person art war history party result change morning reason research girl guy " +
+        "moment air teacher force education foot boy age policy process music market sense nation " +
+        "plan college interest death experience effect use class control care field development " +
+        "role effort rate heart drug show leader light voice wife whole police mind price report " +
+        "decision son view relationship town road arm value building action society model source " +
+        "quality strategy march position century wall west east coast letter tree cell judge " +
+        "gravity orbit signal rocket engine matrix cipher vector plasma nebula comet meteor pixel " +
+        "cyber neon laser shield radar sonar drone galaxy asteroid quantum photon reactor console").split(/\s+/);
+
+      var state = null;
+      function freshState() {
+        return {
+          running: false,
+          paused: false,
+          words: [],
+          nextId: 1,
+          score: 0,
+          lives: 3,
+          correctChars: 0,
+          totalTypedChars: 0,
+          startTime: 0,
+          pausedAt: 0,
+          totalPausedMs: 0,
+          lastSpawn: 0,
+          spawnEveryMs: 2200,
+          particles: []
+        };
+      }
+      state = freshState();
+
+      var soundOn = true;
+      try { soundOn = localStorage.getItem("zt_sound_on_v1") !== "0"; } catch (e) { /* storage unavailable */ }
+      function updateSoundBtn() {
+        soundBtn.textContent = soundOn ? "🔊 Sound" : "🔇 Sound";
+        soundBtn.setAttribute("aria-pressed", soundOn ? "true" : "false");
+      }
+      updateSoundBtn();
+
+      var audioCtx = null;
+      function beep(freq, durationMs, type, gainPeak) {
+        if (!soundOn) return;
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === "suspended") audioCtx.resume();
+          var osc = audioCtx.createOscillator();
+          var gain = audioCtx.createGain();
+          osc.type = type || "square";
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(gainPeak || 0.06, audioCtx.currentTime + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + durationMs / 1000);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + durationMs / 1000);
+        } catch (e) { /* WebAudio unavailable — game stays fully playable without sound */ }
+      }
+      function sfxType() { beep(520, 0.05, "square", 0.03); }
+      function sfxHit() { beep(180, 0.12, "sawtooth", 0.05); }
+      function sfxDestroy() { beep(880, 0.15, "triangle", 0.07); }
+      function sfxGameOver() { beep(110, 0.5, "sawtooth", 0.08); }
+
+      // ---- Sizing: canvas backed at devicePixelRatio for crisp text on any screen ----
+      var W = 0, H = 0, DPR = 1;
+      function resizeCanvas() {
+        var rect = stage.getBoundingClientRect();
+        DPR = Math.min(window.devicePixelRatio || 1, 2);
+        W = Math.max(280, rect.width);
+        H = Math.max(180, rect.height);
+        canvas.width = Math.round(W * DPR);
+        canvas.height = Math.round(H * DPR);
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      }
+      if (window.ResizeObserver) new ResizeObserver(resizeCanvas).observe(stage);
+      window.addEventListener("resize", resizeCanvas);
+
+      function randomWord() {
+        return WORD_BANK[Math.floor(Math.random() * WORD_BANK.length)];
+      }
+
+      function difficultyElapsedSec() {
+        if (!state.startTime) return 0;
+        return (Date.now() - state.startTime - state.totalPausedMs) / 1000;
+      }
+
+      function spawnWord() {
+        var text = randomWord();
+        ctx.font = "600 20px " + getMonoFont();
+        var textW = ctx.measureText(text).width;
+        var x = Math.random() * Math.max(10, W - textW - 20) + 10;
+        var elapsed = difficultyElapsedSec();
+        var baseSpeed = 26 + Math.min(46, elapsed * 0.55); // px/sec, ramps with time
+        var speed = baseSpeed + Math.random() * 14;
+        state.words.push({
+          id: state.nextId++,
+          text: text,
+          x: x,
+          y: -24,
+          speed: speed,
+          matched: 0
+        });
+      }
+
+      function getMonoFont() {
+        return "'Cascadia Code','JetBrains Mono','Fira Code','Space Mono',monospace";
+      }
+
+      function spawnParticles(x, y, color) {
+        for (var i = 0; i < 14; i++) {
+          var angle = Math.random() * Math.PI * 2;
+          var speed = 60 + Math.random() * 120;
+          state.particles.push({
+            x: x, y: y,
+            vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+            life: 1, color: color
+          });
+        }
+      }
+
+      function findActiveWord() {
+        for (var i = 0; i < state.words.length; i++) {
+          if (state.words[i].matched > 0) return state.words[i];
+        }
+        return null;
+      }
+
+      function handleChar(ch) {
+        if (!state.running || state.paused) return;
+        ch = ch.toLowerCase();
+        state.totalTypedChars++;
+
+        var active = findActiveWord();
+        if (active) {
+          if (active.text[active.matched] === ch) {
+            active.matched++;
+            state.correctChars++;
+            sfxType();
+            if (active.matched >= active.text.length) {
+              destroyWord(active);
+            }
+          }
+          // wrong keystroke while locked on: ignored (forgiving — doesn't drop target)
+          return;
+        }
+
+        // No active target — look for the most urgent (lowest y is safe; largest y = closest
+        // to the bottom = most urgent) word starting with this character.
+        var best = null;
+        for (var i = 0; i < state.words.length; i++) {
+          var w = state.words[i];
+          if (w.text[0] === ch) {
+            if (!best || w.y > best.y) best = w;
+          }
+        }
+        if (best) {
+          best.matched = 1;
+          state.correctChars++;
+          sfxType();
+          if (best.matched >= best.text.length) destroyWord(best);
+        }
+      }
+
+      function destroyWord(word) {
+        var idx = state.words.indexOf(word);
+        if (idx !== -1) state.words.splice(idx, 1);
+        state.score += word.text.length * 10;
+        spawnParticles(word.x + 20, word.y, "#7fff6e");
+        sfxDestroy();
+        scoreEl.textContent = String(state.score);
+      }
+
+      function loseLife(word) {
+        var idx = state.words.indexOf(word);
+        if (idx !== -1) state.words.splice(idx, 1);
+        state.lives--;
+        livesEl.textContent = String(Math.max(0, state.lives));
+        sfxHit();
+        spawnParticles(word.x + 20, H - 10, "#ff5c5c");
+        if (state.lives <= 0) gameOver();
+      }
+
+      function updateHud() {
+        var elapsedMin = Math.max(1 / 60, difficultyElapsedSec() / 60);
+        var wpm = Math.round((state.correctChars / 5) / elapsedMin);
+        var acc = state.totalTypedChars > 0 ? Math.round((state.correctChars / state.totalTypedChars) * 100) : 100;
+        wpmEl.textContent = String(Math.max(0, wpm));
+        accEl.textContent = acc + "%";
+      }
+
+      function startGame() {
+        state = freshState();
+        state.running = true;
+        state.startTime = Date.now();
+        state.lastSpawn = Date.now();
+        scoreEl.textContent = "0";
+        livesEl.textContent = "3";
+        wpmEl.textContent = "0";
+        accEl.textContent = "100%";
+        pauseBtn.textContent = "⏸ Pause";
+        overlay.classList.add("is-hidden");
+        resizeCanvas();
+        focusInput();
+        requestAnimationFrame(loop);
+      }
+
+      function gameOver() {
+        state.running = false;
+        updateHud();
+        sfxGameOver();
+        overlayTitle.textContent = "Game Over";
+        overlayText.textContent = "Nice run! Here's how you did:";
+        overlayStats.style.display = "flex";
+        overlayStats.innerHTML =
+          '<div><span>Score</span><strong>' + state.score + '</strong></div>' +
+          '<div><span>WPM</span><strong>' + wpmEl.textContent + '</strong></div>' +
+          '<div><span>Accuracy</span><strong>' + accEl.textContent + '</strong></div>';
+        startBtn.textContent = "▶ Play Again";
+        overlay.classList.remove("is-hidden");
+      }
+
+      function togglePause(forceState) {
+        if (!state.running) return;
+        var next = typeof forceState === "boolean" ? forceState : !state.paused;
+        if (next === state.paused) return;
+        state.paused = next;
+        if (state.paused) {
+          state.pausedAt = Date.now();
+          pauseBtn.textContent = "▶ Resume";
+          overlayTitle.textContent = "Paused";
+          overlayText.textContent = "Take your time — your score and words are right where you left them.";
+          overlayStats.style.display = "none";
+          startBtn.textContent = "▶ Resume";
+          overlay.classList.remove("is-hidden");
+        } else {
+          state.totalPausedMs += Date.now() - state.pausedAt;
+          pauseBtn.textContent = "⏸ Pause";
+          overlay.classList.add("is-hidden");
+          focusInput();
+          requestAnimationFrame(loop);
+        }
+      }
+
+      function focusInput() {
+        if (input) { try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); } }
+      }
+
+      var lastFrameTime = 0;
+      function loop(ts) {
+        if (!state.running || state.paused) return;
+        if (!lastFrameTime) lastFrameTime = ts;
+        var dt = Math.min(0.05, (ts - lastFrameTime) / 1000);
+        lastFrameTime = ts;
+
+        // Spawn
+        var now = Date.now();
+        var elapsed = difficultyElapsedSec();
+        state.spawnEveryMs = Math.max(650, 2200 - elapsed * 18);
+        if (now - state.lastSpawn > state.spawnEveryMs) {
+          spawnWord();
+          state.lastSpawn = now;
+        }
+
+        // Move words
+        for (var i = state.words.length - 1; i >= 0; i--) {
+          var w = state.words[i];
+          w.y += w.speed * dt;
+          if (w.y > H - 8) loseLife(w);
+        }
+
+        // Move particles
+        for (var p = state.particles.length - 1; p >= 0; p--) {
+          var pt = state.particles[p];
+          pt.x += pt.vx * dt;
+          pt.y += pt.vy * dt;
+          pt.vy += 260 * dt;
+          pt.life -= dt * 1.6;
+          if (pt.life <= 0) state.particles.splice(p, 1);
+        }
+
+        draw();
+        updateHud();
+        if (state.running && !state.paused) requestAnimationFrame(loop);
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        // subtle scanline vignette
+        var grad = ctx.createRadialGradient(W / 2, H * 0.15, 10, W / 2, H * 0.15, Math.max(W, H) * 0.8);
+        grad.addColorStop(0, "rgba(127,255,110,.05)");
+        grad.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+
+        // danger line
+        ctx.strokeStyle = "rgba(255,92,92,.25)";
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(0, H - 6);
+        ctx.lineTo(W, H - 6);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.font = "600 20px " + getMonoFont();
+        ctx.textBaseline = "middle";
+        for (var i = 0; i < state.words.length; i++) {
+          var w = state.words[i];
+          var matchedText = w.text.slice(0, w.matched);
+          var restText = w.text.slice(w.matched);
+          var x = w.x;
+
+          if (w.matched > 0) {
+            ctx.shadowColor = "rgba(127,255,110,.9)";
+            ctx.shadowBlur = 10;
+          } else {
+            ctx.shadowBlur = 0;
+          }
+          ctx.fillStyle = "#7fff6e";
+          ctx.fillText(matchedText, x, w.y);
+          x += ctx.measureText(matchedText).width;
+
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = "rgba(255,255,255,.88)";
+          ctx.fillText(restText, x, w.y);
+        }
+
+        for (var p = 0; p < state.particles.length; p++) {
+          var pt = state.particles[p];
+          ctx.globalAlpha = Math.max(0, pt.life);
+          ctx.fillStyle = pt.color;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 2.4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      // ---- Input capture: a persistent hidden text field works for both desktop
+      // keyboards and mobile soft keyboards without any special-key handling. ----
+      input.addEventListener("input", function () {
+        var val = input.value;
+        for (var i = 0; i < val.length; i++) {
+          var ch = val[i];
+          if (/[a-z0-9]/i.test(ch)) handleChar(ch);
+        }
+        input.value = "";
+      });
+      stage.addEventListener("pointerdown", function () { focusInput(); });
+      window.addEventListener("keydown", function (e) {
+        if (!panel.classList.contains("is-open")) return;
+        if (e.key === "Escape") { togglePause(true); return; }
+        if (document.activeElement !== input && e.key.length === 1) focusInput();
+      });
+
+      startBtn.addEventListener("click", function () {
+        if (state.running && state.paused) { togglePause(false); return; }
+        startGame();
+      });
+      pauseBtn.addEventListener("click", function () { togglePause(); });
+      restartBtn.addEventListener("click", function () { startGame(); });
+      soundBtn.addEventListener("click", function () {
+        soundOn = !soundOn;
+        try { localStorage.setItem("zt_sound_on_v1", soundOn ? "1" : "0"); } catch (e) { /* storage unavailable */ }
+        updateSoundBtn();
+      });
+      fsBtn.addEventListener("click", function () {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else if (stage.requestFullscreen) {
+          stage.requestFullscreen().catch(function () { /* fullscreen denied — game still works windowed */ });
+        }
+      });
+      document.addEventListener("fullscreenchange", function () {
+        setTimeout(resizeCanvas, 50);
+      });
+
+      // Auto-pause if the player navigates away from the ZType panel mid-game.
+      var ztCard = document.querySelector('[data-pt-open="panel-ztype"]');
+      document.querySelectorAll("[data-pt-back]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          if (state.running && !state.paused) togglePause(true);
+        });
+      });
+      if (ztCard) {
+        ztCard.addEventListener("click", function () { setTimeout(resizeCanvas, 60); });
+      }
+
+      resizeCanvas();
+      draw();
+    })();
+  </script>
+
+  <!-- ================= Button ripple effect (additive, delegated, applies site-wide to
+       .btn-primary/.btn-secondary/.aichat-tbtn/.cp-btn-sm/.zt-btn without editing each one) ================= -->
+  <script>
+    (function () {
+      "use strict";
+      var SELECTOR = ".btn-primary, .btn-secondary, .aichat-tbtn, .cp-btn-sm, .zt-btn, .pro-tool-card";
+      document.addEventListener("click", function (e) {
+        var el = e.target.closest ? e.target.closest(SELECTOR) : null;
+        if (!el) return;
+        var rect = el.getBoundingClientRect();
+        var ripple = document.createElement("span");
+        var size = Math.max(rect.width, rect.height);
+        ripple.className = "sc-ripple";
+        ripple.style.width = ripple.style.height = size + "px";
+        ripple.style.left = (e.clientX - rect.left - size / 2) + "px";
+        ripple.style.top = (e.clientY - rect.top - size / 2) + "px";
+        el.appendChild(ripple);
+        setTimeout(function () { ripple.remove(); }, 600);
+      });
+    })();
+  </script>
+
   <!-- ================= Premium: Pro Tools card→panel navigation (additive, self-contained) ================= -->
+
   <script>
     (function initProToolsNav() {
       "use strict";
@@ -9564,6 +10230,9 @@
         target.classList.add("is-open");
         target.scrollIntoView({ behavior: "smooth", block: "start" });
       }
+      // Exposed so other tool panels (e.g. Code Playground's "Ask AI" button) can
+      // jump straight to another panel without duplicating this nav logic.
+      window.scOpenProTool = openPanel;
 
       grid.querySelectorAll("[data-pt-open]").forEach(function (card) {
         card.addEventListener("click", function () {
@@ -9849,6 +10518,7 @@
       var panelErrors = document.getElementById("cp-panel-errors");
       var panelHistory = document.getElementById("cp-panel-history");
       var outputMeta = document.getElementById("cp-output-meta");
+      var statsBarEl = document.getElementById("cp-stats-bar");
       var stdoutPre = document.getElementById("cp-stdout-pre");
       var stderrPre = document.getElementById("cp-stderr-pre");
       var sqlResultEl = document.getElementById("cp-sql-result");
@@ -10073,10 +10743,15 @@
             // config it always had.
             var isCoarsePointer = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 
-            // ---- Desktop: completely unchanged from before this fix. ----
+            // ---- Desktop: premium IDE editing experience — minimap, ligature-friendly
+            // monospace stack, comfortable padding, smooth scrolling, bracket/cursor
+            // highlighting, full auto-indent/folding. Mobile keeps its own tuned
+            // zoom-bug-safe options below, completely untouched. ----
             var desktopOptions = {
-              fontSize: 13,
-              smoothScrolling: false,
+              fontSize: 15.5,
+              smoothScrolling: true,
+              minimap: { enabled: true, scale: 1 },
+              padding: { top: 14, bottom: 14 },
             };
 
             // ---- Mobile (Android Chrome / Samsung Internet / Edge Mobile / iOS Safari):
@@ -10111,12 +10786,22 @@
                 value: loadCodeFor(currentLang),
                 language: LANGS[currentLang].monacoLang,
                 theme: "vs-dark",
-                fontFamily: "'Space Mono', monospace",
-                minimap: { enabled: false }, // stays disabled on mobile too
+                fontFamily: "'Cascadia Code', 'JetBrains Mono', 'Fira Code', 'Space Mono', monospace",
+                fontLigatures: true,
+                minimap: { enabled: false }, // overridden to enabled on desktop via desktopOptions above
                 automaticLayout: true,
                 scrollBeyondLastLine: false,
                 tabSize: 2,
                 mouseWheelZoom: false, // disable Monaco's own ctrl/pinch "zoom editor font" feature
+                matchBrackets: "always",
+                bracketPairColorization: { enabled: true },
+                autoClosingBrackets: "languageDefined",
+                autoClosingQuotes: "languageDefined",
+                autoIndent: "full",
+                folding: true,
+                renderLineHighlight: "all",
+                cursorBlinking: "smooth",
+                wordWrap: "on",
               },
               isCoarsePointer ? mobileOptions : desktopOptions
             ));
@@ -10265,15 +10950,22 @@
         return '<span class="' + (cls || "") + '">' + escapeHtml(text) + "</span>";
       }
 
+      function renderStatsBar(run) {
+        if (!statsBarEl) return;
+        var stats = [];
+        stats.push('<span class="cp-stat-chip cp-stat-time">⏱ Execution Time: <strong>' + (run.time != null ? escapeHtml(run.time + "s") : "—") + "</strong></span>");
+        stats.push('<span class="cp-stat-chip cp-stat-memory">💾 Memory Usage: <strong>' + (run.memory != null ? escapeHtml((run.memory / 1024).toFixed(1) + " MB") : "—") + "</strong></span>");
+        statsBarEl.innerHTML = stats.join("");
+      }
+
       function renderRunResult(run) {
         sqlResultEl.style.display = "none";
         sqlResultEl.innerHTML = "";
         stdoutPre.style.display = "block";
+        renderStatsBar(run);
 
         var chips = [];
         chips.push(metaChip(run.statusLabel, run.statusState === "ok" ? "cp-meta-ok" : "cp-meta-error"));
-        if (run.time != null) chips.push(metaChip(run.time + "s"));
-        if (run.memory != null) chips.push(metaChip((run.memory / 1024).toFixed(1) + " MB"));
         if (run.exitCode != null) chips.push(metaChip("exit " + run.exitCode));
         outputMeta.innerHTML = chips.join("");
 
@@ -10290,6 +10982,7 @@
       }
 
       function renderSqlResult(run) {
+        if (statsBarEl) statsBarEl.innerHTML = "";
         outputMeta.innerHTML = metaChip(run.statusLabel, run.statusState === "ok" ? "cp-meta-ok" : "cp-meta-error");
         stdoutPre.style.display = "none";
         sqlResultEl.style.display = "flex";
@@ -10607,6 +11300,90 @@
         editor.setValue(LANGS[currentLang].boilerplate);
         sessionCache[currentLang] = LANGS[currentLang].boilerplate;
       });
+
+      // ---- Stdin: clear button ----
+      var stdinClearBtn = document.getElementById("cp-stdin-clear-btn");
+      if (stdinClearBtn) {
+        stdinClearBtn.addEventListener("click", function () {
+          stdinEl.value = "";
+          stdinEl.focus();
+        });
+      }
+
+      // ---- "Ask AI" toolbar button: hands the current editor code straight to the
+      // site-wide AI Chat Assistant panel (panel-aichat), pre-filled and ready to send. ----
+      var aiAskBtn = document.getElementById("cp-ai-ask-btn");
+      if (aiAskBtn) {
+        aiAskBtn.addEventListener("click", function () {
+          if (!editor) return;
+          var code = editor.getValue();
+          var langLabel = LANGS[currentLang] ? LANGS[currentLang].label : currentLang;
+          var monacoLang = LANGS[currentLang] ? LANGS[currentLang].monacoLang : "";
+          var draft = code && code.trim()
+            ? "Here is my " + langLabel + " code:\n```" + monacoLang + "\n" + code + "\n```\n\nCan you help me with it?"
+            : "";
+          var aichatInput = document.getElementById("aichat-input");
+          if (typeof window.scOpenProTool === "function") window.scOpenProTool("panel-aichat");
+          if (aichatInput) {
+            aichatInput.value = draft;
+            aichatInput.dispatchEvent(new Event("input", { bubbles: true }));
+            setTimeout(function () { aichatInput.focus(); }, 300);
+          }
+        });
+      }
+
+      // ---- Draggable resizer between the editor and output columns (desktop only —
+      // the CSS grid-template-columns var it edits is a no-op below the 981px breakpoint) ----
+      (function initResizer() {
+        var resizer = document.getElementById("cp-resizer");
+        var layoutEl = document.getElementById("cp-layout");
+        if (!resizer || !layoutEl) return;
+        var STORAGE_KEY = "cp_editor_width_pct_v1";
+        var dragging = false;
+
+        function applyWidth(pct) {
+          pct = Math.max(35, Math.min(80, pct));
+          layoutEl.style.setProperty("--cp-editor-w", pct + "%");
+          try { localStorage.setItem(STORAGE_KEY, String(pct)); } catch (e) { /* storage unavailable */ }
+        }
+
+        try {
+          var saved = parseFloat(localStorage.getItem(STORAGE_KEY));
+          if (!isNaN(saved)) applyWidth(saved);
+        } catch (e) { /* storage unavailable */ }
+
+        function onMove(clientX) {
+          var rect = layoutEl.getBoundingClientRect();
+          var pct = ((clientX - rect.left) / rect.width) * 100;
+          applyWidth(pct);
+          if (editor) editor.layout();
+        }
+
+        resizer.addEventListener("pointerdown", function (e) {
+          dragging = true;
+          resizer.classList.add("is-dragging");
+          resizer.setPointerCapture(e.pointerId);
+          e.preventDefault();
+        });
+        resizer.addEventListener("pointermove", function (e) {
+          if (!dragging) return;
+          onMove(e.clientX);
+        });
+        function endDrag(e) {
+          if (!dragging) return;
+          dragging = false;
+          resizer.classList.remove("is-dragging");
+          if (editor) setTimeout(function () { editor.layout(); }, 50);
+        }
+        resizer.addEventListener("pointerup", endDrag);
+        resizer.addEventListener("pointercancel", endDrag);
+        resizer.addEventListener("keydown", function (e) {
+          var rect = layoutEl.getBoundingClientRect();
+          var currentPct = parseFloat(getComputedStyle(layoutEl).getPropertyValue("--cp-editor-w")) || 68;
+          if (e.key === "ArrowLeft") { applyWidth(currentPct - 2); if (editor) editor.layout(); e.preventDefault(); }
+          if (e.key === "ArrowRight") { applyWidth(currentPct + 2); if (editor) editor.layout(); e.preventDefault(); }
+        });
+      })();
 
       // ---------------------------------------------------------------
       // Lazy init: only load Monaco once this panel is actually opened
@@ -12242,6 +13019,14 @@
             regenBtn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 17-6.5l2.5 2.5M22 12.5a10 10 0 0 1-17 6.5L2.5 16.5"/></svg> Regenerate';
             regenBtn.addEventListener("click", function () { regenerateFromMessage(wrap); });
             actions.appendChild(regenBtn);
+
+            var continueBtn = document.createElement("button");
+            continueBtn.type = "button";
+            continueBtn.className = "aichat-msg-action-btn";
+            continueBtn.title = "Ask the AI to keep going from where this response left off";
+            continueBtn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Continue';
+            continueBtn.addEventListener("click", function () { continueFromMessage(wrap); });
+            actions.appendChild(continueBtn);
           }
 
           if (opts.isError) {
@@ -12876,6 +13661,18 @@
         runGeneration();
       }
 
+      function continueFromMessage(wrapEl) {
+        if (state.isGenerating) return;
+        var lastModelIndex = -1;
+        for (var i = state.messages.length - 1; i >= 0; i--) {
+          if (state.messages[i].role === "model" && !state.messages[i].error) { lastModelIndex = i; break; }
+        }
+        if (lastModelIndex === -1) return;
+        state.messages.push({ role: "user", text: "Continue exactly where you left off — do not repeat any part of your previous answer, just carry on seamlessly from the last word.", files: [] });
+        persistHistory();
+        runGeneration();
+      }
+
       stopBtn.addEventListener("click", function () {
         if (!state.isGenerating) return;
         state.revealCancelled = true; // instantly finish any in-progress word-by-word reveal
@@ -13120,6 +13917,7 @@
         { name: "URL Encoder / Decoder", type: "tab", id: "urlcodec", group: "Browser Tools", aliases: ["url encode", "url decode", "uri"] },
         { name: "AI Chat Assistant", type: "pro", id: "panel-aichat", group: "AI Tools", aliases: ["chat", "assistant", "ai chat", "chatbot"] },
         { name: "Code Playground", type: "pro", id: "panel-codeplayground", group: "Developer Tools", aliases: ["compiler", "code runner", "run code", "online ide", "python", "java", "c++", "javascript", "sql", "judge0"] },
+        { name: "ZType", type: "pro", id: "panel-ztype", group: "Games", aliases: ["typing game", "typing shooter", "type", "wpm"] },
         { name: "Meme Generator", type: "pro", id: "panel-meme", group: "AI Tools", aliases: ["meme"] },
         { name: "AI Image Cleaner / Background Remover", type: "pro", id: "panel-aicleaner", group: "AI Tools", aliases: ["remove", "remove background", "background remover", "object removal", "image cleaner", "inpaint"] },
         { name: "Favicon Generator", type: "pro", id: "panel-favicon", group: "AI Tools", aliases: ["favicon", "site icon"] },
