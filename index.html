@@ -1856,6 +1856,34 @@
     .favicon-preview-item canvas { image-rendering: pixelated; background: repeating-conic-gradient(#20202a 0% 25%, #17171b 0% 50%) 50% / 10px 10px; border-radius: 4px; }
     .favicon-preview-item span { font-family: var(--mono); font-size: .62rem; color: var(--muted); }
 
+    /* AI Voice Generator (functional, self-contained) */
+    .voicegen-wrap { display: flex; flex-direction: column; gap: 1rem; max-width: 720px; }
+    .voicegen-textarea {
+      width: 100%; min-height: 180px; resize: vertical; background: var(--surface2); color: var(--text);
+      border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .9rem 1rem;
+      font-family: inherit; font-size: .92rem; line-height: 1.55; transition: border-color .2s ease;
+    }
+    .voicegen-textarea:focus { outline: none; border-color: var(--accent); }
+    .voicegen-meta-row { display: flex; justify-content: space-between; align-items: center; gap: .75rem; flex-wrap: wrap; }
+    .voicegen-counter { font-family: var(--mono); font-size: .75rem; color: var(--muted); }
+    .voicegen-counter.is-over { color: #ff6e6e; }
+    .voicegen-actions { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+    .voicegen-spinner {
+      width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(127,255,110,.25);
+      border-top-color: var(--accent); animation: voicegen-spin .7s linear infinite; display: inline-block;
+    }
+    @keyframes voicegen-spin { to { transform: rotate(360deg); } }
+    .voicegen-status { display: flex; align-items: center; gap: .5rem; font-size: .82rem; color: var(--muted); min-height: 1.2rem; }
+    .voicegen-status.is-error { color: #ff6e6e; }
+    .voicegen-status.is-success { color: var(--accent); }
+    .voicegen-player-card {
+      display: none; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 1rem; gap: .75rem; flex-direction: column;
+    }
+    .voicegen-player-card.is-visible { display: flex; }
+    .voicegen-player-card audio { width: 100%; }
+    .voicegen-hint { font-size: .78rem; color: var(--muted); line-height: 1.5; }
+
     /* PDF Password Protect card */
     .pdfprotect-card {
       margin-top: 1.4rem; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius);
@@ -3244,6 +3272,12 @@
           <p>Generate high-quality favicon files from any image.</p>
         </div>
 
+        <div class="pro-tool-card is-live is-clickable" data-pt-open="panel-voicegen" tabindex="0" role="button" aria-label="Open AI Voice Generator">
+          <div class="pro-tool-icon"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v4M8 23h8"/></svg></div>
+          <h3>AI Voice Generator <span class="pro-tool-badge is-live">LIVE</span></h3>
+          <p>Turn text into natural speech and download it as an MP3.</p>
+        </div>
+
       </div>
 
       <!-- ============== Meme Generator panel ============== -->
@@ -3473,6 +3507,41 @@
           <div class="favicon-preview-grid" id="favicon-preview-grid"></div>
           <div class="action-row" id="favicon-actions" style="display:none;">
             <button type="button" class="btn-secondary" id="favicon-download-all" style="font-size:.8rem;">Download All (.zip)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============== AI Voice Generator panel ============== -->
+      <div class="pro-tool-panel" id="panel-voicegen">
+        <button type="button" class="pro-tool-back-btn" data-pt-back>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Pro Tools
+        </button>
+        <div class="tool-workspace-standalone">
+          <div class="tool-title-row">
+            <h2>AI Voice Generator <span class="premium-badge">LIVE</span> <span>Convert text into natural speech and download it as an MP3.</span></h2>
+          </div>
+
+          <p class="voicegen-hint">🔒 Powered by a secure backend. The ElevenLabs API key lives only in the server's environment variables — it is never sent to, stored in, or visible from your browser.</p>
+
+          <div class="voicegen-wrap">
+            <textarea id="voicegen-text" class="voicegen-textarea" maxlength="3000" placeholder="Type or paste the text you want converted to speech..."></textarea>
+
+            <div class="voicegen-meta-row">
+              <span class="voicegen-counter" id="voicegen-counter">Characters: 0 / 3000</span>
+              <div class="voicegen-actions">
+                <button type="button" class="btn-primary" id="voicegen-generate-btn">Generate Voice</button>
+              </div>
+            </div>
+
+            <div class="voicegen-status" id="voicegen-status" aria-live="polite"></div>
+
+            <div class="voicegen-player-card" id="voicegen-player-card">
+              <audio id="voicegen-audio" controls></audio>
+              <div class="action-row">
+                <a id="voicegen-download-btn" class="btn-secondary" style="font-size:.8rem;" href="#" download="smartcompress-voice.mp3">Download MP3</a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -9651,6 +9720,104 @@
     })();
   </script>
 
+  <!-- ================= Premium: AI Voice Generator (additive, self-contained) ================= -->
+  <!-- Calls POST /api/generate-voice only. The ElevenLabs API key is never present in this
+       file, never sent from the browser, and is not readable from any frontend request. -->
+  <script>
+    (function () {
+      "use strict";
+      var textArea = document.getElementById("voicegen-text");
+      if (!textArea) return; // panel not present, do nothing
+
+      var MAX_CHARS = 3000;
+      var counterEl = document.getElementById("voicegen-counter");
+      var generateBtn = document.getElementById("voicegen-generate-btn");
+      var statusEl = document.getElementById("voicegen-status");
+      var playerCard = document.getElementById("voicegen-player-card");
+      var audioEl = document.getElementById("voicegen-audio");
+      var downloadBtn = document.getElementById("voicegen-download-btn");
+
+      var currentBlobUrl = null;
+      var isGenerating = false;
+
+      function updateCounter() {
+        var len = textArea.value.length;
+        counterEl.textContent = "Characters: " + len + " / " + MAX_CHARS;
+        counterEl.classList.toggle("is-over", len > MAX_CHARS);
+      }
+
+      function setStatus(message, kind) {
+        statusEl.textContent = message || "";
+        statusEl.classList.remove("is-error", "is-success");
+        if (kind) statusEl.classList.add(kind);
+      }
+
+      function setGenerating(active) {
+        isGenerating = active;
+        generateBtn.disabled = active;
+        generateBtn.innerHTML = active
+          ? '<span class="voicegen-spinner" aria-hidden="true"></span> Generating voice...'
+          : "Generate Voice";
+      }
+
+      textArea.addEventListener("input", updateCounter);
+      updateCounter();
+
+      generateBtn.addEventListener("click", function () {
+        if (isGenerating) return; // prevent duplicate/overlapping requests
+
+        var text = textArea.value.trim();
+        if (!text) {
+          setStatus("Please enter some text first.", "is-error");
+          return;
+        }
+        if (text.length > MAX_CHARS) {
+          setStatus("Text is too long. Please keep it under " + MAX_CHARS + " characters.", "is-error");
+          return;
+        }
+
+        setGenerating(true);
+        setStatus("Generating voice...");
+        playerCard.classList.remove("is-visible");
+
+        fetch("/api/generate-voice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: text,
+            model_id: "eleven_multilingual_v2",
+            output_format: "mp3_44100_128"
+          })
+        })
+          .then(function (res) {
+            if (!res.ok) {
+              // Backend always returns safe JSON on failure (never raw provider details).
+              return res.json().catch(function () { return {}; }).then(function (data) {
+                throw new Error((data && data.error) || "Voice generation is temporarily unavailable. Please try again.");
+              });
+            }
+            return res.blob();
+          })
+          .then(function (blob) {
+            if (currentBlobUrl) {
+              URL.revokeObjectURL(currentBlobUrl); // revoke previous blob before creating another
+            }
+            currentBlobUrl = URL.createObjectURL(blob);
+            audioEl.src = currentBlobUrl;
+            downloadBtn.href = currentBlobUrl;
+            playerCard.classList.add("is-visible");
+            setStatus("Voice generated successfully.", "is-success");
+          })
+          .catch(function (err) {
+            setStatus(err.message || "Voice generation is temporarily unavailable. Please try again.", "is-error");
+          })
+          .finally(function () {
+            setGenerating(false);
+          });
+      });
+    })();
+  </script>
+
   <!-- ================= Premium: Favicon Generator (additive, self-contained) ================= -->
   <script>
     (function () {
@@ -13921,6 +14088,7 @@
         { name: "Meme Generator", type: "pro", id: "panel-meme", group: "AI Tools", aliases: ["meme"] },
         { name: "AI Image Cleaner / Background Remover", type: "pro", id: "panel-aicleaner", group: "AI Tools", aliases: ["remove", "remove background", "background remover", "object removal", "image cleaner", "inpaint"] },
         { name: "Favicon Generator", type: "pro", id: "panel-favicon", group: "AI Tools", aliases: ["favicon", "site icon"] },
+        { name: "AI Voice Generator", type: "pro", id: "panel-voicegen", group: "AI Tools", aliases: ["voice", "text to speech", "tts", "elevenlabs", "speech generator", "mp3"] },
         { name: "AI Image Generator", type: "info", id: "pro-tools", group: "AI Tools (Coming Soon)", aliases: ["text to image", "image generator"] },
         { name: "Blog", type: "hash", id: "blog", group: "Site", aliases: ["articles", "posts"] },
         { name: "About Us", type: "hash", id: "about", group: "Site", aliases: ["about"] },
